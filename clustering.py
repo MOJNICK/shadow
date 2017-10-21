@@ -36,7 +36,7 @@ class Clustering:
         for indexX in xrange(self.clusters.shape[0]):
             check_point_zone_function(self, indexX)
 
-        self.remove_small_clusters()
+        self.remove_small_clusters_and_noise()
 
 
 
@@ -60,13 +60,21 @@ class Clustering:
                 if self.distance_function(point, self.clusters[i]) < self.eps:
                     point[2] = currentClusterNumber
 
-    def remove_small_clusters(self):
-        lastClusterNumber = 0
+    def remove_small_clusters_and_noise(self):
+        maxClusterNumber = np.max(self.clusters[:,2])
+        clusterOccurences = np.zeros(maxClusterNumber + 1, dtype=np.int)
+
         for point in self.clusters:
             if point[2] == 0:
                 continue
             else:
-                if last
+                clusterOccurences[point[2]] += 1
+
+        for i in xrange(clusterOccurences.shape[0]):
+            if clusterOccurences[i] < self.minPts:
+                self.clusters = self.clusters[(self.clusters[:, 2]!=i)]
+
+
 
 class Distance:
     @staticmethod
