@@ -36,9 +36,9 @@ class TestClustering(unittest.TestCase):
         self.objectClustering.clusters[1:4,2] = 1
         self.objectClustering.clusters[6:9, 2] = 6
         self.objectClustering.remove_small_clusters_and_noise()
-        np.testing.assert_equal(self.objectClustering.clusters, np.array([], dtype=np.int), 'problem with no big cluster')
+        np.testing.assert_equal(self.objectClustering.clusters, np.empty([0, 3], dtype=np.int), 'problem with no big cluster')
 
-    def test_remove_small_clusters_and_noise_third(self):
+    def test_remove_small_clusters_and_noise_fourth(self):
         self.objectClustering.minPts = 12
         self.objectClustering.remove_small_clusters_and_noise()
-        np.testing.assert_equal(self.objectClustering.clusters, np.array([], dtype=np.int), 'problem with no cluster')
+        np.testing.assert_equal(self.objectClustering.clusters, np.empty([0, 3], dtype=np.int), 'problem with no cluster')
