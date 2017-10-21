@@ -16,17 +16,22 @@ class Clustering:
         self.eps = eps
         self.minPts = minPts
 
+
     def create_new_cluster(self):
-        return ++self.nowClusterNumber
+        self.nowClusterNumber += 1
+        return self.nowClusterNumber
+
 
     def get_cluster_number(self):
         return self.nowClusterNumber
+
 
     def binary_clustering(self, binaryImage):
         # ""binaryImage==npArray with 1 as positive detection, 0 negative
         #   returns npArray: [clusterNumber, [pixelX, pixelY]]
         # ""
         pass
+
 
     def points_clustering(self, check_point_zone_function):
         #   returns npArray: [pixelX, pixelY, clusterNumber]
@@ -37,7 +42,6 @@ class Clustering:
             check_point_zone_function(self, indexX)
 
         self.remove_small_clusters_and_noise()
-
 
 
     def check_point_zone_linear(self, indexX):
@@ -54,11 +58,12 @@ class Clustering:
         maxY = point[1] + self.eps
         iStart = 0
         for i in xrange(iStart, self.clusters.shape[0]):#all elements
-            if self.clusters[i, 0] > maxX | self.clusters[i, 0] < minX:
+            if self.clusters[i, 0] < minX | maxX < self.clusters[i, 0]:
                 break
             else:
                 if self.distance_function(point, self.clusters[i]) < self.eps:
-                    point[2] = currentClusterNumber
+                    self.clusters[i] = currentClusterNumber
+
 
     def remove_small_clusters_and_noise(self):
         maxClusterNumber = np.max(self.clusters[:,2])
@@ -78,11 +83,11 @@ class Clustering:
 
 class Distance:
     @staticmethod
-    def distance_fast(self, pixelA, pixelB):
+    def distance_fast(pixelA, pixelB):
         # """"fast sum, sqrt error""""
         return abs(pixelA[0] - pixelB[0]) + abs(pixelA[1] - pixelB[1])
 
     @staticmethod
-    def distance_slow(self, pixelA, pixelB):
+    def distance_slow(pixelA, pixelB):
         """euclidean"""
         return math.sqrt(math.pow((pixelA[0] - pixelB[0]), 2) + math.pow((pixelA[1] - pixelB[1]), 2))
