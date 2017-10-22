@@ -49,8 +49,29 @@ class TestClustering(unittest.TestCase):
         np.testing.assert_equal(self.objectClustering.clusters, np.empty([0, 3], dtype=np.int), 'problem with no cluster')
 
 
-    def test_point_zone_linear(self):
+    def test_point_zone_linear_first(self):
         self.objectClustering.check_point_zone_linear(2)
-        print(self.objectClustering.clusters)
         np.testing.assert_equal(self.objectClustering.clusters, np.array([[1, 2, 0], [2, 3, 1], [3, 4, 1], [4, 2, 0], [5, 7, 0],
                                                                           [6, 8, 0], [8, 8, 0], [9, 2, 0], [11, 2, 0], [12, 2, 0]], dtype=np.int), '')
+
+    def test_point_zone_linear_second(self):
+        self.objectClustering.eps = 5
+        self.objectClustering.check_point_zone_linear(2)
+        np.testing.assert_equal(self.objectClustering.clusters, np.array([[1, 2, 1], [2, 3, 1], [3, 4, 1], [4, 2, 1], [5, 7, 1],
+                                                                          [6, 8, 0], [8, 8, 0], [9, 2, 0], [11, 2, 0], [12, 2, 0]], dtype=np.int), '')
+
+
+    def test_distance_fast(self):
+        pixelA = np.array([1, 3, 7])
+        pixelB = np.array([1, 3, 7])
+        self.assertEqual(clustering.Distance.distance_fast(pixelA, pixelB), 0, 'fast distance function problem')
+
+        pixelB = np.array([0, 1, 7])
+        self.assertEqual(clustering.Distance.distance_fast(pixelA, pixelB), 3, 'fast distance function problem')
+
+        pixelB = np.array([0, 10, 2])
+        self.assertEqual(clustering.Distance.distance_fast(pixelA, pixelB), 8, 'fast distance function problem')
+
+        pixelA = np.array([3, 4, 1])
+        pixelB = np.array(self.objectClustering.clusters[3])
+        self.assertEqual(clustering.Distance.distance_fast(pixelA, pixelB), 3, 'fast distance function problem')

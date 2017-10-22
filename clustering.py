@@ -54,15 +54,16 @@ class Clustering:
 
         minX = point[0] - self.eps
         maxX = point[0] + self.eps
-        minY = point[1] - self.eps
-        maxY = point[1] + self.eps
-        iStart = 0
-        for i in xrange(iStart, self.clusters.shape[0]):#all elements
-            if self.clusters[i, 0] < minX | maxX < self.clusters[i, 0]:
-                break
+
+        for i in xrange(0, self.clusters.shape[0]):#all elements
+            if self.clusters[i, 0] < minX:
+                continue
             else:
-                if self.distance_function(point, self.clusters[i]) < self.eps:
-                    self.clusters[i] = currentClusterNumber
+                if maxX < self.clusters[i, 0]:
+                    break
+                else:
+                    if self.distance_function(point, self.clusters[i]) <= self.eps:
+                        self.clusters[i, 2] = currentClusterNumber
 
 
     def remove_small_clusters_and_noise(self):
