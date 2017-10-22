@@ -75,3 +75,15 @@ class TestClustering(unittest.TestCase):
         pixelA = np.array([3, 4, 1])
         pixelB = np.array(self.objectClustering.clusters[3])
         self.assertEqual(clustering.Distance.distance_fast(pixelA, pixelB), 3, 'fast distance function problem')
+
+    def test_points_clustering_first(self):
+        self.objectClustering.eps = 3
+        self.objectClustering.points_clustering(self.objectClustering.check_point_zone_linear)
+        np.testing.assert_equal(self.objectClustering.clusters, np.array([[1, 2, 1], [2, 3, 1], [3, 4, 1], [4, 2, 1], [5, 7, 2],
+                                                                          [6, 8, 2], [8, 8, 2], [9, 2, 3], [11, 2, 3], [12, 2, 3]], dtype=np.int), '')
+
+    def test_points_clustering_second(self):
+        self.objectClustering.eps = 3
+        self.objectClustering.minPts = 4
+        self.objectClustering.points_clustering(self.objectClustering.check_point_zone_linear)
+        np.testing.assert_equal(self.objectClustering.clusters, np.array([[1, 2, 1], [2, 3, 1], [3, 4, 1], [4, 2, 1]], dtype=np.int), '')

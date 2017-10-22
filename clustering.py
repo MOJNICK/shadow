@@ -36,10 +36,10 @@ class Clustering:
     def points_clustering(self, check_point_zone_function):
         #   returns npArray: [pixelX, pixelY, clusterNumber]
         if self.clusters.shape[1] != 3:
-            raise ValueError("Passed array is not of the right shape")
+            raise ValueError("Passed array is not the right shape")
 
         for indexX in xrange(self.clusters.shape[0]):
-            check_point_zone_function(self, indexX)
+            check_point_zone_function(indexX)
 
         self.remove_small_clusters_and_noise()
 
