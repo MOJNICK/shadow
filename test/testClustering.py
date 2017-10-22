@@ -1,5 +1,5 @@
 import unittest
-import clustering
+from shadow import clustering
 import numpy as np
 
 class TestClustering(unittest.TestCase):
