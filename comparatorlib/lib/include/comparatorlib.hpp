@@ -27,7 +27,7 @@ enum Transition
 	int balanced_light_distance(pTYPE, pTYPE);
 
 	template <class pTYPE>
-	int balanced_color_distance(pTYPE, pTYPE);
+	int color_distance(pTYPE, pTYPE);
 
 	template <class pTYPE>
 	void swap_pointer(pTYPE*, pTYPE*)
