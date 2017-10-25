@@ -1,8 +1,16 @@
 #ifndef COMPARATOR_HPP
 #define COMPARATOR_HPP
+#include <cstring>
 #include "types.hpp"
 #include "mat.hpp"
 #include "math.h"
+#include <vector>
+enum Transition
+	no,
+	forward,
+	backward
+};
+
 	template <class pTYPE>
 	void iterate_H(cv::Mat, void (*)(pTYPE, pTYPE, double, double, cv::Point3_));
 	
@@ -13,17 +21,21 @@
 	void iterate_HV(cv::Mat, void (*)(pTYPE, pTYPE, double, double, cv::Point3_));
 
 	template <class pTYPE>
-	bool color_light_classifier(pTYPE pix0, pTYPE pix1, double lightThreshold, double colorThreshold, cv::Point3_ colorBallance);
+	Transition color_light_classifier(pTYPE, pTYPE, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance);
 
 	template <class pTYPE>
-	int color_distance(pTYPE pix0, pTYPE pix1);
+	int balanced_light_distance(pTYPE, pTYPE);
 
 	template <class pTYPE>
-	swap_pointer(pTYPE*, pTYPE*)
+	int balanced_color_distance(pTYPE, pTYPE);
 
-	template<class pType>
+	template <class pTYPE>
+	void swap_pointer(pTYPE*, pTYPE*)
+
+	template<class pTYPE>
 	bool brighter(pTYPE, pTYPE)
 
-
+	template<class pTYPE>
+	void correct_balance(cv::Point3_, pTYPE)
 
 #endif
