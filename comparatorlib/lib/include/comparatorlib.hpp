@@ -20,6 +20,7 @@ enum Transition
 	class IterateProcess
 	{
 	public:
+		IterateProcess();
 		std::vector<int> iterate_HV();
 	private:		
 		Mat img;//reference by default

@@ -3,6 +3,14 @@ int const channels = 3;//only for convinience
 double const prealocate = 0.01;
 
 	template <class pTYPE>
+	IterateProcess<pTYPE>::IterateProcess(Mat img)
+	{
+		this.img = img;
+		this.classifier = Classifier<pTYPE>::color_light_classifier;
+	}
+
+
+	template <class pTYPE>
 	std::vector<int> IterateProcess<pTYPE>::iterate_H()
 	{
 		auto& img = this.img;
@@ -75,7 +83,7 @@ double const prealocate = 0.01;
 	}
 
 	template <class pTYPE>
-	Transition color_light_classifier(pTYPE pix0, pTYPE pix1, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
+	Transition Classifier<pType>::color_light_classifier(pTYPE pix0, pTYPE pix1, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
 	{
 		Transition result = forward;
 		if(brighter(pix0, pix1))
@@ -92,25 +100,25 @@ double const prealocate = 0.01;
 	}
 
 	template <class pTYPE>
-	int balanced_light_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)//pix0 have to < pix1
+	int Classifier<pType>::balanced_light_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)//pix0 have to < pix1
 	{
 		return ((pix1[0] + pix1[1] + pix1[2]) - (pix0[0] * colorBalance[0] + pix0[1] * colorBalance[1] + pix0[2] * colorBalance[2]));
 	}
 
-	template <class pTYPE>
-	int balanced_color_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)
+	template Classifier<pType>::<class pTYPE>
+	int Classifier<pType>::balanced_color_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)
 	{
 		return pow(pix0[0] * colorBalance[0] - pix1[0], 2) + pow(pix0[1] * colorBalance[1] - pix1[1], 2) + pow(pix0[2] * colorBalance[2] - pix1[2], 2);
 	}
 
 	template<class pTYPE>
-	bool brighter(pTYPE pix0, pTYPE pix1)
+	bool Classifier<pType>::brighter(pTYPE pix0, pTYPE pix1)
 	{
 		return ((pix0[0] + pix0[1] + pix0[2]) > (pix1[0] + pix1[1] + pix1[2]) ? (true) : (false));
 	}
 
 	template<class pTYPE>
-	void correct_balance(cv::Point3_ colorBalance, pTYPE pix)//unused
+	void Classifier<pType>::correct_balance(cv::Point3_ colorBalance, pTYPE pix)//unused
 	{
 		pix[0] *= colorBalance[0]; pix[1] *= colorBalance[1]; pix[2] *= colorBalance[2];
 	}
