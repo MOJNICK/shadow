@@ -2,10 +2,15 @@
 int const channels = 3;//only for convinience
 double const prealocate = 0.01;
 
-
 	template <class pTYPE>
-	std::vector<int> iterate_H(cv::Mat img, void (*classifier)(pTYPE, pTYPE, double, double, cv::Point3_), double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
+	std::vector<int> IterateProcess<pTYPE>::iterate_H()
 	{
+		auto& img = this.img;
+		auto& classifier = this.classifier;
+		auto lightThreshold = this.lightThreshold;
+		auto colorThreshold = this.colorThreshold;
+		auto colorBalance = this.colorBalance;
+
 		std::vector<int> result;
 		result.reserve(sizeof(int) * img.total() * prealocate);
 
@@ -25,10 +30,16 @@ double const prealocate = 0.01;
 
 		return result;
 	}
-	
+
 	template <class pTYPE>
-	std::vector<int> iterate_V(cv::Mat img, void (*classifier)(pTYPE, pTYPE, double, double, cv::Point3_), double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
+	std::vector<int> IterateProcess<pTYPE>::iterate_V()
 	{
+		auto& img = this.img;
+		auto& classifier = this.classifier;
+		auto lightThreshold = this.lightThreshold;
+		auto colorThreshold = this.colorThreshold;
+		auto colorBalance = this.colorBalance;
+
 		std::vector<int> result;
 		result.reserve(sizeof(int) * img.total() * prealocate)
 
@@ -48,20 +59,26 @@ double const prealocate = 0.01;
 	}
 
 	template <class pTYPE>
-	std::vector<int> iterate_HV(cv::Mat img, void (*classifier)(pTYPE, pTYPE, double, double, cv::Point3_), double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
+	std::vector<int> IterateProcess<pTYPE>::iterate_HV()
 	{
-		auto shadowH = iterate_H(img, classifier, lightThreshold, colorThreshold, colorBalance);
-		auto shadowV = iterate_V(img, classifier, lightThreshold, colorThreshold, colorBalance);
-		shadowH.insert(shadowH.end(), shadowV.begin(), shadowV.end());
-		auto shadowHV = shadowH;
-		return shadowHV;
+		auto& img = this.img;
+		auto& classifier = this.classifier;
+		auto lightThreshold = this.lightThreshold;
+		auto colorThreshold = this.colorThreshold;
+		auto colorBalance = this.colorBalance;
+
+		auto detectedH = iterate_H(img, classifier, lightThreshold, colorThreshold, colorBalance);
+		auto detectedV = iterate_V(img, classifier, lightThreshold, colorThreshold, colorBalance);
+		detectedH.insert(detectedH.end(), detectedV.begin(), detectedV.end());
+		auto detectedHV = std::move(detectedH);
+		return detectedHV;
 	}
 
-	template <class pTYPE>
+	template <class pTYPE, class TYPE>
 	Transition color_light_classifier(pTYPE pix0in, pTYPE pix1in, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
 	{
-		pTYPE pix0 = new (pTYPE*)[channels]; std::memcpy(pix0, pix0in, channels * sizeof(pTYPE*));//no impact at source image
-		pTYPE pix1 = new (pTYPE*)[channels]; std::memcpy(pix1, pix1in, channels * sizeof(pTYPE*));//no impact at source image
+		TYPE pix0[channels]; std::memcpy(pix0, pix0in, channels * sizeof(TYPE));//no impact at source image
+		TYPE pix1[channels]; std::memcpy(pix1, pix1in, channels * sizeof(TYPE));//no impact at source image,//this copy could be easily aviuded
 
 		Transition result = forward;
 		if(brighter(pix0, pix1))
@@ -77,26 +94,26 @@ double const prealocate = 0.01;
 		return (result = no);
 	}
 
-	template <class pTYPE>
+	template <class pTYPE, class TYPE>
 	int balanced_light_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)//pix0 have to < pix1
 	{
 		correct_balance(colorBalance, pix0);
 		return ((pix1[0] + pix1[1] + pix1[2]) - (pix0[0] + pix0[1] + pix0[2]));
 	}
 
-	template <class pTYPE>
+	template <class pTYPE, class TYPE>
 	int color_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)
 	{
 		return pow(pix0[0] - pix1[0], 2) + pow(pix0[1] - pix1[1], 2) + pow(pix0[2] - pix1[2], 2);
 	}
 
-	template<class pTYPE>
+	template<class pTYPE, class TYPE>
 	bool brighter(pTYPE pix0, pTYPE pix1)
 	{
 		return ((pix0[0] + pix0[1] + pix0[2]) > (pix1[0] + pix1[1] + pix1[2]) ? (true) : (false));
 	}
 
-	template<class pTYPE>
+	template<class pTYPE, class TYPE>
 	void correct_balance(cv::Point3_ colorBalance, pTYPE pix)
 	{
 		pix[0] *= colorBalance[0]; pix[1] *= colorBalance[1]; pix[2] *= colorBalance[2];
