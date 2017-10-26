@@ -33,7 +33,7 @@ enum Transition
 		
 	}
 	
-	template <class pTYPE, class TYPE>
+	template <class pTYPE>
 	class Classifier
 	{
 	public:

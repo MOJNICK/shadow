@@ -74,12 +74,9 @@ double const prealocate = 0.01;
 		return detectedHV;
 	}
 
-	template <class pTYPE, class TYPE>
-	Transition color_light_classifier(pTYPE pix0in, pTYPE pix1in, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
+	template <class pTYPE>
+	Transition color_light_classifier(pTYPE pix0, pTYPE pix1, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
 	{
-		TYPE pix0[channels]; std::memcpy(pix0, pix0in, channels * sizeof(TYPE));//no impact at source image
-		TYPE pix1[channels]; std::memcpy(pix1, pix1in, channels * sizeof(TYPE));//no impact at source image,//this copy could be easily aviuded
-
 		Transition result = forward;
 		if(brighter(pix0, pix1))
 		{
@@ -94,27 +91,26 @@ double const prealocate = 0.01;
 		return (result = no);
 	}
 
-	template <class pTYPE, class TYPE>
+	template <class pTYPE>
 	int balanced_light_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)//pix0 have to < pix1
 	{
-		correct_balance(colorBalance, pix0);
-		return ((pix1[0] + pix1[1] + pix1[2]) - (pix0[0] + pix0[1] + pix0[2]));
+		return ((pix1[0] + pix1[1] + pix1[2]) - (pix0[0] * colorBalance[0] + pix0[1] * colorBalance[1] + pix0[2] * colorBalance[2]));
 	}
 
-	template <class pTYPE, class TYPE>
-	int color_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)
+	template <class pTYPE>
+	int balanced_color_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)
 	{
-		return pow(pix0[0] - pix1[0], 2) + pow(pix0[1] - pix1[1], 2) + pow(pix0[2] - pix1[2], 2);
+		return pow(pix0[0] * colorBalance[0] - pix1[0], 2) + pow(pix0[1] * colorBalance[1] - pix1[1], 2) + pow(pix0[2] * colorBalance[2] - pix1[2], 2);
 	}
 
-	template<class pTYPE, class TYPE>
+	template<class pTYPE>
 	bool brighter(pTYPE pix0, pTYPE pix1)
 	{
 		return ((pix0[0] + pix0[1] + pix0[2]) > (pix1[0] + pix1[1] + pix1[2]) ? (true) : (false));
 	}
 
-	template<class pTYPE, class TYPE>
-	void correct_balance(cv::Point3_ colorBalance, pTYPE pix)
+	template<class pTYPE>
+	void correct_balance(cv::Point3_ colorBalance, pTYPE pix)//unused
 	{
 		pix[0] *= colorBalance[0]; pix[1] *= colorBalance[1]; pix[2] *= colorBalance[2];
 	}
