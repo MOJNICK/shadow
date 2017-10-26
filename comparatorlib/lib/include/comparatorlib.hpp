@@ -20,8 +20,9 @@ enum Transition
 	class IterateProcess
 	{
 	public:
-		IterateProcess();
+		IterateProcess(Mat img);
 		std::vector<int> iterate_HV();
+	
 	private:		
 		Mat img;//reference by default
 		double lightThreshold;

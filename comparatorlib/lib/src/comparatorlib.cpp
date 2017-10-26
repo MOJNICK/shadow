@@ -3,7 +3,7 @@ int const channels = 3;//only for convinience
 double const prealocate = 0.01;
 
 	template <class pTYPE>
-	IterateProcess<pTYPE>::IterateProcess(Mat img)
+	IterateProcess<pTYPE>::IterateProcess(Mat img)//should get type from img
 	{
 		this.img = img;
 		this.classifier = Classifier<pTYPE>::color_light_classifier;
