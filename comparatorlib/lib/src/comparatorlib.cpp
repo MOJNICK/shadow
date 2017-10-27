@@ -3,7 +3,7 @@ int const channels = 3;//only for convinience
 double const prealocate = 0.01;
 
 	template <class TYPE>
-	IterateProcess<TYPE>::IterateProcess(Mat<TYPE> img)//should get type from img?
+	IterateProcess<TYPE>::IterateProcess(cv::Mat_<TYPE> img)//should get type from img?
 	{
 		this.img = img;
 		this.classifier = Classifier<TYPE*>::color_light_classifier;
@@ -82,7 +82,7 @@ double const prealocate = 0.01;
 	}
 
 	template <class TYPE>
-	Transition Classifier<TYPE*>::color_light_classifier(TYPE* pix0, TYPE* pix1, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
+	Transition Classifier<TYPE*>::color_light_classifier(TYPE* pix0, TYPE* pix1, double lightThreshold, double colorThreshold, cv::Point3_<double> colorBalance = cv::Point3_(1, 1, 1))
 	{
 		Transition result = forward;
 		if(brighter(pix0, pix1))
@@ -99,13 +99,13 @@ double const prealocate = 0.01;
 	}
 
 	template <class TYPE>
-	int Classifier<TYPE*>::balanced_light_distance(cv::Point3_ colorBalance, TYPE* pix0, TYPE* pix1)//pix0 have to < pix1
+	int Classifier<TYPE*>::balanced_light_distance(cv::Point3_<double> colorBalance, TYPE* pix0, TYPE* pix1)//pix0 have to < pix1
 	{
 		return ((pix1[0] + pix1[1] + pix1[2]) - (pix0[0] * colorBalance[0] + pix0[1] * colorBalance[1] + pix0[2] * colorBalance[2]));
 	}
 
 	template <class TYPE*>
-	int Classifier<TYPE*>::balanced_color_distance(cv::Point3_ colorBalance, TYPE* pix0, TYPE* pix1)
+	int Classifier<TYPE*>::balanced_color_distance(cv::Point3_<double> colorBalance, TYPE* pix0, TYPE* pix1)
 	{
 		return pow(pix0[0] * colorBalance[0] - pix1[0], 2) + pow(pix0[1] * colorBalance[1] - pix1[1], 2) + pow(pix0[2] * colorBalance[2] - pix1[2], 2);
 	}
@@ -117,7 +117,7 @@ double const prealocate = 0.01;
 	}
 
 	template<class TYPE>
-	void Classifier<TYPE*>::correct_balance(cv::Point3_ colorBalance, TYPE* pix)//unused
+	void Classifier<TYPE*>::correct_balance(cv::Point3_<double> colorBalance, TYPE* pix)//unused
 	{
 		pix[0] *= colorBalance[0]; pix[1] *= colorBalance[1]; pix[2] *= colorBalance[2];
 	}

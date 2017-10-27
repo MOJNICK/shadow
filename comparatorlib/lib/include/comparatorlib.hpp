@@ -1,14 +1,16 @@
 #ifndef COMPARATOR_HPP
 #define COMPARATOR_HPP
 #include <cstring>
-#include "types.hpp"
-#include "mat.hpp"
+#include <opencv2/core/core.hpp>
+//#include "types.hpp"
+//#include "mat.hpp"
 #include "math.h"
 #include <vector>
 
 typedef char TYPE;
 
 enum Transition
+{
 	no,
 	forward,
 	backward,
@@ -24,37 +26,37 @@ struct IndexTransition
 	Transition transition;
 };
 
-	class Classifier<TYPE>;
+	// class Classifier<TYPE>;
 
 	template <class TYPE>
 	class IterateProcess
 	{
 	public:
-		IterateProcess(Mat<TYPE> img);
+		IterateProcess(cv::Mat_<TYPE> img);
 		std::vector<IndexTransition> iterate_HV();
 	
 	private:		
-		Mat<TYPE> img;//reference by default
+		cv::Mat_<TYPE> img;//reference by default
 		double lightThreshold;
 		double colorThreshold;
-		cv::Point3_ colorBalance;
-		Transition (*classifier)(TYPE*, TYPE*, double, double, cv::Point3_);
+		cv::Point3_<double> colorBalance;
+		Transition (*classifier)(TYPE*, TYPE*, double, double, cv::Point3_<double>);
 
 		std::vector<IndexTransition> iterate_H();
 		std::vector<IndexTransition> iterate_V();
 		
-	}
+	};
 	
 	template <class TYPE>
 	class Classifier
 	{
 	public:
-		static Transition color_light_classifier(TYPE*, TYPE*, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance);
+		static Transition color_light_classifier(TYPE*, TYPE*, double lightThreshold, double colorThreshold, cv::Point3_<double> colorBalance);
 	private:
 		static int balanced_light_distance(TYPE*, TYPE*);
 		static int color_distance(TYPE*, TYPE*);
 		static bool brighter(TYPE*, TYPE*);
-		static void correct_balance(cv::Point3_, TYPE*)
-	}
+		static void correct_balance(cv::Point3_<double>, TYPE*);
+	};
 
 #endif
