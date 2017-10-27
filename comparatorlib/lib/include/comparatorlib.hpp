@@ -7,6 +7,8 @@
 #include "math.h"
 #include <vector>
 
+int const channels = 3;//not a parameter, only for convinience
+
 typedef char TYPE;
 
 enum Transition
@@ -32,15 +34,14 @@ struct IndexTransition
 	class IterateProcess
 	{
 	public:
-		IterateProcess(cv::Mat_<TYPE> img);
+		IterateProcess(cv::Mat_<TYPE>, double, double, double[]);
 		std::vector<IndexTransition> iterate_HV();
 	
 	private:		
 		cv::Mat_<TYPE> img;//reference by default
+		Classifier classifier;
 		double lightThreshold;
 		double colorThreshold;
-		cv::Point3_<double> colorBalance;
-		Transition (*classifier)(TYPE*, TYPE*, double, double, cv::Point3_<double>);
 
 		std::vector<IndexTransition> iterate_H();
 		std::vector<IndexTransition> iterate_V();
@@ -51,12 +52,21 @@ struct IndexTransition
 	class Classifier
 	{
 	public:
-		static Transition color_light_classifier(TYPE*, TYPE*, double lightThreshold, double colorThreshold, cv::Point3_<double> colorBalance);
+		Classifier(double, double, double[]);
+		void copy(TYPE[], TYPE[]);
+		Transition fClassifier();
 	private:
-		static int balanced_light_distance(TYPE*, TYPE*);
-		static int color_distance(TYPE*, TYPE*);
-		static bool brighter(TYPE*, TYPE*);
-		static void correct_balance(cv::Point3_<double>, TYPE*);
+		TYPE pix0[channels];
+		TYPE pix1[channels];
+		double lightThreshold;
+		double colorThreshold;
+		double colorBalance[channels];
+
+		int balanced_light_distance();
+		int balanced_color_distance();
+		bool brighter();
+		void correct_balance_pix0();
+		void swap();
 	};
 
 #endif
