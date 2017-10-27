@@ -52,8 +52,8 @@ double const prealocate = 0.01;
 
 	template <class TYPE> std::vector<IndexTransition> IterateProcess<TYPE>::iterate_HV()
 	{
-		auto detectedH = iterate_H();
-		auto detectedV = iterate_V();
+		std::vector<IndexTransition> detectedH = iterate_H();
+		std::vector<IndexTransition> detectedV = iterate_V();
 		detectedH.insert(detectedH.end(), detectedV.begin(), detectedV.end());
 		auto detectedHV = std::move(detectedH);
 		return detectedHV;
