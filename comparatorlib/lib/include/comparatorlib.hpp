@@ -27,7 +27,27 @@ struct IndexTransition
 	int index;
 	Transition transition;
 };
+	
+	template <class TYPE>
+	class Classifier;
 
+	template <class TYPE>
+	class IterateProcess
+	{
+	public:
+		IterateProcess(cv::Mat_<TYPE>, double, double, double[]);
+		std::vector<IndexTransition> iterate_HV();
+	private:		
+		cv::Mat_<TYPE> img;//reference by default
+		Classifier<TYPE> classifier;
+		double lightThreshold;
+		double colorThreshold;
+
+		std::vector<IndexTransition> iterate_H();
+		std::vector<IndexTransition> iterate_V();
+		
+	};
+	
 	template <class TYPE>
 	class Classifier
 	{
@@ -48,26 +68,5 @@ struct IndexTransition
 		void correct_balance_pix0();
 		void swap();
 	};
-
-
-
-	template <class TYPE>
-	class IterateProcess
-	{
-	public:
-		IterateProcess(cv::Mat_<TYPE>, double, double, double[]);
-		std::vector<IndexTransition> iterate_HV();
-	
-	private:		
-		cv::Mat_<TYPE> img;//reference by default
-		Classifier<TYPE> classifier;
-		double lightThreshold;
-		double colorThreshold;
-
-		std::vector<IndexTransition> iterate_H();
-		std::vector<IndexTransition> iterate_V();
-		
-	};
-	
 
 #endif
