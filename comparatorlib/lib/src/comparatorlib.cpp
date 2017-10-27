@@ -10,24 +10,17 @@ double const prealocate = 0.01;
 	}
 
 
-	template <class TYPE>
-	std::vector<IndexTransition> IterateProcess<TYPE*>::iterate_H()
+	template <class TYPE> std::vector<IndexTransition> IterateProcess<TYPE>::iterate_H()
 	{
-		auto& img = this.img;
-		auto& classifier = this.classifier;
-		auto lightThreshold = this.lightThreshold;
-		auto colorThreshold = this.colorThreshold;
-		auto colorBalance = this.colorBalance;
-
 		std::vector<IndexTransition> result;
 		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
 		for(int i = 0; i < img.rows; i++)		
 		{
-			int rowIndex = i * img.step;
-			for(int j = 0; j < img.cols - channels; j += channels)
+			int rowIndex = i * this->img.step;
+			for(int j = 0; j < this->img.cols - channels; j += channels)
 			{
-				switch (classifier(img.data + rowIndex + j, img.data + rowIndex + j + channels, lightThreshold, colorThreshold, colorBalance))
+				switch (this->classifier(this->img.data + rowIndex + j, this->img.data + rowIndex + j + channels, this->lightThreshold, this->colorThreshold, this->colorBalance))
 				{
 					case no: continue;
 					case forward: result.push_back(IndexTransition{rowIndex + j + channels, leftToRight});
