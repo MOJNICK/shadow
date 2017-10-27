@@ -2,8 +2,6 @@
 #define COMPARATOR_HPP
 #include <cstring>
 #include <opencv2/core/core.hpp>
-//#include "types.hpp"
-//#include "mat.hpp"
 #include "math.h"
 #include <vector>
 
@@ -40,8 +38,6 @@ struct IndexTransition
 	private:		
 		cv::Mat_<TYPE> img;//reference by default
 		Classifier<TYPE> classifier;
-		double lightThreshold;
-		double colorThreshold;
 
 		std::vector<IndexTransition> iterate_H();
 		std::vector<IndexTransition> iterate_V();
@@ -53,8 +49,8 @@ struct IndexTransition
 	{
 	public:
 		Classifier(double, double, double[]);
-		void copy(TYPE[], TYPE[]);
-		Transition fClassifier();
+		void copy_pix(TYPE[], TYPE[]);
+		Transition f_classifier();
 	private:
 		TYPE pix0[channels];
 		TYPE pix1[channels];

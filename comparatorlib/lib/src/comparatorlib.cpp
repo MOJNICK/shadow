@@ -17,8 +17,8 @@ double const prealocate = 0.01;
 			int rowIndex = i * img.step;
 			for(int j = 0; j < img.cols - channels; j += channels)
 			{
-				classifier.copy(img.data + rowIndex + j, img.data + rowIndex + j + channels);
-				switch (classifier.fClassifier())
+				classifier.copy_pix(img.data + rowIndex + j, img.data + rowIndex + j + channels);
+				switch (classifier.f_classifier())
 				{
 					case no: continue;
 					case forward: result.push_back(IndexTransition{rowIndex + j + channels, leftToRight});
@@ -38,8 +38,8 @@ double const prealocate = 0.01;
 		{
 			for(int row = 0; row < img.rows - 1; row++)
 			{
-				classifier.copy(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
-				switch (classifier.fClassifier())
+				classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
+				switch (classifier.f_classifier())
 				{
 					case no: continue;
 					case forward: result.push_back(IndexTransition{((row + 1) * img.step) + col, upToDown});
@@ -70,13 +70,13 @@ double const prealocate = 0.01;
 		memcpy(colorBalance, colorBalance_, sizeof(TYPE) * channels);	
 	}
 
-	template <class TYPE> void Classifier<TYPE>::copy(TYPE pix0_[], TYPE pix1_[])
+	template <class TYPE> void Classifier<TYPE>::copy_pix(TYPE pix0_[], TYPE pix1_[])
 	{
 		memcpy(pix0, pix0_, sizeof(TYPE) * channels);
 		memcpy(pix1, pix1_, sizeof(TYPE) * channels);	
 	}
 
-	template <class TYPE> Transition Classifier<TYPE>::fClassifier()
+	template <class TYPE> Transition Classifier<TYPE>::f_classifier()
 	{
 		Transition result = forward;
 		if(brighter())
