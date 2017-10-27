@@ -2,16 +2,16 @@
 int const channels = 3;//only for convinience
 double const prealocate = 0.01;
 
-	template <class pTYPE>
-	IterateProcess<pTYPE>::IterateProcess(Mat img)//should get type from img
+	template <class TYPE>
+	IterateProcess<TYPE>::IterateProcess(Mat<TYPE> img)//should get type from img?
 	{
 		this.img = img;
-		this.classifier = Classifier<pTYPE>::color_light_classifier;
+		this.classifier = Classifier<TYPE*>::color_light_classifier;
 	}
 
 
-	template <class pTYPE>
-	std::vector<int> IterateProcess<pTYPE>::iterate_H()
+	template <class TYPE>
+	std::vector<IndexTransition> IterateProcess<TYPE*>::iterate_H()
 	{
 		auto& img = this.img;
 		auto& classifier = this.classifier;
@@ -19,28 +19,27 @@ double const prealocate = 0.01;
 		auto colorThreshold = this.colorThreshold;
 		auto colorBalance = this.colorBalance;
 
-		std::vector<int> result;
-		result.reserve(sizeof(int) * img.total() * prealocate);
+		std::vector<IndexTransition> result;
+		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
 		for(int i = 0; i < img.rows; i++)		
 		{
 			int rowIndex = i * img.step;
 			for(int j = 0; j < img.cols - channels; j += channels)
 			{
-				switch (classifier(img[rowIndex + j], img[rowIndex + j + channels], lightThreshold, colorThreshold, colorBalance))
+				switch (classifier(img.data + rowIndex + j, img.data + rowIndex + j + channels, lightThreshold, colorThreshold, colorBalance))
 				{
 					case no: continue;
-					case backward: result.push_back(rowIndex + j);
-					case forward: result.push_back(rowIndex + j + channels);
+					case forward: result.push_back(IndexTransition{rowIndex + j + channels, leftToRight});
+					case backward: result.push_back(IndexTransition{rowIndex + j, rightToLeft});
 				}
 			}
 		}
-
 		return result;
 	}
 
-	template <class pTYPE>
-	std::vector<int> IterateProcess<pTYPE>::iterate_V()
+	template <class TYPE>
+	std::vector<IndexTransition> IterateProcess<TYPE*>::iterate_V()
 	{
 		auto& img = this.img;
 		auto& classifier = this.classifier;
@@ -48,26 +47,26 @@ double const prealocate = 0.01;
 		auto colorThreshold = this.colorThreshold;
 		auto colorBalance = this.colorBalance;
 
-		std::vector<int> result;
-		result.reserve(sizeof(int) * img.total() * prealocate)
+		std::vector<IndexTransition> result;
+		result.reserve(sizeof(IndexTransition) * img.total() * prealocate)
 
 		for(int col = 0; col < img.cols - channels; col += channels)		
 		{
 			for(int row = 0; row < img.rows - 1; row++)
 			{
-				switch (classifier(img[row * img.step + col], img[((row + 1) * img.step) + col], lightThreshold, colorThreshold, colorBalance))
+				switch (classifier(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col], lightThreshold, colorThreshold, colorBalance))
 				{
 					case no: continue;
-					case forward: result.push_back(((row + 1) * img.step) + col);
-					case backward: result.push_back(row * img.step + col);
+					case forward: result.push_back(IndexTransition{((row + 1) * img.step) + col, upToDown});
+					case backward: result.push_back(IndexTransition{row * img.step + col, downToUp});
 				}
 			}
 		}
 		return result;
 	}
 
-	template <class pTYPE>
-	std::vector<int> IterateProcess<pTYPE>::iterate_HV()
+	template <class TYPE>
+	std::vector<IndexTransition> IterateProcess<TYPE*>::iterate_HV()
 	{
 		auto& img = this.img;
 		auto& classifier = this.classifier;
@@ -82,8 +81,8 @@ double const prealocate = 0.01;
 		return detectedHV;
 	}
 
-	template <class pTYPE>
-	Transition Classifier<pType>::color_light_classifier(pTYPE pix0, pTYPE pix1, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
+	template <class TYPE>
+	Transition Classifier<TYPE*>::color_light_classifier(TYPE* pix0, TYPE* pix1, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance = cv::Point3_(1, 1, 1))
 	{
 		Transition result = forward;
 		if(brighter(pix0, pix1))
@@ -99,26 +98,26 @@ double const prealocate = 0.01;
 		return (result = no);
 	}
 
-	template <class pTYPE>
-	int Classifier<pType>::balanced_light_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)//pix0 have to < pix1
+	template <class TYPE>
+	int Classifier<TYPE*>::balanced_light_distance(cv::Point3_ colorBalance, TYPE* pix0, TYPE* pix1)//pix0 have to < pix1
 	{
 		return ((pix1[0] + pix1[1] + pix1[2]) - (pix0[0] * colorBalance[0] + pix0[1] * colorBalance[1] + pix0[2] * colorBalance[2]));
 	}
 
-	template Classifier<pType>::<class pTYPE>
-	int Classifier<pType>::balanced_color_distance(cv::Point3_ colorBalance, pTYPE pix0, pTYPE pix1)
+	template <class TYPE*>
+	int Classifier<TYPE*>::balanced_color_distance(cv::Point3_ colorBalance, TYPE* pix0, TYPE* pix1)
 	{
 		return pow(pix0[0] * colorBalance[0] - pix1[0], 2) + pow(pix0[1] * colorBalance[1] - pix1[1], 2) + pow(pix0[2] * colorBalance[2] - pix1[2], 2);
 	}
 
-	template<class pTYPE>
-	bool Classifier<pType>::brighter(pTYPE pix0, pTYPE pix1)
+	template<class TYPE>
+	bool Classifier<TYPE*>::brighter(TYPE* pix0, TYPE* pix1)
 	{
 		return ((pix0[0] + pix0[1] + pix0[2]) > (pix1[0] + pix1[1] + pix1[2]) ? (true) : (false));
 	}
 
-	template<class pTYPE>
-	void Classifier<pType>::correct_balance(cv::Point3_ colorBalance, pTYPE pix)//unused
+	template<class TYPE>
+	void Classifier<TYPE*>::correct_balance(cv::Point3_ colorBalance, TYPE* pix)//unused
 	{
 		pix[0] *= colorBalance[0]; pix[1] *= colorBalance[1]; pix[2] *= colorBalance[2];
 	}

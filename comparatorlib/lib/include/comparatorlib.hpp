@@ -7,44 +7,54 @@
 #include <vector>
 
 typedef char TYPE;
-typedef char* pTYPE;
 
 enum Transition
 	no,
 	forward,
-	backward
+	backward,
+	upToDown,
+	downToUp,
+	leftToRight,
+	rightToLeft
 };
-	class Classifier<pTYPE>;
 
-	template <class pTYPE>
+struct IndexTransition
+{
+	int index;
+	Transition transition;
+};
+
+	class Classifier<TYPE>;
+
+	template <class TYPE>
 	class IterateProcess
 	{
 	public:
-		IterateProcess(Mat img);
-		std::vector<int> iterate_HV();
+		IterateProcess(Mat<TYPE> img);
+		std::vector<IndexTransition> iterate_HV();
 	
 	private:		
-		Mat img;//reference by default
+		Mat<TYPE> img;//reference by default
 		double lightThreshold;
 		double colorThreshold;
 		cv::Point3_ colorBalance;
-		Transition (*classifier)(pTYPE, pTYPE, double, double, cv::Point3_);
+		Transition (*classifier)(TYPE*, TYPE*, double, double, cv::Point3_);
 
-		std::vector<int> iterate_H();
-		std::vector<int> iterate_V();
+		std::vector<IndexTransition> iterate_H();
+		std::vector<IndexTransition> iterate_V();
 		
 	}
 	
-	template <class pTYPE>
+	template <class TYPE>
 	class Classifier
 	{
 	public:
-		static Transition color_light_classifier(pTYPE, pTYPE, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance);
+		static Transition color_light_classifier(TYPE*, TYPE*, double lightThreshold, double colorThreshold, cv::Point3_ colorBalance);
 	private:
-		static int balanced_light_distance(pTYPE, pTYPE);
-		static int color_distance(pTYPE, pTYPE);
-		static bool brighter(pTYPE, pTYPE);
-		static void correct_balance(cv::Point3_, pTYPE)
+		static int balanced_light_distance(TYPE*, TYPE*);
+		static int color_distance(TYPE*, TYPE*);
+		static bool brighter(TYPE*, TYPE*);
+		static void correct_balance(cv::Point3_, TYPE*)
 	}
 
 #endif
