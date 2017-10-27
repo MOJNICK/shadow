@@ -2,7 +2,7 @@
 
 double const prealocate = 0.01;
 
-	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat_<TYPE> img, double lightThreshold, double colorThreshold, double colorBalance) : classifier(lightThreshold, colorThreshold, colorBalance)//should get type from img?
+	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat_<TYPE> img, double lightThreshold, double colorThreshold, double colorBalance[]) : classifier(lightThreshold, colorThreshold, colorBalance)//should get type from img?
 	{
 		this->img = img;
 	}
@@ -65,7 +65,7 @@ double const prealocate = 0.01;
 
 
 
-	template <class TYPE> Classifier<TYPE>::Classifier(double lightThreshold_, double colorThreshold_, double[] colorBalance_) : lightThreshold{lightThreshold_}, colorThreshold{colorThreshold_}
+	template <class TYPE> Classifier<TYPE>::Classifier(double lightThreshold_, double colorThreshold_, double colorBalance_[]) : lightThreshold{lightThreshold_}, colorThreshold{colorThreshold_}
 	{
 		memcpy(colorBalance, colorBalance_, sizeof(TYPE) * channels);	
 	}
@@ -109,7 +109,7 @@ double const prealocate = 0.01;
 
 	template<class TYPE> void Classifier<TYPE>::correct_balance_pix0()//unused
 	{
-		pix[0] *= colorBalance[0]; pix[1] *= colorBalance[1]; pix[2] *= colorBalance[2];
+		pix0[0] *= colorBalance[0]; pix0[1] *= colorBalance[1]; pix0[2] *= colorBalance[2];
 	}
 
 	template<class TYPE> void Classifier<TYPE>::swap()//unused
