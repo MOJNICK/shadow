@@ -4,26 +4,27 @@
 class ComparatorTestClass : public cvtest::BaseTest
 {
 public:
-    ComparatorTestClass():{}
+    ComparatorTestClass(){}
 protected:
     
     void run(int) {
       ts->set_failed_test_info(cvtest::TS::OK);
 
-      Classifier classifier(1.0, 1.0, (double[]){1.0, 1.0, 1.0});
+      double balance[] = {1.0, 1.0, 1.0};
+      Classifier<int> classifier(1.0, 1.0, balance);
 
-      int pix0 = {100, 100, 100};
-      int pix1 = {100, 100, 100};
+      int pix0[] = {100, 100, 100};
+      int pix1[] = {100, 100, 100};
 
       classifier.copy_pix(pix0, pix1);
       //check that all values are between 1 and 1 (and not Nan)
-      if (0 != cvtest::check(, 1, 1, 0) )
-          ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_TEST_DATA);
+      // if (0 != cvtest::check(, 1, 1, 0) )
+      //     ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_TEST_DATA);
 
       
       
       //check that all values are between 0 and 0 (and not Nan)
-      if (0 != cvtest::check(classifier.f_classifier(), 0, 0, 0) )
+      if (no != classifier.f_classifier())
           ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_OUTPUT);
   }
 };

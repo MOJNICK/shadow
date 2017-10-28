@@ -55,7 +55,7 @@ double const prealocate = 0.01;
 		std::vector<IndexTransition> detectedH = iterate_H();
 		std::vector<IndexTransition> detectedV = iterate_V();
 		detectedH.insert(detectedH.end(), detectedV.begin(), detectedV.end());
-		std::vector<IndexTransition> detectedHV = std::move(detectedH);
+		std::vector<IndexTransition> detectedHV = detectedH;
 		return detectedHV;
 	}
 
