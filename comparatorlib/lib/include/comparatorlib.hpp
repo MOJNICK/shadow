@@ -6,6 +6,8 @@
 #include <vector>
 #include <utility>
 
+#define private public
+
 int const channels = 3;//not a parameter, only for convinience
 
 typedef int TYPE;
@@ -59,11 +61,11 @@ struct IndexTransition
 		double lightThreshold;
 		double colorThreshold;
 		double colorBalance[channels];
-		int lightDistance;
+		DTYPE lightDistance;
 
 		void correct_pix0();
-		int light_distance();
-		int color_distance();
+		DTYPE light_distance();
+		DTYPE color_distance();
 		bool brighter();
 		void swap();
 	};
