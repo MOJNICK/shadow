@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 
-set (CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS}")
+
+
+macro(use_cxx_std)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14") 
+endmacro(use_cxx_std)
 
 option(CMAKE_BUILD_TYPE "" Release) 
 option(TEST_PRIVATE_PART "define private public, and include private test code" OFF)
