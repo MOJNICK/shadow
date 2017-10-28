@@ -85,31 +85,34 @@ double const prealocate = 0.01;
 			result = backward;
 		}
 
-		if(balanced_light_distance() > lightThreshold)//ballance applied
-			if(balanced_color_distance() < colorThreshold)
+		correct_pix0();
+		if(light_distance() > lightThreshold)
+			if(color_distance() < colorThreshold)
 				return result;
 
 		return (result = no);
 	}
 
-	template <class TYPE> int Classifier<TYPE>::balanced_light_distance()//pix0 have to < pix1
+	template<class TYPE> void Classifier<TYPE>::correct_pix0()
 	{
-		return ((pix1[0] + pix1[1] + pix1[2]) - (pix0[0] * colorBalance[0] + pix0[1] * colorBalance[1] + pix0[2] * colorBalance[2]));
+		pix0[0] *= colorBalance[0]; pix0[1] *= colorBalance[1]; pix0[2] *= colorBalance[2];//overflow ??
 	}
 
-	template <class TYPE> int Classifier<TYPE>::balanced_color_distance()
+	template <class TYPE> int Classifier<TYPE>::light_distance()//pix0 have to < pix1 and be corrected
 	{
-		return pow(pix0[0] * colorBalance[0] - pix1[0], 2) + pow(pix0[1] * colorBalance[1] - pix1[1], 2) + pow(pix0[2] * colorBalance[2] - pix1[2], 2);
+		lightDistance = ((pix1[0] + pix1[1] + pix1[2]) - (pix0[0] + pix0[1] + pix0[2] ));
+		return lightDistance;
+	}
+
+	template <class TYPE> int Classifier<TYPE>::color_distance()
+	{
+		DTYPE var = -(pix1[0] - pix0[0] + pix1[1] - pix0[1] + pix1[2] - pix0[2]) / channels;//for minimize color_distance
+		return pow(pix1[0] - pix0[0] + var, 2) + pow(pix1[1] - pix0[1] + var, 2) + pow(pix1[2] - pix0[2] + var, 2);
 	}
 
 	template<class TYPE> bool Classifier<TYPE>::brighter()
 	{
 		return ((pix0[0] + pix0[1] + pix0[2]) > (pix1[0] + pix1[1] + pix1[2]) ? (true) : (false));
-	}
-
-	template<class TYPE> void Classifier<TYPE>::correct_balance_pix0()//unused
-	{
-		pix0[0] *= colorBalance[0]; pix0[1] *= colorBalance[1]; pix0[2] *= colorBalance[2];
 	}
 
 	template<class TYPE> void Classifier<TYPE>::swap()//unused

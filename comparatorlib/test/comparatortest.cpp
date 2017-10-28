@@ -15,17 +15,19 @@ protected:
 
       int pix0[] = {100, 100, 100};
       int pix1[] = {100, 100, 100};
-
       classifier.copy_pix(pix0, pix1);
+      if (Transition::no != classifier.f_classifier())
+          ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_OUTPUT);
+
+
+      std::fill( pix1, pix1 + sizeof( pix1 ), 101 );
+      classifier.copy_pix(pix0, pix1);
+      if (Transition::forward != classifier.f_classifier())
+          ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_OUTPUT);
       //check that all values are between 1 and 1 (and not Nan)
       // if (0 != cvtest::check(, 1, 1, 0) )
       //     ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_TEST_DATA);
 
-      
-      
-      //check that all values are between 0 and 0 (and not Nan)
-      if (no != classifier.f_classifier())
-          ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_OUTPUT);
   }
 };
 
@@ -34,7 +36,7 @@ TEST(ComparatorLibSuite, ATestThatPasses) {
   comparatorLibTestClass.safe_run();
 }
 
-TEST(ComparatorLibSuite, ATestThatFails) {
-  bool mybool = false;
-  ASSERT_TRUE(mybool);
-}
+// TEST(ComparatorLibSuite, ATestThatFails) {
+//   bool mybool = false;
+//   ASSERT_TRUE(mybool);
+// }

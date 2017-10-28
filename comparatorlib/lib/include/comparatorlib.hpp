@@ -9,6 +9,7 @@
 int const channels = 3;//not a parameter, only for convinience
 
 typedef int TYPE;
+typedef int DTYPE;
 
 enum Transition
 {
@@ -58,11 +59,12 @@ struct IndexTransition
 		double lightThreshold;
 		double colorThreshold;
 		double colorBalance[channels];
+		int lightDistance;
 
-		int balanced_light_distance();
-		int balanced_color_distance();
+		void correct_pix0();
+		int light_distance();
+		int color_distance();
 		bool brighter();
-		void correct_balance_pix0();
 		void swap();
 	};
 
