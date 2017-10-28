@@ -2,6 +2,24 @@
 #include <libcomparator.hpp>
 
 
+class IterateH : public cvtest::BaseTest
+{
+public:
+    IterateH(){}
+protected:
+    
+    void run(int) {
+      
+
+  }
+};
+TEST(ComparatorLibSuite, IterateH) {
+  IterateH iterateH;
+  iterateH.safe_run();
+}
+
+
+
 class Fclassifier : public cvtest::BaseTest
 {
 public:
@@ -9,13 +27,14 @@ public:
 protected:
     
     void run(int) {
-      ts->set_failed_test_info(cvtest::TS::OK);
-
       double balance[] = {1.0, 1.0, 1.0};
-      Classifier<int> classifier(1.0, 1.0, balance);
+      double lightThreshold = 1.0;
+      double colorThreshold = 1.0;
 
-      int pix0[] = {3, 3, 3};
-      int pix1[] = {3, 3, 3};
+      Classifier<TYPE> classifier(lightThreshold, colorThreshold, balance);
+
+      TYPE pix0[] = {3, 3, 3};
+      TYPE pix1[] = {3, 3, 3};
       
       classifier.copy_pix(pix0, pix1);
       ASSERT_EQ(Transition::no, classifier.f_classifier());
@@ -36,7 +55,6 @@ protected:
 
   }
 };
-
 TEST(ComparatorLibSuite, f_classifier) {
   Fclassifier fclassifeir;
   fclassifeir.safe_run();
@@ -53,10 +71,14 @@ protected:
       ts->set_failed_test_info(cvtest::TS::OK);
 
       double balance[] = {2.0, 1.0, 1.0};
-      Classifier<int> classifier(1.0, 4.0, balance);
+      double lightThreshold = 1.0;
+      double colorThreshold = 4.0;
 
-      int pix0[] = {3, 3, 3};
-      int pix1[] = {3, 3, 3};
+      Classifier<TYPE> classifier(lightThreshold, colorThreshold, balance);
+
+
+      TYPE pix0[] = {3, 3, 3};
+      TYPE pix1[] = {3, 3, 3};
       
       classifier.copy_pix(pix0, pix1);
       if (Transition::no != classifier.f_classifier())
@@ -85,7 +107,6 @@ protected:
 
   }
 };
-
 TEST(ComparatorLibSuite, f_classifierbt) {
   FclassifierBT fclassifierbt;
   fclassifierbt.safe_run();
@@ -101,13 +122,15 @@ public:
 protected:
     
     void run(int) {
-      ts->set_failed_test_info(cvtest::TS::OK);
-
       double balance[] = {1.0, 1.0, 1.0};
-      Classifier<int> classifier(1.0, 1.0, balance);
+      double lightThreshold = 1.0;
+      double colorThreshold = 1.0;
 
-      int pix0[] = {3, 3, 3};
-      int pix1[] = {10, 10, 10};
+      Classifier<TYPE> classifier(lightThreshold, colorThreshold, balance);
+
+
+      TYPE pix0[] = {3, 3, 3};
+      TYPE pix1[] = {10, 10, 10};
       
       classifier.copy_pix(pix0, pix1);
       ASSERT_EQ(21, classifier.light_distance());
@@ -119,7 +142,6 @@ protected:
       ASSERT_EQ(6, classifier.color_distance());
   }
 };
-
 TEST(ComparatorPrivateLibSuite, PrivatePartClassifier) {
   LightAndColor lightAndColor;
   lightAndColor.safe_run();

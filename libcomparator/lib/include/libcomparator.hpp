@@ -12,7 +12,7 @@
 
 int const channels = 3;//not a parameter, only for convinience
 
-typedef int TYPE;
+typedef uchar TYPE;
 typedef int DTYPE;
 
 enum Transition
