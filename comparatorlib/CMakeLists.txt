@@ -9,7 +9,7 @@ if(TEST_PRIVATE_PART)
 	add_definitions(-DTEST_PRIVATE_PART)
 endif()
 
-project(comparatorlib)
+project(comparator)
 
 include_directories(lib/include)
 
