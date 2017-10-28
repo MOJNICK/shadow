@@ -116,3 +116,13 @@ double const prealocate = 0.01;
 	{
 
 	}
+
+	void instantiate()
+	{
+		double x[]={1.2,1.0,1.0};
+		TYPE pix [] = {10,10,10};
+		Classifier<TYPE> specifyCL(1.0,1.0,x);
+		specifyCL.copy_pix(pix, pix);
+		specifyCL.f_classifier();
+		IterateProcess<TYPE> specifyIT(cv::Mat_<TYPE>(0,0),1.0,1.0,x);
+	}
