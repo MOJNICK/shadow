@@ -1,5 +1,5 @@
 #include <opencv2/ts/ts.hpp>
-#include <comparatorlib.hpp>
+#include <libcomparator.hpp>
 
 
 class Fclassifier : public cvtest::BaseTest

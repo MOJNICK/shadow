@@ -1,4 +1,4 @@
-#include "comparatorlib.hpp"
+#include "libcomparator.hpp"
 
 double const prealocate = 0.01;
 
