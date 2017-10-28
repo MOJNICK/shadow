@@ -9,7 +9,15 @@ public:
 protected:
     
     void run(int) {
-      
+      cv::Mat_<TYPE> mat(3,3,100);
+      mat(1,1) = 0;
+      double balance[] = {1.0, 1.0, 1.0};
+      double lightThreshold = 1.0;
+      double colorThreshold = 1.0;
+
+      IterateProcess<TYPE> iterateProcess(mat, lightThreshold, colorThreshold, balance);
+
+      std::vector<IndexTransition> result = iterateProcess.iterate_H();
 
   }
 };

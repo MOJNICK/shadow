@@ -10,9 +10,9 @@
 #define private public
 #endif
 
+typedef unsigned int uint;
 int const channels = 3;//not a parameter, only for convinience
-
-typedef uchar TYPE;
+typedef unsigned char TYPE;
 typedef int DTYPE;
 
 enum Transition
@@ -28,7 +28,7 @@ enum Transition
 
 struct IndexTransition
 {
-	int index;
+	long unsigned int index;
 	Transition transition;
 };
 	

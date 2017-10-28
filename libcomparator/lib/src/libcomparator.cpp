@@ -12,10 +12,10 @@ double const prealocate = 0.01;
 		std::vector<IndexTransition> result;
 		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
-		for(int i = 0; i < img.rows; i++)		
+		for(uint i = 0; i < img.rows; i++)		
 		{
-			int rowIndex = i * img.step;
-			for(int j = 0; j < img.cols - channels; j += channels)
+			uint rowIndex = i * img.step;
+			for(uint j = 0; j < img.cols - channels; j += channels)
 			{
 				classifier.copy_pix(img.data + rowIndex + j, img.data + rowIndex + j + channels);
 				switch (classifier.f_classifier())
@@ -34,9 +34,9 @@ double const prealocate = 0.01;
 		std::vector<IndexTransition> result;
 		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
-		for(int col = 0; col < img.cols - channels; col += channels)		
+		for(uint col = 0; col < img.cols - channels; col += channels)		
 		{
-			for(int row = 0; row < img.rows - 1; row++)
+			for(uint row = 0; row < img.rows - 1; row++)
 			{
 				classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
 				switch (classifier.f_classifier())
@@ -128,4 +128,7 @@ double const prealocate = 0.01;
 		specifyCL.copy_pix(pix, pix);
 		specifyCL.f_classifier();
 		IterateProcess<TYPE> specifyIT(cv::Mat_<TYPE>(0,0),1.0,1.0,x);
+		specifyIT.iterate_H();
+		specifyIT.iterate_V();
+		specifyIT.iterate_HV();
 	}
