@@ -1,0 +1,21 @@
+#!/bin/bash 
+cd ~/git/shadow
+mkdir ./comparatorlib/
+cd ./comparatorlib
+touch CMakeLists.txt
+mkdir ./lib/
+cd lib
+touch CMakeLists.txt
+mkdir ./include/
+cd include
+touch comparatorlib.hpp
+cd ..
+mkdir ./src/
+cd ./src
+touch comparatorlib.cpp
+cd ../../
+mkdir ./test/
+cd test
+touch CMakeLists.txt
+touch comparatortest.cpp
+touch test_main.cpp
