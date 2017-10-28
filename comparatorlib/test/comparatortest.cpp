@@ -33,6 +33,14 @@ protected:
   }
 };
 
+TEST(ComparatorLibSuite, f_classifier) {
+  ComparatorTestClass comparatorLibTestClass;
+  comparatorLibTestClass.safe_run();
+}
+
+
+#ifdef TEST_PRIVATE_PART
+
 class LightAndColor : public cvtest::BaseTest
 {
 public:
@@ -66,16 +74,11 @@ protected:
   }
 };
 
-
-TEST(ComparatorLibSuite, f_classifier) {
-  ComparatorTestClass comparatorLibTestClass;
-  comparatorLibTestClass.safe_run();
-}
-
 TEST(ComparatorPrivateLibSuite, PrivatePartClassifier) {
   LightAndColor lightAndColor;
   lightAndColor.safe_run();
 }
+#endif
 
 // TEST(ComparatorLibSuite, ATestThatFails) {
 //   bool mybool = false;

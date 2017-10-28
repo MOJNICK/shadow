@@ -6,7 +6,9 @@
 #include <vector>
 #include <utility>
 
+#ifdef TEST_PRIVATE_PART
 #define private public
+#endif
 
 int const channels = 3;//not a parameter, only for convinience
 
