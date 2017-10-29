@@ -5,8 +5,11 @@ macro(use_cxx_std)
 endmacro(use_cxx_std)
 
 use_cxx_std()
-
 option(CMAKE_BUILD_TYPE "" Release) 
+
+include_directories(lib/include)
+
+option (WITH_TESTS "build tests" OFF)
 option(TEST_PRIVATE_PART "define private public, and include private test code" OFF)
 
 if (WITH_TESTS)
@@ -14,16 +17,7 @@ if (WITH_TESTS)
 		add_definitions(-DTEST_PRIVATE_PART)
 	endif()
   	add_definitions(-DWITH_TESTS)
+  	add_subdirectory(test)
 endif()
-
-
-
-include_directories(lib/include)
 
 add_subdirectory(lib)
-
-option (WITH_TESTS "build tests" ON)
-
-if (WITH_TESTS)
-  add_subdirectory(test)
-endif()
