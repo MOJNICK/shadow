@@ -32,6 +32,9 @@ enum Transition
 	all = biLR | biUpDW,
 };
 
+inline Transition& operator|=(Transition& a, const Transition& b)
+{return a = static_cast<Transition>((a) | (b));}
+
 struct IndexTransition
 {
 	long unsigned int index;
@@ -43,7 +46,7 @@ struct IndexTransition
 	{
 	public:
 		DataProcess();
-		std::vector<IndexTransition> concatenate_HV(std::vector<IndexTransition>);
+		void concatenate_HV(std::vector<IndexTransition>&);
 	};
 
 	template <class TYPE>

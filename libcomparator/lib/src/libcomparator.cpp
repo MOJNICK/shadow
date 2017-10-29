@@ -4,10 +4,29 @@ double const prealocate = 0.01;
 
 	DataProcess::DataProcess(){};
 
-	std::vector<IndexTransition> DataProcess::concatenate_HV(std::vector<IndexTransition> data)
+	void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	{
-		std::list<IndexTransition> myList(data.begin(), data.end());
-		std::sort(data.begin(), data.end(), [](auto& a, auto& b){return a.index < b.index;});
+		std::list<IndexTransition> listData(data.begin(), data.end());
+		listData.sort([](const IndexTransition& a, const IndexTransition& b){return a.index < b.index;});
+		std::transform(listData.begin(), --listData.end(), ++listData.begin(), listData.begin(),[](IndexTransition& a, IndexTransition& b)
+		{
+			if(a.index == b.index)
+			{
+				return IndexTransition{a.index, static_cast<Transition>(a.transition | b.transition)};
+			}
+			else
+			{
+				return a;
+			}
+		} );
+		if( (*(--listData.end())).index == (*listData.end()).index )
+		{
+			 (*(listData.end())).transition |=  (*(--listData.end())).transition;
+		}
+
+		// listData.unique(
+		// data.erase(;
+		// data = listData;
 	}
 
 
