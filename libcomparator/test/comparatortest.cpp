@@ -79,7 +79,7 @@ protected:
       compareIndexTransition(result[1], expected);
   }
 };
-TEST(ComparatorLibSuite, IterateH) {
+TEST(ComparatorPrivateLibSuite, IterateH) {
   IterateH iterateH;
   iterateH.safe_run();
 }
@@ -112,7 +112,7 @@ protected:
       compareIndexTransition(result[1], expected);
   }
 };
-TEST(ComparatorLibSuite, IterateV) {
+TEST(ComparatorPrivateLibSuite, IterateV) {
   IterateV IterateV;
   IterateV.safe_run();
 }
