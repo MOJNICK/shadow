@@ -17,13 +17,17 @@ typedef int DTYPE;
 
 enum Transition
 {
-	no,
-	forward,
-	backward,
-	upToDown,
-	downToUp,
-	leftToRight,
-	rightToLeft
+	no = 0x00,
+	fwd = 0x02,
+	back = fwd << 1,
+	biFwdBack= fwd | back,
+	upToDw = fwd << 2,
+	dwToUp = fwd << 3,
+	biUpDW = upToDw | dwToUp,
+	lToR = fwd << 4,
+	rToL = fwd << 5,
+	biLR = lToR | rToL,
+	all = biLR | biUpDW,
 };
 
 struct IndexTransition
@@ -32,8 +36,17 @@ struct IndexTransition
 	Transition transition;
 };
 	
+
+	class DataProcess
+	{
+	public:
+		DataProcess();
+		std::vector<IndexTransition> concatenate_HV(std::vector<IndexTransition>);
+	};
+
 	template <class TYPE>
 	class Classifier;
+
 
 	template <class TYPE>
 	class IterateProcess

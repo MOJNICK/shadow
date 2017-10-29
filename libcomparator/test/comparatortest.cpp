@@ -34,13 +34,13 @@ protected:
       std::vector<IndexTransition> result = iterateProcess.iterate_HV();
 
       ASSERT_EQ(result.size(), 4);
-      auto expected = IndexTransition{12, leftToRight};
+      auto expected = IndexTransition{12, lToR};
       compareIndexTransition(result[0], expected);
-      expected = IndexTransition{12, rightToLeft};
+      expected = IndexTransition{12, rToL};
       compareIndexTransition(result[1], expected);
-      expected = IndexTransition{12, upToDown};
+      expected = IndexTransition{12, upToDw};
       compareIndexTransition(result[2], expected);
-      expected = IndexTransition{12, downToUp};
+      expected = IndexTransition{12, dwToUp};
       compareIndexTransition(result[3], expected);
   }
 };
@@ -73,9 +73,9 @@ protected:
       std::vector<IndexTransition> result = iterateProcess.iterate_H();
 
       ASSERT_EQ(result.size(), 2);
-      auto expected = IndexTransition{12, leftToRight};
+      auto expected = IndexTransition{12, lToR};
       compareIndexTransition(result[0], expected);
-      expected = IndexTransition{12, rightToLeft};
+      expected = IndexTransition{12, rToL};
       compareIndexTransition(result[1], expected);
   }
 };
@@ -106,9 +106,9 @@ protected:
       std::vector<IndexTransition> result = iterateProcess.iterate_V();
 
       ASSERT_EQ(result.size(), 2);
-      auto expected = IndexTransition{12, upToDown};
+      auto expected = IndexTransition{12, upToDw};
       compareIndexTransition(result[0], expected);
-      expected = IndexTransition{12, downToUp};
+      expected = IndexTransition{12, dwToUp};
       compareIndexTransition(result[1], expected);
   }
 };
@@ -142,12 +142,12 @@ protected:
       std::fill( pix0, pix0 + channels, 3);
       std::fill( pix1, pix1 + channels, 10);
       classifier.copy_pix(pix0, pix1);
-      ASSERT_EQ(Transition::backward, classifier.f_classifier());
+      ASSERT_EQ(Transition::back, classifier.f_classifier());
 
       std::fill( pix0, pix0 + channels, 10);
       std::fill( pix1, pix1 + channels, 3);
       classifier.copy_pix(pix0, pix1);
-      if (Transition::forward != classifier.f_classifier())
+      if (Transition::fwd != classifier.f_classifier())
           ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_OUTPUT);
       //check that all values are between 1 and 1 (and not Nan)
       // if (0 != cvtest::check(, 1, 1, 0) )
@@ -187,7 +187,7 @@ protected:
       std::fill( pix1, pix1 + channels, 10);
       pix0[0] = 4;      
       classifier.copy_pix(pix0, pix1);
-      ASSERT_EQ(Transition::backward, classifier.f_classifier());
+      ASSERT_EQ(Transition::back, classifier.f_classifier());
 
       std::fill( pix0, pix0 + channels, 10);
       std::fill( pix1, pix1 + channels, 3);
@@ -198,7 +198,7 @@ protected:
       // std::fill( pix1, pix1 + channels, 3);
       // pix0[0] = 5;
       // classifier.copy_pix(pix0, pix1);
-      // if (Transition::backward != classifier.f_classifier())
+      // if (Transition::back != classifier.f_classifier())
       //     ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_OUTPUT);
       //check that all values are between 1 and 1 (and not Nan)
       // if (0 != cvtest::check(, 1, 1, 0) )

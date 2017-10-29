@@ -2,6 +2,14 @@
 
 double const prealocate = 0.01;
 
+	DataProcess::DataProcess(){};
+
+	std::vector<IndexTransition> DataProcess::concatenate_HV(std::vector<IndexTransition> data)
+	{
+
+	}
+
+
 	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat_<TYPE> img, double lightThreshold, double colorThreshold, double colorBalance[]) : classifier(lightThreshold, colorThreshold, colorBalance)//should get type from img?
 	{
 		this->img = img;
@@ -21,8 +29,8 @@ double const prealocate = 0.01;
 				switch (classifier.f_classifier())
 				{
 					case no: continue; break;
-					case forward: result.push_back(IndexTransition{rowIndex + j + channels, leftToRight}); break;
-					case backward: result.push_back(IndexTransition{rowIndex + j, rightToLeft}); break;
+					case fwd: result.push_back(IndexTransition{rowIndex + j + channels, lToR}); break;
+					case back: result.push_back(IndexTransition{rowIndex + j, rToL}); break;
 				}
 			}
 		}
@@ -42,8 +50,8 @@ double const prealocate = 0.01;
 				switch (classifier.f_classifier())
 				{
 					case no: continue; break;
-					case forward: result.push_back(IndexTransition{((row + 1) * img.step) + col, upToDown}); break;
-					case backward: result.push_back(IndexTransition{row * img.step + col, downToUp}); break;
+					case fwd: result.push_back(IndexTransition{((row + 1) * img.step) + col, upToDw}); break;
+					case back: result.push_back(IndexTransition{row * img.step + col, dwToUp}); break;
 				}
 			}
 		}
@@ -78,11 +86,11 @@ double const prealocate = 0.01;
 
 	template <class TYPE> Transition Classifier<TYPE>::f_classifier()
 	{
-		Transition result = backward;
+		Transition result = back;
 		if(brighter())
 		{
 			std::swap(pix0, pix1);//pix0 is now the dimmer
-			result = forward;
+			result = fwd;
 		}
 
 		correct_pix0();
