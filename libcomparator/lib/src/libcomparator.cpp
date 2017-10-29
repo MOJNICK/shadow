@@ -24,9 +24,14 @@ double const prealocate = 0.01;
 			 (*(listData.end())).transition |=  (*(--listData.end())).transition;
 		}
 
-		// listData.unique(
-		// data.erase(;
-		// data = listData;
+		for(auto it = listData.begin(); it != listData.end();)
+		{
+			if((*it).index == (*(++it)).index)
+				it = listData.erase(--it);
+		}
+
+		data.clear();
+		std::copy(listData.begin(), listData.end(), data.begin());
 	}
 
 
