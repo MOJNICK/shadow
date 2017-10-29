@@ -3,6 +3,8 @@
 #include <cstring>
 #include <opencv2/core/core.hpp>
 #include "math.h"
+#include <algorithm>
+#include <list>
 #include <vector>
 #include <utility>
 
@@ -17,14 +19,21 @@ typedef int DTYPE;
 
 enum Transition
 {
-	no,
-	forward,
-	backward,
-	upToDown,
-	downToUp,
-	leftToRight,
-	rightToLeft
+	no = 0x00,
+	fwd = 0x02,
+	back = fwd << 1,
+	biFwdBack= fwd | back,
+	upToDw = fwd << 2,
+	dwToUp = fwd << 3,
+	biUpDw = upToDw | dwToUp,
+	lToR = fwd << 4,
+	rToL = fwd << 5,
+	biLR = lToR | rToL,
+	all = biLR | biUpDw,
 };
+
+inline Transition& operator|=(Transition& a, const Transition& b)
+{return a = static_cast<Transition>((a) | (b));}
 
 struct IndexTransition
 {
@@ -32,8 +41,17 @@ struct IndexTransition
 	Transition transition;
 };
 	
+
+	class DataProcess
+	{
+	public:
+		DataProcess();
+		void concatenate_HV(std::vector<IndexTransition>&);
+	};
+
 	template <class TYPE>
 	class Classifier;
+
 
 	template <class TYPE>
 	class IterateProcess
