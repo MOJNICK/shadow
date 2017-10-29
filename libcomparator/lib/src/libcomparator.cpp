@@ -16,22 +16,13 @@ double const prealocate = 0.01;
 			}
 			else
 			{
-				return a;
+				return b;
 			}
 		} );
 		if( (*listData.begin()).index == (*(++listData.begin())).index)
 		{
 			 (*(listData.begin())).transition |=  (*(++listData.begin())).transition;
 		}
-
-		// for_each(listData.begin(), listData.end(), [](auto a){
-		// 	static IndexTransition last = a;
-		// 	if(last.index == a.index)
-		// 	{
-		// 		a.transition |= last.transition;
-		// 	}
-
-		// });
 
 		for(auto it = listData.begin(); it != listData.end();)
 		{

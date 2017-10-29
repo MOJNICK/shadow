@@ -6,27 +6,71 @@ class IterateTestMethods : public cvtest::BaseTest
 public:
   IterateTestMethods(){}
 protected:
-  void compareIndexTransition(IndexTransition& indexTransition1, IndexTransition& indexTransition2)
+  void compareIndexTransition(IndexTransition& expected, IndexTransition& actual)
   {
-    ASSERT_EQ(indexTransition1.index, indexTransition2.index);
-    ASSERT_EQ(indexTransition1.transition, indexTransition2.transition);
+    ASSERT_EQ(expected.index, actual.index);
+    ASSERT_EQ(expected.transition, actual.transition);
+  }
+
+    void compareVecIndexTransition(std::vector<IndexTransition> expectedVec, std::vector<IndexTransition> actualVec)
+  {
+    ASSERT_EQ(expectedVec.size(), actualVec.size());
+    for(int i = 0; i < expectedVec.size(); ++i)
+    {
+      ASSERT_EQ(expectedVec[i].index, actualVec[i].index);
+      ASSERT_EQ(expectedVec[i].transition, actualVec[i].transition);
+    }
   }
 };
 
 class ConcatenateHV : public IterateTestMethods
 {
 public:
-    ConcatenateHV(){}
+    ConcatenateHV() : shuffleNumber{100}{}
+    ConcatenateHV(int shuffleNumber) : shuffleNumber{shuffleNumber}{}
 protected:
   void run(int)
-  {      
-    std::vector<IndexTransition> result = { IndexTransition{12, lToR}, IndexTransition{12, rToL},
-                                            IndexTransition{12, upToDw}, IndexTransition{12, dwToUp}};
+  { 
+    DataProcess dp;     
+    
+    std::vector<IndexTransition> expectedVec;
+    std::vector<IndexTransition> inputVec;
 
-    DataProcess dp;
-    dp.concatenate_HV(result);
-    auto expected = IndexTransition{12, all};
-    compareIndexTransition(expected, result[0]);
+    expectedVec = { IndexTransition{12, all} };
+    inputVec = { IndexTransition{12, lToR}, IndexTransition{12, rToL},
+                 IndexTransition{12, upToDw}, IndexTransition{12, dwToUp}};
+    shuffleAndTest(expectedVec, inputVec);
+
+    expectedVec = { IndexTransition{12, biRUp}, IndexTransition{13, biLDw} };
+    inputVec = { IndexTransition{13, lToR}, IndexTransition{12, rToL},
+                 IndexTransition{12, upToDw}, IndexTransition{13, dwToUp}};
+    shuffleAndTest(expectedVec, inputVec);
+    
+    expectedVec = { IndexTransition{12, biRUp}, IndexTransition{13, dwToUp}, IndexTransition{114, lToR} };
+    inputVec = { IndexTransition{114, lToR}, IndexTransition{12, rToL},
+                 IndexTransition{12, upToDw}, IndexTransition{13, dwToUp}};
+    shuffleAndTest(expectedVec, inputVec);
+    
+    expectedVec = { IndexTransition{11, lToR}, IndexTransition{12, biRUp}, IndexTransition{13, dwToUp} };
+    inputVec = { IndexTransition{11, lToR}, IndexTransition{12, rToL},
+                 IndexTransition{12, upToDw}, IndexTransition{13, dwToUp}};
+    shuffleAndTest(expectedVec, inputVec);
+
+    expectedVec = { IndexTransition{11, lToR}, IndexTransition{12, rToL}, IndexTransition{13, dwToUp}, IndexTransition{14, upToDw} };
+    inputVec = { IndexTransition{11, lToR}, IndexTransition{12, rToL},
+                 IndexTransition{14, upToDw}, IndexTransition{13, dwToUp}};
+    shuffleAndTest(expectedVec, inputVec);
+  }
+private:
+  int shuffleNumber;
+  void shuffleAndTest(std::vector<IndexTransition>& expectedVec, std::vector<IndexTransition>& inputVec)
+  {
+    for(int i = 0; i < shuffleNumber; ++i)
+    { 
+      std::random_shuffle (inputVec.begin(), inputVec.end());
+      DataProcess::concatenate_HV(inputVec);
+      compareVecIndexTransition(expectedVec, inputVec);
+    }
   }
 };
 TEST(ComparatorLibSuite, ConcatenateHV)
@@ -97,9 +141,9 @@ TEST(ComparatorLibSuite, IterateHV)
 
       ASSERT_EQ(result.size(), 2);
       auto expected = IndexTransition{12, lToR};
-      compareIndexTransition(result[0], expected);
+      compareIndexTransition(expected, result[0]);
       expected = IndexTransition{12, rToL};
-      compareIndexTransition(result[1], expected);
+      compareIndexTransition(expected, result[1]);
     }
   };
   TEST(ComparatorPrivateLibSuite, IterateH)
@@ -131,9 +175,9 @@ TEST(ComparatorLibSuite, IterateHV)
 
       ASSERT_EQ(result.size(), 2);
       auto expected = IndexTransition{12, upToDw};
-      compareIndexTransition(result[0], expected);
+      compareIndexTransition(expected, result[0]);
       expected = IndexTransition{12, dwToUp};
-      compareIndexTransition(result[1], expected);
+      compareIndexTransition(expected, result[1]);
     }
   };
   TEST(ComparatorPrivateLibSuite, IterateV)

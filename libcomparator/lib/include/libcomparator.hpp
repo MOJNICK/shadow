@@ -50,7 +50,7 @@ struct IndexTransition
 	{
 	public:
 		DataProcess();
-		void concatenate_HV(std::vector<IndexTransition>&);
+		static void concatenate_HV(std::vector<IndexTransition>&);
 	};
 
 	template <class TYPE>
