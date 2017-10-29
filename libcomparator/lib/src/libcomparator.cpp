@@ -20,9 +20,9 @@ double const prealocate = 0.01;
 				classifier.copy_pix(img.data + rowIndex + j, img.data + rowIndex + j + channels);
 				switch (classifier.f_classifier())
 				{
-					case no: continue;
-					case forward: result.push_back(IndexTransition{rowIndex + j + channels, leftToRight});
-					case backward: result.push_back(IndexTransition{rowIndex + j, rightToLeft});
+					case no: continue; break;
+					case forward: result.push_back(IndexTransition{rowIndex + j + channels, leftToRight}); break;
+					case backward: result.push_back(IndexTransition{rowIndex + j, rightToLeft}); break;
 				}
 			}
 		}
@@ -41,9 +41,9 @@ double const prealocate = 0.01;
 				classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
 				switch (classifier.f_classifier())
 				{
-					case no: continue;
-					case forward: result.push_back(IndexTransition{((row + 1) * img.step) + col, upToDown});
-					case backward: result.push_back(IndexTransition{row * img.step + col, downToUp});
+					case no: continue; break;
+					case forward: result.push_back(IndexTransition{((row + 1) * img.step) + col, upToDown}); break;
+					case backward: result.push_back(IndexTransition{row * img.step + col, downToUp}); break;
 				}
 			}
 		}
@@ -78,11 +78,11 @@ double const prealocate = 0.01;
 
 	template <class TYPE> Transition Classifier<TYPE>::f_classifier()
 	{
-		Transition result = forward;
+		Transition result = backward;
 		if(brighter())
 		{
 			std::swap(pix0, pix1);//pix0 is now the dimmer
-			result = backward;
+			result = forward;
 		}
 
 		correct_pix0();
