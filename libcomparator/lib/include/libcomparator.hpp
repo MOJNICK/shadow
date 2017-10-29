@@ -3,6 +3,8 @@
 #include <cstring>
 #include <opencv2/core/core.hpp>
 #include "math.h"
+#include <algorithm>
+#include <list>
 #include <vector>
 #include <utility>
 

@@ -6,7 +6,8 @@ double const prealocate = 0.01;
 
 	std::vector<IndexTransition> DataProcess::concatenate_HV(std::vector<IndexTransition> data)
 	{
-
+		std::list<IndexTransition> myList(data.begin(), data.end());
+		std::sort(data.begin(), data.end(), [](auto& a, auto& b){return a.index < b.index;});
 	}
 
 
