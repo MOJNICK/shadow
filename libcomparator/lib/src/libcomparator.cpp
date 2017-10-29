@@ -16,22 +16,13 @@ double const prealocate = 0.01;
 			}
 			else
 			{
-				return a;
+				return b;
 			}
 		} );
 		if( (*listData.begin()).index == (*(++listData.begin())).index)
 		{
 			 (*(listData.begin())).transition |=  (*(++listData.begin())).transition;
 		}
-
-		// for_each(listData.begin(), listData.end(), [](auto a){
-		// 	static IndexTransition last = a;
-		// 	if(last.index == a.index)
-		// 	{
-		// 		a.transition |= last.transition;
-		// 	}
-
-		// });
 
 		for(auto it = listData.begin(); it != listData.end();)
 		{
@@ -134,6 +125,15 @@ double const prealocate = 0.01;
 
 		return (result = no);
 	}
+	
+	#ifdef WITH_TESTS
+		template <class TYPE> void Classifier<TYPE>::set_parameters(double lightThreshold_, double colorThreshold_, double colorBalance_[])
+		{
+			lightThreshold = lightThreshold_;
+			colorThreshold = colorThreshold_;
+			memcpy(colorBalance, colorBalance_, sizeof(double) * channels);	
+		}
+	#endif
 
 	template<class TYPE> void Classifier<TYPE>::correct_pix0()
 	{
@@ -166,11 +166,16 @@ double const prealocate = 0.01;
 	{
 		double x[]={1.2,1.0,1.0};
 		TYPE pix [] = {10,10,10};
-		Classifier<TYPE> specifyCL(1.0,1.0,x);
+		Classifier<TYPE> specifyCL(1.0, 1.0, x);
 		specifyCL.copy_pix(pix, pix);
 		specifyCL.f_classifier();
 		IterateProcess<TYPE> specifyIT(cv::Mat_<TYPE>(0,0),1.0,1.0,x);
-		specifyIT.iterate_H();
-		specifyIT.iterate_V();
 		specifyIT.iterate_HV();
+	#ifdef WITH_TESTS
+		specifyCL.set_parameters(1.0, 1.0, x);
+		#ifdef TEST_PRIVATE_PART
+			specifyIT.iterate_H();
+			specifyIT.iterate_V();
+		#endif
+	#endif
 	}
