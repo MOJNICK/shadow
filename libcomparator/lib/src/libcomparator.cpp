@@ -125,13 +125,15 @@ double const prealocate = 0.01;
 
 		return (result = no);
 	}
-
-	template <class TYPE> void Classifier<TYPE>::set_parameters(double lightThreshold_, double colorThreshold_, double colorBalance_[])
-	{
-		lightThreshold = lightThreshold_;
-		colorThreshold = colorThreshold_;
-		memcpy(colorBalance, colorBalance_, sizeof(double) * channels);	
-	}
+	
+	#ifdef WITH_TESTS
+		template <class TYPE> void Classifier<TYPE>::set_parameters(double lightThreshold_, double colorThreshold_, double colorBalance_[])
+		{
+			lightThreshold = lightThreshold_;
+			colorThreshold = colorThreshold_;
+			memcpy(colorBalance, colorBalance_, sizeof(double) * channels);	
+		}
+	#endif
 
 	template<class TYPE> void Classifier<TYPE>::correct_pix0()
 	{
@@ -169,9 +171,11 @@ double const prealocate = 0.01;
 		specifyCL.f_classifier();
 		IterateProcess<TYPE> specifyIT(cv::Mat_<TYPE>(0,0),1.0,1.0,x);
 		specifyIT.iterate_HV();
+	#ifdef WITH_TESTS
 		specifyCL.set_parameters(1.0, 1.0, x);
-	#ifdef TEST_PRIVATE_PART
-		specifyIT.iterate_H();
-		specifyIT.iterate_V();
+		#ifdef TEST_PRIVATE_PART
+			specifyIT.iterate_H();
+			specifyIT.iterate_V();
+		#endif
 	#endif
 	}

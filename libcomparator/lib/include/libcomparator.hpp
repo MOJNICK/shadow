@@ -8,8 +8,10 @@
 #include <vector>
 #include <utility>
 
-#ifdef TEST_PRIVATE_PART
-#define private public
+#ifdef WITH_TESTS
+	#ifdef TEST_PRIVATE_PART
+		#define private public
+	#endif
 #endif
 
 typedef unsigned int uint;
