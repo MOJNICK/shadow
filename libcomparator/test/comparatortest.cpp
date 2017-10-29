@@ -1,8 +1,58 @@
 #include <opencv2/ts/ts.hpp>
 #include <libcomparator.hpp>
 
+class IterateTestMethods : public cvtest::BaseTest
+{
+public:
+    IterateTestMethods(){}
+protected:
+  void compareIndexTransition(IndexTransition& iT1, IndexTransition& iT2)
+  {
+    ASSERT_EQ(iT1.index, iT2.index);
+    ASSERT_EQ(iT1.transition, iT2.transition);
+  }
+};
 
-class IterateH : public cvtest::BaseTest
+class IterateHV : public IterateTestMethods
+{
+public:
+    IterateHV(){}
+protected:
+    
+    void run(int) {
+      cv::Mat_<TYPE> mat(3, 3 * channels, 100);
+      // cv::Vec<TYPE, channels> subPix;
+      // subPix = static_cast<cv::Vec<TYPE, channels>>(cv::Matx<TYPE, channels, 1>::zeros());
+      // mat.at<cv::Vec<TYPE, channels>>(cv::Point(3,3)) = subPix;
+      mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
+      double balance[] = {1.0, 1.0, 1.0};
+      double lightThreshold = 1.0;
+      double colorThreshold = 1.0;
+
+      IterateProcess<TYPE> iterateProcess(mat, lightThreshold, colorThreshold, balance);
+
+      std::vector<IndexTransition> result = iterateProcess.iterate_HV();
+
+      ASSERT_EQ(result.size(), 4);
+      auto expected = IndexTransition{12, leftToRight};
+      compareIndexTransition(result[0], expected);
+      expected = IndexTransition{12, rightToLeft};
+      compareIndexTransition(result[1], expected);
+      expected = IndexTransition{12, upToDown};
+      compareIndexTransition(result[2], expected);
+      expected = IndexTransition{12, downToUp};
+      compareIndexTransition(result[3], expected);
+  }
+};
+TEST(ComparatorLibSuite, IterateHV) {
+  IterateHV IterateHV;
+  IterateHV.safe_run();
+}
+
+
+#ifdef TEST_PRIVATE_PART
+
+class IterateH : public IterateTestMethods
 {
 public:
     IterateH(){}
@@ -27,15 +77,6 @@ protected:
       compareIndexTransition(result[0], expected);
       expected = IndexTransition{12, rightToLeft};
       compareIndexTransition(result[1], expected);
-
-      // ASSERT_EQ(result[0], IndexTransition{12, rightToLeft});
-
-  }
-
-  void compareIndexTransition(IndexTransition& iT1, IndexTransition& iT2)
-  {
-    ASSERT_EQ(iT1.index, iT2.index);
-    ASSERT_EQ(iT1.transition, iT2.transition);
   }
 };
 TEST(ComparatorLibSuite, IterateH) {
@@ -43,7 +84,8 @@ TEST(ComparatorLibSuite, IterateH) {
   iterateH.safe_run();
 }
 
-class IterateV : public cvtest::BaseTest
+
+class IterateV : public IterateTestMethods
 {
 public:
     IterateV(){}
@@ -68,15 +110,6 @@ protected:
       compareIndexTransition(result[0], expected);
       expected = IndexTransition{12, downToUp};
       compareIndexTransition(result[1], expected);
-
-      // ASSERT_EQ(result[0], IndexTransition{12, rightToLeft});
-
-  }
-
-  void compareIndexTransition(IndexTransition& iT1, IndexTransition& iT2)
-  {
-    ASSERT_EQ(iT1.index, iT2.index);
-    ASSERT_EQ(iT1.transition, iT2.transition);
   }
 };
 TEST(ComparatorLibSuite, IterateV) {
@@ -84,6 +117,7 @@ TEST(ComparatorLibSuite, IterateV) {
   IterateV.safe_run();
 }
 
+#endif
 
 
 class Fclassifier : public cvtest::BaseTest
@@ -118,7 +152,6 @@ protected:
       //check that all values are between 1 and 1 (and not Nan)
       // if (0 != cvtest::check(, 1, 1, 0) )
       //     ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_TEST_DATA);
-
   }
 };
 TEST(ComparatorLibSuite, f_classifier) {
