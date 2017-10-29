@@ -25,11 +25,11 @@ enum Transition
 	biFwdBack= fwd | back,
 	upToDw = fwd << 2,
 	dwToUp = fwd << 3,
-	biUpDW = upToDw | dwToUp,
+	biUpDw = upToDw | dwToUp,
 	lToR = fwd << 4,
 	rToL = fwd << 5,
 	biLR = lToR | rToL,
-	all = biLR | biUpDW,
+	all = biLR | biUpDw,
 };
 
 inline Transition& operator|=(Transition& a, const Transition& b)

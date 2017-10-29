@@ -6,12 +6,64 @@ class IterateTestMethods : public cvtest::BaseTest
 public:
     IterateTestMethods(){}
 protected:
-  void compareIndexTransition(IndexTransition& iT1, IndexTransition& iT2)
+  void compareIndexTransition(IndexTransition& indexTransition1, IndexTransition& indexTransition2)
   {
-    ASSERT_EQ(iT1.index, iT2.index);
-    ASSERT_EQ(iT1.transition, iT2.transition);
+    ASSERT_EQ(indexTransition1.index, indexTransition2.index);
+    ASSERT_EQ(indexTransition1.transition, indexTransition2.transition);
   }
 };
+
+class ConcatenateHV : public IterateTestMethods
+{
+public:
+    ConcatenateHV(){}
+protected:
+    
+    void run(int) {
+      cv::Mat_<TYPE> mat(3, 3 * channels, 100);
+      // cv::Vec<TYPE, channels> subPix;
+      // subPix = static_cast<cv::Vec<TYPE, channels>>(cv::Matx<TYPE, channels, 1>::zeros());
+      // mat.at<cv::Vec<TYPE, channels>>(cv::Point(3,3)) = subPix;
+      mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
+      double balance[] = {1.0, 1.0, 1.0};
+      double lightThreshold = 1.0;
+      double colorThreshold = 1.0;
+
+      IterateProcess<TYPE> iterateProcess(mat, lightThreshold, colorThreshold, balance);
+
+      std::vector<IndexTransition> result = iterateProcess.iterate_HV();
+
+      ASSERT_EQ(result.size(), 4);
+      auto expected = IndexTransition{12, lToR};
+      compareIndexTransition(result[0], expected);
+      expected = IndexTransition{12, rToL};
+      compareIndexTransition(result[1], expected);
+      expected = IndexTransition{12, upToDw};
+      compareIndexTransition(result[2], expected);
+      expected = IndexTransition{12, dwToUp};
+      compareIndexTransition(result[3], expected);
+
+      Transition trans1 = biUpDw;
+      Transition trans2 = biLR;
+      trans1|=trans2;
+      ASSERT_EQ(trans1, all);
+
+      trans1=lToR;
+      trans2=rToL;
+      trans1|=trans2;
+      ASSERT_EQ(trans1, biLR);
+
+      DataProcess dp;
+      dp.concatenate_HV(result);
+      expected = IndexTransition{12, all};
+      compareIndexTransition(expected, result[0]);
+  }
+};
+TEST(ComparatorLibSuite, ConcatenateHV) {
+  ConcatenateHV ConcatenateHV;
+  ConcatenateHV.safe_run();
+}
+
 
 class IterateHV : public IterateTestMethods
 {
