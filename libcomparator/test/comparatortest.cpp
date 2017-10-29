@@ -262,6 +262,72 @@ protected:
     classifier.copy_pix(pix0, pix1);
     ASSERT_EQ(Transition::no, classifier.f_classifier());
 
+    
+    balance[0] = 0.9;
+    lightThreshold = 0.0;
+    colorThreshold = 10.0;
+    classifier.set_parameters(lightThreshold, colorThreshold, balance);
+
+    std::fill( pix0, pix0 + channels, 3);
+    std::fill( pix1, pix1 + channels, 3);
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::no, classifier.f_classifier());
+
+    std::fill( pix0, pix0 + channels, 30);
+    std::fill( pix1, pix1 + channels, 30);
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::back, classifier.f_classifier());
+
+    std::fill( pix0, pix0 + channels, 30);
+    std::fill( pix1, pix1 + channels, 30);
+    pix0[0] = 35;
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::no, classifier.f_classifier());
+
+    std::fill( pix0, pix0 + channels, 33);
+    std::fill( pix1, pix1 + channels, 30);
+    pix1[0] = 34;
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::fwd, classifier.f_classifier());
+
+    std::fill( pix0, pix0 + channels, 33);
+    std::fill( pix1, pix1 + channels, 30);
+    pix1[0] = 33;
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::fwd, classifier.f_classifier());
+
+    
+    balance[0] = 1.1;
+    lightThreshold = 0.0;
+    colorThreshold = 10.0;
+    classifier.set_parameters(lightThreshold, colorThreshold, balance);
+
+    std::fill( pix0, pix0 + channels, 33);
+    std::fill( pix1, pix1 + channels, 33);
+    pix1[0] = 30;
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::no, classifier.f_classifier());
+
+
+    balance[0] = 1.0;
+    lightThreshold = 90.0;
+    colorThreshold = 200.0;
+    classifier.set_parameters(lightThreshold, colorThreshold, balance);
+
+    std::fill( pix0, pix0 + channels, 50);
+    std::fill( pix1, pix1 + channels, 50 + 29);
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::no, classifier.f_classifier());
+
+    std::fill( pix0, pix0 + channels, 50);
+    std::fill( pix1, pix1 + channels, 50 + 30);
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::no, classifier.f_classifier());
+
+    std::fill( pix0, pix0 + channels, 50);
+    std::fill( pix1, pix1 + channels, 50 + 31);
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::back, classifier.f_classifier());
     // std::fill( pix0, pix0 + channels, 10);
     // std::fill( pix1, pix1 + channels, 3);
     // pix0[0] = 5;

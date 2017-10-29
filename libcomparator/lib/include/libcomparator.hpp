@@ -19,7 +19,7 @@ typedef int DTYPE;
 
 	enum Transition
 	{
-		no = 0,
+		no = 1 << 0,
 		fwd = 1 << 1,
 		back = 1 << 2,
 		biFwdBack= fwd | back,

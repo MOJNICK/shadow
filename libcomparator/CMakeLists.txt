@@ -12,6 +12,9 @@ option(TEST_PRIVATE_PART "define private public, and include private test code" 
 if(TEST_PRIVATE_PART)
 	add_definitions(-DTEST_PRIVATE_PART)
 endif()
+if (WITH_TESTS)
+  add_definitions(-DWITH_TESTS)
+endif()
 
 project(comparator)
 
@@ -23,5 +26,4 @@ option (WITH_TESTS "build tests" ON)
 
 if (WITH_TESTS)
   add_subdirectory(test)
-  add_definitions(-DWITH_TESTS)
 endif()
