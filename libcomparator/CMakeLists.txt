@@ -23,4 +23,5 @@ option (WITH_TESTS "build tests" ON)
 
 if (WITH_TESTS)
   add_subdirectory(test)
+  add_definitions(-DWITH_TESTS)
 endif()

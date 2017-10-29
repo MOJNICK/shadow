@@ -17,33 +17,33 @@ int const channels = 3;//not a parameter, only for convinience
 typedef unsigned char TYPE;
 typedef int DTYPE;
 
-enum Transition
-{
-	no = 0,
-	fwd = 1 << 1,
-	back = 1 << 2,
-	biFwdBack= fwd | back,
-	upToDw = 1 << 3,
-	dwToUp = 1 << 4,
-	biUpDw = upToDw | dwToUp,
-	lToR = 1 << 5,
-	rToL = 1 << 6,
-	biLR = lToR | rToL,
-	biLUp = lToR | upToDw,
-	biLDw = lToR | dwToUp,
-	biRUp = rToL | upToDw,
-	biRDw = rToL | dwToUp,
-	all = biLR | biUpDw,
-};
+	enum Transition
+	{
+		no = 0,
+		fwd = 1 << 1,
+		back = 1 << 2,
+		biFwdBack= fwd | back,
+		upToDw = 1 << 3,
+		dwToUp = 1 << 4,
+		biUpDw = upToDw | dwToUp,
+		lToR = 1 << 5,
+		rToL = 1 << 6,
+		biLR = lToR | rToL,
+		biLUp = lToR | upToDw,
+		biLDw = lToR | dwToUp,
+		biRUp = rToL | upToDw,
+		biRDw = rToL | dwToUp,
+		all = biLR | biUpDw,
+	};
 
-inline Transition& operator|=(Transition& a, const Transition& b)
-{return a = static_cast<Transition>((a) | (b));}
+	inline Transition& operator|=(Transition& a, const Transition& b)
+	{return a = static_cast<Transition>((a) | (b));}
 
-struct IndexTransition
-{
-	long unsigned int index;
-	Transition transition;
-};
+	struct IndexTransition
+	{
+		long unsigned int index;
+		Transition transition;
+	};
 	
 
 	class DataProcess
@@ -79,6 +79,9 @@ struct IndexTransition
 		Classifier(double, double, double[]);
 		void copy_pix(TYPE[], TYPE[]);
 		Transition f_classifier();
+		#ifdef WITH_TESTS
+			void set_parameters(double, double, double[]);
+		#endif
 	private:
 		TYPE pix0[channels];
 		TYPE pix1[channels];
