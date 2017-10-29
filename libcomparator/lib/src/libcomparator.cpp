@@ -8,7 +8,7 @@ double const prealocate = 0.01;
 	{
 		std::list<IndexTransition> listData(data.begin(), data.end());
 		listData.sort([](const IndexTransition& a, const IndexTransition& b){return a.index < b.index;});
-		std::transform(listData.begin(), --listData.end(), ++listData.begin(), listData.begin(),[](IndexTransition& a, IndexTransition& b)
+		std::transform(listData.begin(), --listData.end(), ++listData.begin(), ++listData.begin(),[](IndexTransition& a, IndexTransition& b)
 		{
 			if(a.index == b.index)
 			{
@@ -19,10 +19,19 @@ double const prealocate = 0.01;
 				return a;
 			}
 		} );
-		if( (*(--listData.end())).index == (*listData.end()).index )
+		if( (*listData.begin()).index == (*(++listData.begin())).index)
 		{
-			 (*(listData.end())).transition |=  (*(--listData.end())).transition;
+			 (*(listData.begin())).transition |=  (*(++listData.begin())).transition;
 		}
+
+		// for_each(listData.begin(), listData.end(), [](auto a){
+		// 	static IndexTransition last = a;
+		// 	if(last.index == a.index)
+		// 	{
+		// 		a.transition |= last.transition;
+		// 	}
+
+		// });
 
 		for(auto it = listData.begin(); it != listData.end();)
 		{
@@ -31,7 +40,7 @@ double const prealocate = 0.01;
 		}
 
 		data.clear();
-		std::copy(listData.begin(), listData.end(), data.begin());
+		std::copy(listData.begin(), listData.end(), back_inserter(data));
 	}
 
 
