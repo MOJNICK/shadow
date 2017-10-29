@@ -19,16 +19,20 @@ typedef int DTYPE;
 
 enum Transition
 {
-	no = 0x00,
-	fwd = 0x02,
-	back = fwd << 1,
+	no = 0,
+	fwd = 1 << 1,
+	back = 1 << 2,
 	biFwdBack= fwd | back,
-	upToDw = fwd << 2,
-	dwToUp = fwd << 3,
+	upToDw = 1 << 3,
+	dwToUp = 1 << 4,
 	biUpDw = upToDw | dwToUp,
-	lToR = fwd << 4,
-	rToL = fwd << 5,
+	lToR = 1 << 5,
+	rToL = 1 << 6,
 	biLR = lToR | rToL,
+	biLUp = lToR | upToDw,
+	biLDw = lToR | dwToUp,
+	biRUp = rToL | upToDw,
+	biRDw = rToL | dwToUp,
 	all = biLR | biUpDw,
 };
 

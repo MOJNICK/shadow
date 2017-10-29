@@ -170,7 +170,9 @@ double const prealocate = 0.01;
 		specifyCL.copy_pix(pix, pix);
 		specifyCL.f_classifier();
 		IterateProcess<TYPE> specifyIT(cv::Mat_<TYPE>(0,0),1.0,1.0,x);
+		specifyIT.iterate_HV();
+	#ifdef TEST_PRIVATE_PART
 		specifyIT.iterate_H();
 		specifyIT.iterate_V();
-		specifyIT.iterate_HV();
+	#endif
 	}
