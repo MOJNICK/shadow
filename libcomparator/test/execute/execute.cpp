@@ -21,7 +21,7 @@ int main( int argc, char** argv )
 
     TYPE acceptanceLevel = 1;
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 1.03;
+    double lightThreshold = 0.03;
     double colorThreshold = 0.01;
     IterateProcess<TYPE> iterateProcess(image, acceptanceLevel, lightThreshold, colorThreshold, balance);
     auto result = iterateProcess.iterate_HV();

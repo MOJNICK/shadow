@@ -94,7 +94,7 @@ protected:
     mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
     TYPE acceptanceLevel = 1;
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 2.0;
+    double lightThreshold = 1.0;
     double colorThreshold = 1.0;
 
     IterateProcess<TYPE> iterateProcess(mat, acceptanceLevel, lightThreshold, colorThreshold, balance);
@@ -134,7 +134,7 @@ TEST(ComparatorLibSuite, IterateHV)
       mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
       TYPE acceptanceLevel = 1;
       double balance[] = {1.0, 1.0, 1.0};
-      double lightThreshold = 2.0;
+      double lightThreshold = 1.0;
       double colorThreshold = 1.0;
 
       IterateProcess<TYPE> iterateProcess(mat, acceptanceLevel, lightThreshold, colorThreshold, balance);
@@ -169,7 +169,7 @@ TEST(ComparatorLibSuite, IterateHV)
       mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
       TYPE acceptanceLevel = 1;
       double balance[] = {1.0, 1.0, 1.0};
-      double lightThreshold = 4.0;
+      double lightThreshold = 3.0;
       double colorThreshold = 1.0;
 
       IterateProcess<TYPE> iterateProcess(mat, acceptanceLevel, lightThreshold, colorThreshold, balance);
@@ -200,7 +200,7 @@ protected:
   {
     TYPE acceptanceLevel = 1;
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 2.0;
+    double lightThreshold = 1.0;
     double colorThreshold = 1.0;
 
     Classifier<TYPE> classifier( acceptanceLevel, lightThreshold, colorThreshold, balance );
@@ -243,7 +243,7 @@ protected:
 
     TYPE acceptanceLevel = 1;
     double balance[] = {2.0, 1.0, 1.0};
-    double lightThreshold = 2.0;
+    double lightThreshold = 1.0;
     double colorThreshold = 1.0;
 
     Classifier<TYPE> classifier( acceptanceLevel, lightThreshold, colorThreshold, balance);
@@ -275,7 +275,7 @@ protected:
 
     
     balance[0] = 0.9;
-    lightThreshold = 1.00001;
+    lightThreshold = 0.00001;
     colorThreshold = 0.05;
     classifier.set_parameters( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
@@ -309,7 +309,7 @@ protected:
 
     
     balance[0] = 1.1;
-    lightThreshold = 1.0001;
+    lightThreshold = 0.0001;
     colorThreshold = 10.0;
     classifier.set_parameters( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
@@ -321,7 +321,7 @@ protected:
 
 
     balance[0] = 1.0;
-    lightThreshold = 2.00001;
+    lightThreshold = 1.00001;
     colorThreshold = 200.0;
     classifier.set_parameters( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
@@ -374,7 +374,7 @@ TEST(ComparatorLibSuite, f_classifierbt)
     {
       TYPE acceptanceLevel = 1;
       double balance[] = {1.0, 1.0, 1.0};
-      double lightThreshold = 1.0;
+      double lightThreshold = 0.0;
       double colorThreshold = 1.0;
 
       Classifier<TYPE> classifier( acceptanceLevel, lightThreshold, colorThreshold, balance);
