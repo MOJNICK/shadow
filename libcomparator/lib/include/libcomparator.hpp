@@ -96,7 +96,7 @@ typedef int DTYPE;
 
 		void correct_pix0();
 		DTYPE light_distance();
-		DTYPE color_distance();
+		double color_distance();
 		bool brighter();
 		void swap();
 	};

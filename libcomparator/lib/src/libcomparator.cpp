@@ -147,10 +147,10 @@ double const prealocate = 0.01;
 		return lightDistance;
 	}
 
-	template <class TYPE> DTYPE Classifier<TYPE>::color_distance()
+	template <class TYPE> double Classifier<TYPE>::color_distance()
 	{
-		DTYPE var = -(pix1[0] - pix0[0] + pix1[1] - pix0[1] + pix1[2] - pix0[2]) / channels;//for minimize color_distance
-		return pow(pix1[0] - pix0[0] + var, 2) + pow(pix1[1] - pix0[1] + var, 2) + pow(pix1[2] - pix0[2] + var, 2);
+		double var = -(pix1[0] / pix0[0] + pix1[1] / pix0[1] + pix1[2] / pix0[2]) / channels;//for minimize color_distance
+		return pow(pix1[0] / pix0[0] + var, 2) + pow(pix1[1] / pix0[1] + var, 2) + pow(pix1[2] / pix0[2] + var, 2);
 	}
 
 	template<class TYPE> bool Classifier<TYPE>::brighter()

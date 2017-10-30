@@ -93,7 +93,7 @@ protected:
     // mat.at<cv::Vec<TYPE, channels>>(cv::Point(3,3)) = subPix;
     mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 1.0;
+    double lightThreshold = 2.0;
     double colorThreshold = 1.0;
 
     IterateProcess<TYPE> iterateProcess(mat, lightThreshold, colorThreshold, balance);
@@ -132,7 +132,7 @@ TEST(ComparatorLibSuite, IterateHV)
       // mat.at<cv::Vec<TYPE, channels>>(cv::Point(3,3)) = subPix;
       mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
       double balance[] = {1.0, 1.0, 1.0};
-      double lightThreshold = 1.0;
+      double lightThreshold = 2.0;
       double colorThreshold = 1.0;
 
       IterateProcess<TYPE> iterateProcess(mat, lightThreshold, colorThreshold, balance);
@@ -166,7 +166,7 @@ TEST(ComparatorLibSuite, IterateHV)
       // mat.at<cv::Vec<TYPE, channels>>(cv::Point(3,3)) = subPix;
       mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
       double balance[] = {1.0, 1.0, 1.0};
-      double lightThreshold = 1.0;
+      double lightThreshold = 4.0;
       double colorThreshold = 1.0;
 
       IterateProcess<TYPE> iterateProcess(mat, lightThreshold, colorThreshold, balance);
@@ -196,7 +196,7 @@ protected:
   void run(int)
   {
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 1.0;
+    double lightThreshold = 2.0;
     double colorThreshold = 1.0;
 
     Classifier<TYPE> classifier(lightThreshold, colorThreshold, balance);
