@@ -2,6 +2,7 @@
 
 double const prealocate = 0.01;
 
+
 	DataProcess::DataProcess(){};
 
 	void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
@@ -35,7 +36,7 @@ double const prealocate = 0.01;
 	}
 
 
-	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat_<TYPE> img, double lightThreshold, double colorThreshold, double colorBalance[]) : classifier(lightThreshold, colorThreshold, colorBalance)//should get type from img?
+	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat_<TYPE> img, double lightThreshold, double colorThreshold, double colorBalance[]) : classifier(lightThreshold, colorThreshold, colorBalance)
 	{
 		this->img = img;
 	}
@@ -161,6 +162,14 @@ double const prealocate = 0.01;
 	{
 
 	}
+
+
+	template<class TYPE> Main<TYPE>::Main(cv::Mat_<TYPE> img, double lightThreshold, double colorThreshold, double colorBalance[]) :
+	 iterateProcess(lightThreshold, colorThreshold, colorBalance)
+	{
+		executionResult = DataProcess::concatenate_HV(iterateProcess.iterate_HV());
+	}
+
 
 	void instantiate()
 	{

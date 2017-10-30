@@ -55,6 +55,7 @@ typedef int DTYPE;
 		static void concatenate_HV(std::vector<IndexTransition>&);
 	};
 
+	
 	template <class TYPE>
 	class Classifier;
 
@@ -73,6 +74,7 @@ typedef int DTYPE;
 		std::vector<IndexTransition> iterate_V();
 		
 	};
+
 	
 	template <class TYPE>
 	class Classifier
@@ -98,5 +100,22 @@ typedef int DTYPE;
 		bool brighter();
 		void swap();
 	};
+
+
+	template <class TYPE>
+	class Main
+	{
+	public:
+		Main(cv::Mat_<TYPE>, double, double, double[]);
+		std::vector<IndexTransition> executionResult;
+	private:
+		IterateProcess<TYPE> iterateProcess;
+	};
+
+
+	extern "C"
+	{
+
+	}
 
 #endif
