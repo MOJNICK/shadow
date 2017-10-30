@@ -16,11 +16,11 @@ int main( int argc, char** argv )
         return -1;
     }
 
-    double factor = 0.5;
+    double factor = 0.25;
     cv::resize(image, image, cv::Size(), factor, factor);
 
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 15.0;
+    double lightThreshold = 10.0;
     double colorThreshold = 3.0;
     IterateProcess<TYPE> iterateProcess(image, lightThreshold, colorThreshold, balance);
     auto result = iterateProcess.iterate_HV();
@@ -29,7 +29,9 @@ int main( int argc, char** argv )
     if(image.isContinuous())
     {
     	for_each(result.begin(), result.end(), [&image](auto el){
-    		image.data[el.index] = 255; image.data[el.index + channels] = 255;
+    		image.data[el.index] = 255;
+    		// image.data[el.index + 1] = 255; 
+    		image.data[el.index + 2] = 255;
     	});
     	
 	    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );// Create a window for display.
