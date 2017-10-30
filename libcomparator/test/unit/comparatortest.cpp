@@ -244,7 +244,7 @@ protected:
     TYPE acceptanceLevel = 1;
     double balance[] = {2.0, 1.0, 1.0};
     double lightThreshold = 2.0;
-    double colorThreshold = 4.0;
+    double colorThreshold = 1.0;
 
     Classifier<TYPE> classifier( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
@@ -258,13 +258,13 @@ protected:
 
     std::fill( pix0, pix0 + channels, 6);
     std::fill( pix1, pix1 + channels, 14);
-    pix0[0] = 4;      
+    pix0[0] = 3;      
     classifier.copy_pix(pix0, pix1);
     ASSERT_EQ(Transition::back, classifier.f_classifier());
 
     std::fill( pix0, pix0 + channels, 6);
     std::fill( pix1, pix1 + channels, 12);
-    pix0[0] = 4;      
+    pix0[0] = 3;      
     classifier.copy_pix(pix0, pix1);
     ASSERT_EQ(Transition::no, classifier.f_classifier());
 
@@ -276,7 +276,7 @@ protected:
     
     balance[0] = 0.9;
     lightThreshold = 1.00001;
-    colorThreshold = 10.0;
+    colorThreshold = 0.05;
     classifier.set_parameters( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
     std::fill( pix0, pix0 + channels, 3);
@@ -380,17 +380,23 @@ TEST(ComparatorLibSuite, f_classifierbt)
       Classifier<TYPE> classifier( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
 
-      TYPE pix0[] = {3, 3, 3};
-      TYPE pix1[] = {10, 10, 10};
+      TYPE pix0[] = {8, 8, 8};
+      TYPE pix1[] = {16, 16, 16};
       
       classifier.copy_pix(pix0, pix1);
-      ASSERT_DOUBLE_EQ(10/3.0, classifier.light_distance());
-      ASSERT_EQ(0, classifier.color_distance());
+      ASSERT_DOUBLE_EQ(2, classifier.light_distance());
+      ASSERT_DOUBLE_EQ(0, classifier.color_distance());
       
-      pix1[0] = 13;
+      pix1[0] = 12;
       classifier.copy_pix(pix0, pix1);
-      ASSERT_DOUBLE_EQ(33/9.0, classifier.light_distance());
-      ASSERT_EQ(6, classifier.color_distance());
+      ASSERT_DOUBLE_EQ(44/24.0, classifier.light_distance());
+      ASSERT_DOUBLE_EQ(2/12.0, classifier.color_distance());
+
+      std::fill( pix0, pix0 + channels, 128);
+      std::fill( pix1, pix1 + channels, 128);
+      pix0[0] = 32;
+      classifier.copy_pix(pix0, pix1);
+      ASSERT_DOUBLE_EQ(6.0, classifier.color_distance());
     }
   };
   TEST(ComparatorPrivateLibSuite, PrivatePartClassifier)

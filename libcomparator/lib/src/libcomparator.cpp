@@ -147,18 +147,15 @@ double const prealocate = 0.01;
 
 	template <class TYPE> double Classifier<TYPE>::light_distance()//pix0 have to < pix1 and be corrected
 	{
-		if( acceptanceLevel > (pix0[0] + pix0[1] + pix0[2]))// && (pix1[0] + pix1[1] + pix1[2])==0)
-		{
-			std::fill( pix0, pix0 + channels, acceptanceLevel);
-		}
+		std::for_each(pix0, pix0 + channels, [](TYPE& el){if(el == 0){el = 1;}});
 		lightDistance = static_cast<double>(pix1[0] + pix1[1] + pix1[2]) / static_cast<double>(pix0[0] + pix0[1] + pix0[2]);
 		return lightDistance;
 	}
 
 	template <class TYPE> double Classifier<TYPE>::color_distance()
 	{
-		double var = -(pix1[0] / pix0[0] + pix1[1] / pix0[1] + pix1[2] / pix0[2]) / channels;//for minimize color_distance
-		return pow(pix1[0] / pix0[0] + var, 2) + pow(pix1[1] / pix0[1] + var, 2) + pow(pix1[2] / pix0[2] + var, 2);
+		double var = -(pix1[0] / static_cast<double>(pix0[0]) + pix1[1] / static_cast<double>(pix0[1]) + pix1[2] / static_cast<double>(pix0[2])) / channels;//for minimize color_distance
+		return pow(pix1[0] / static_cast<double>(pix0[0]) + var, 2) + pow(pix1[1] / static_cast<double>(pix0[1]) + var, 2) + pow(pix1[2] / static_cast<double>(pix0[2]) + var, 2);
 	}
 
 	template<class TYPE> bool Classifier<TYPE>::brighter()
