@@ -64,7 +64,7 @@ typedef int DTYPE;
 	class IterateProcess
 	{
 	public:
-		IterateProcess(cv::Mat_<TYPE>, double, double, double[]);
+		IterateProcess( cv::Mat_<TYPE>, TYPE, double, double, double[] );
 		std::vector<IndexTransition> iterate_HV();
 	private:		
 		cv::Mat_<TYPE> img;//reference by default
@@ -80,23 +80,25 @@ typedef int DTYPE;
 	class Classifier
 	{
 	public:
-		Classifier(double, double, double[]);
+		Classifier( TYPE, double, double, double[] );
 		void copy_pix(TYPE[], TYPE[]);
 		Transition f_classifier();
 		#ifdef WITH_TESTS
-			void set_parameters(double, double, double[]);
+			void set_parameters( TYPE, double, double, double[] );
 		#endif
 	private:
 		TYPE pix0[channels];
 		TYPE pix1[channels];
+		TYPE acceptanceLevel;
 		double lightThreshold;
 		double colorThreshold;
 		double colorBalance[channels];
-		DTYPE lightDistance;
+		double lightDistance;
 
 		void correct_pix0();
-		DTYPE light_distance();
 		double color_distance();
+		double light_distance();
+
 		bool brighter();
 		void swap();
 	};

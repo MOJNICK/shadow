@@ -92,11 +92,12 @@ protected:
     // subPix = static_cast<cv::Vec<TYPE, channels>>(cv::Matx<TYPE, channels, 1>::zeros());
     // mat.at<cv::Vec<TYPE, channels>>(cv::Point(3,3)) = subPix;
     mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
+    TYPE acceptanceLevel = 1;
     double balance[] = {1.0, 1.0, 1.0};
     double lightThreshold = 2.0;
     double colorThreshold = 1.0;
 
-    IterateProcess<TYPE> iterateProcess(mat, lightThreshold, colorThreshold, balance);
+    IterateProcess<TYPE> iterateProcess(mat, acceptanceLevel, lightThreshold, colorThreshold, balance);
 
     std::vector<IndexTransition> result = iterateProcess.iterate_HV();
 
@@ -131,11 +132,12 @@ TEST(ComparatorLibSuite, IterateHV)
       // subPix = static_cast<cv::Vec<TYPE, channels>>(cv::Matx<TYPE, channels, 1>::zeros());
       // mat.at<cv::Vec<TYPE, channels>>(cv::Point(3,3)) = subPix;
       mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
+      TYPE acceptanceLevel = 1;
       double balance[] = {1.0, 1.0, 1.0};
       double lightThreshold = 2.0;
       double colorThreshold = 1.0;
 
-      IterateProcess<TYPE> iterateProcess(mat, lightThreshold, colorThreshold, balance);
+      IterateProcess<TYPE> iterateProcess(mat, acceptanceLevel, lightThreshold, colorThreshold, balance);
 
       std::vector<IndexTransition> result = iterateProcess.iterate_H();
 
@@ -165,11 +167,12 @@ TEST(ComparatorLibSuite, IterateHV)
       // subPix = static_cast<cv::Vec<TYPE, channels>>(cv::Matx<TYPE, channels, 1>::zeros());
       // mat.at<cv::Vec<TYPE, channels>>(cv::Point(3,3)) = subPix;
       mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
+      TYPE acceptanceLevel = 1;
       double balance[] = {1.0, 1.0, 1.0};
       double lightThreshold = 4.0;
       double colorThreshold = 1.0;
 
-      IterateProcess<TYPE> iterateProcess(mat, lightThreshold, colorThreshold, balance);
+      IterateProcess<TYPE> iterateProcess(mat, acceptanceLevel, lightThreshold, colorThreshold, balance);
 
       std::vector<IndexTransition> result = iterateProcess.iterate_V();
 
@@ -195,11 +198,12 @@ public:
 protected:
   void run(int)
   {
+    TYPE acceptanceLevel = 1;
     double balance[] = {1.0, 1.0, 1.0};
     double lightThreshold = 2.0;
     double colorThreshold = 1.0;
 
-    Classifier<TYPE> classifier(lightThreshold, colorThreshold, balance);
+    Classifier<TYPE> classifier( acceptanceLevel, lightThreshold, colorThreshold, balance );
 
     TYPE pix0[] = {3, 3, 3};
     TYPE pix1[] = {3, 3, 3};
@@ -237,11 +241,12 @@ protected:
   void run(int) {
     ts->set_failed_test_info(cvtest::TS::OK);
 
+    TYPE acceptanceLevel = 1;
     double balance[] = {2.0, 1.0, 1.0};
-    double lightThreshold = 1.0;
+    double lightThreshold = 2.0;
     double colorThreshold = 4.0;
 
-    Classifier<TYPE> classifier(lightThreshold, colorThreshold, balance);
+    Classifier<TYPE> classifier( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
 
     TYPE pix0[] = {3, 3, 3};
@@ -252,10 +257,16 @@ protected:
         ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_OUTPUT);
 
     std::fill( pix0, pix0 + channels, 6);
-    std::fill( pix1, pix1 + channels, 10);
+    std::fill( pix1, pix1 + channels, 14);
     pix0[0] = 4;      
     classifier.copy_pix(pix0, pix1);
     ASSERT_EQ(Transition::back, classifier.f_classifier());
+
+    std::fill( pix0, pix0 + channels, 6);
+    std::fill( pix1, pix1 + channels, 12);
+    pix0[0] = 4;      
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::no, classifier.f_classifier());
 
     std::fill( pix0, pix0 + channels, 10);
     std::fill( pix1, pix1 + channels, 3);
@@ -264,9 +275,9 @@ protected:
 
     
     balance[0] = 0.9;
-    lightThreshold = 0.0;
+    lightThreshold = 1.00001;
     colorThreshold = 10.0;
-    classifier.set_parameters(lightThreshold, colorThreshold, balance);
+    classifier.set_parameters( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
     std::fill( pix0, pix0 + channels, 3);
     std::fill( pix1, pix1 + channels, 3);
@@ -298,9 +309,9 @@ protected:
 
     
     balance[0] = 1.1;
-    lightThreshold = 0.0;
+    lightThreshold = 1.0001;
     colorThreshold = 10.0;
-    classifier.set_parameters(lightThreshold, colorThreshold, balance);
+    classifier.set_parameters( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
     std::fill( pix0, pix0 + channels, 33);
     std::fill( pix1, pix1 + channels, 33);
@@ -310,24 +321,31 @@ protected:
 
 
     balance[0] = 1.0;
-    lightThreshold = 90.0;
+    lightThreshold = 2.00001;
     colorThreshold = 200.0;
-    classifier.set_parameters(lightThreshold, colorThreshold, balance);
+    classifier.set_parameters( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
     std::fill( pix0, pix0 + channels, 50);
-    std::fill( pix1, pix1 + channels, 50 + 29);
+    std::fill( pix1, pix1 + channels, 100);
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::no, classifier.f_classifier());
+
+    std::fill( pix0, pix0 + channels, 100);
+    std::fill( pix1, pix1 + channels, 50);
     classifier.copy_pix(pix0, pix1);
     ASSERT_EQ(Transition::no, classifier.f_classifier());
 
     std::fill( pix0, pix0 + channels, 50);
-    std::fill( pix1, pix1 + channels, 50 + 30);
-    classifier.copy_pix(pix0, pix1);
-    ASSERT_EQ(Transition::no, classifier.f_classifier());
-
-    std::fill( pix0, pix0 + channels, 50);
-    std::fill( pix1, pix1 + channels, 50 + 31);
+    std::fill( pix1, pix1 + channels, 101);
     classifier.copy_pix(pix0, pix1);
     ASSERT_EQ(Transition::back, classifier.f_classifier());
+
+    std::fill( pix0, pix0 + channels, 101);
+    std::fill( pix1, pix1 + channels, 50);
+    classifier.copy_pix(pix0, pix1);
+    ASSERT_EQ(Transition::fwd, classifier.f_classifier());
+
+
     // std::fill( pix0, pix0 + channels, 10);
     // std::fill( pix1, pix1 + channels, 3);
     // pix0[0] = 5;
@@ -354,23 +372,24 @@ TEST(ComparatorLibSuite, f_classifierbt)
   protected:
     void run(int)
     {
+      TYPE acceptanceLevel = 1;
       double balance[] = {1.0, 1.0, 1.0};
       double lightThreshold = 1.0;
       double colorThreshold = 1.0;
 
-      Classifier<TYPE> classifier(lightThreshold, colorThreshold, balance);
+      Classifier<TYPE> classifier( acceptanceLevel, lightThreshold, colorThreshold, balance);
 
 
       TYPE pix0[] = {3, 3, 3};
       TYPE pix1[] = {10, 10, 10};
       
       classifier.copy_pix(pix0, pix1);
-      ASSERT_EQ(21, classifier.light_distance());
+      ASSERT_DOUBLE_EQ(10/3.0, classifier.light_distance());
       ASSERT_EQ(0, classifier.color_distance());
       
       pix1[0] = 13;
       classifier.copy_pix(pix0, pix1);
-      ASSERT_EQ(24, classifier.light_distance());
+      ASSERT_DOUBLE_EQ(33/9.0, classifier.light_distance());
       ASSERT_EQ(6, classifier.color_distance());
     }
   };

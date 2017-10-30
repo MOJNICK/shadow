@@ -36,7 +36,7 @@ double const prealocate = 0.01;
 	}
 
 
-	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat_<TYPE> img, double lightThreshold, double colorThreshold, double colorBalance[]) : classifier(lightThreshold, colorThreshold, colorBalance)
+	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat_<TYPE> img, TYPE acceptanceLevel, double lightThreshold, double colorThreshold, double colorBalance[]) : classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
 	{
 		this->img = img;
 	}
@@ -99,8 +99,10 @@ double const prealocate = 0.01;
 
 
 
-	template <class TYPE> Classifier<TYPE>::Classifier(double lightThreshold_, double colorThreshold_, double colorBalance_[]) : lightThreshold{lightThreshold_}, colorThreshold{colorThreshold_}
+	template <class TYPE> Classifier<TYPE>::Classifier(TYPE acceptanceLevel_, double lightThreshold_, double colorThreshold_, double colorBalance_[]) : lightThreshold{lightThreshold_}, colorThreshold{colorThreshold_}
 	{
+		if(acceptanceLevel_ != 0){ acceptanceLevel = acceptanceLevel_; }
+		else{ acceptanceLevel = 1; }
 		memcpy(colorBalance, colorBalance_, sizeof(double) * channels);	
 	}
 
@@ -128,8 +130,10 @@ double const prealocate = 0.01;
 	}
 	
 	#ifdef WITH_TESTS
-		template <class TYPE> void Classifier<TYPE>::set_parameters(double lightThreshold_, double colorThreshold_, double colorBalance_[])
-		{
+		template <class TYPE> void Classifier<TYPE>::set_parameters( TYPE acceptanceLevel_, double lightThreshold_, double colorThreshold_, double colorBalance_[] )
+		 {
+		 	if(acceptanceLevel_ != 0){ acceptanceLevel = acceptanceLevel_; }
+		 	else{ acceptanceLevel = 1; }
 			lightThreshold = lightThreshold_;
 			colorThreshold = colorThreshold_;
 			memcpy(colorBalance, colorBalance_, sizeof(double) * channels);	
@@ -141,9 +145,13 @@ double const prealocate = 0.01;
 		pix0[0] = pix0[0] * colorBalance[0] + 0.5; pix0[1] = pix0[1] * colorBalance[1] + 0.5; pix0[2] = pix0[2] * colorBalance[2] + 0.5;//overflow ??
 	}
 
-	template <class TYPE> DTYPE Classifier<TYPE>::light_distance()//pix0 have to < pix1 and be corrected
+	template <class TYPE> double Classifier<TYPE>::light_distance()//pix0 have to < pix1 and be corrected
 	{
-		lightDistance = (pix1[0] + pix1[1] + pix1[2]) - (pix0[0] + pix0[1] + pix0[2]);
+		if( acceptanceLevel > (pix0[0] + pix0[1] + pix0[2]))// && (pix1[0] + pix1[1] + pix1[2])==0)
+		{
+			std::fill( pix0, pix0 + channels, acceptanceLevel);
+		}
+		lightDistance = static_cast<double>(pix1[0] + pix1[1] + pix1[2]) / static_cast<double>(pix0[0] + pix0[1] + pix0[2]);
 		return lightDistance;
 	}
 
@@ -175,13 +183,13 @@ double const prealocate = 0.01;
 	{
 		double x[]={1.2,1.0,1.0};
 		TYPE pix [] = {10,10,10};
-		Classifier<TYPE> specifyCL(1.0, 1.0, x);
+		Classifier<TYPE> specifyCL(1, 1.0, 1.0, x);
 		specifyCL.copy_pix(pix, pix);
 		specifyCL.f_classifier();
-		IterateProcess<TYPE> specifyIT(cv::Mat_<TYPE>(0,0),1.0,1.0,x);
+		IterateProcess<TYPE> specifyIT(cv::Mat_<TYPE>(0,0), 1, 1.0, 1.0, x);
 		specifyIT.iterate_HV();
 	#ifdef WITH_TESTS
-		specifyCL.set_parameters(1.0, 1.0, x);
+		specifyCL.set_parameters(1, 1.0, 1.0, x);
 		#ifdef TEST_PRIVATE_PART
 			specifyIT.iterate_H();
 			specifyIT.iterate_V();
