@@ -8,7 +8,7 @@
 int main( int argc, char** argv )
 {
 	cv::Mat image;
-    image = cv::imread("/home/szozda/Downloads/reference_image.jpg", CV_LOAD_IMAGE_COLOR);   // Read the file "/Downloads/reference_image.jpg"
+    image = cv::imread("/home/szozda/Downloads/reference_image2.jpg", CV_LOAD_IMAGE_COLOR);   // Read the file "/Downloads/reference_image.jpg"
 
     if(! image.data )                              // Check for invalid input
     {
@@ -16,13 +16,13 @@ int main( int argc, char** argv )
         return -1;
     }
 
-    double factor = 1;
+    double factor = 0.25;
     cv::resize(image, image, cv::Size(), factor, factor);
 
-    TYPE acceptanceLevel = 1;
+    TYPE acceptanceLevel = 50;
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 0.03;
-    double colorThreshold = 0.01;
+    double lightThreshold = 0.1;
+    double colorThreshold = 0.001;
     IterateProcess<TYPE> iterateProcess(image, acceptanceLevel, lightThreshold, colorThreshold, balance);
     auto result = iterateProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
