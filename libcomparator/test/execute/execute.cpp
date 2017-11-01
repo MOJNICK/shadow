@@ -11,6 +11,7 @@ int main( int argc, char** argv )
 	cv::Mat image;
     image = cv::imread("/home/szozda/Downloads/reference_image2.jpg", CV_LOAD_IMAGE_COLOR);   // Read the file "/Downloads/reference_image.jpg"
 
+
     if(! image.data )                              // Check for invalid input
     {
     	std::cout<<"wrong\n";
