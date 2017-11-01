@@ -1,4 +1,4 @@
-file(GLOB comparatortest_source_files *.cpp)
+file(GLOB testcomparator_source_files *.cpp)
 use_cxx_std()
 
 
@@ -9,9 +9,9 @@ if (WITH_TESTS)
   	add_definitions(-DWITH_TESTS)
 endif()
 
-add_executable(comparatortest ${comparatortest_source_files})
+add_executable(testcomparator ${testcomparator_source_files})
 
-target_link_libraries(comparatortest comparator)
+target_link_libraries(testcomparator comparator)
 
 find_package( OpenCV REQUIRED ts)
-target_link_libraries( comparatortest ${OpenCV_LIBS} )
+target_link_libraries( testcomparator ${OpenCV_LIBS} )
