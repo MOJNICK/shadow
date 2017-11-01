@@ -4,10 +4,23 @@
 #include "libcomparator.hpp"
 #include "dataprocess.hpp"
 #include <iostream>
+#include "Python.h"
 
 
 int main( int argc, char** argv )
 {
+    PyObject *modname, *mod, *mdict, *func, *expr, *val1, *val2, *vars, *args, *rslt;           
+
+    Py_Initialize();
+
+    PyRun_SimpleString("import sys, os");
+    PyRun_SimpleString("sys.path.append(os.path.join(os.path.dirname( os.getcwd()),'../shadow'))");
+    PyRun_SimpleString("import clustering");
+    modname = PyString_FromString("clustering");
+    mod = PyImport_Import(modname);
+
+    Py_Finalize();
+
 	cv::Mat image;
     image = cv::imread("/home/szozda/Downloads/reference_image2.jpg", CV_LOAD_IMAGE_COLOR);   // Read the file "/Downloads/reference_image.jpg"
 
