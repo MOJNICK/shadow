@@ -4,9 +4,15 @@
 double const prealocate = 0.01;
 
 
-	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat_<TYPE> img, TYPE acceptanceLevel, double lightThreshold, double colorThreshold, double colorBalance[]) : classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
+	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat& img, TYPE acceptanceLevel, double lightThreshold, double colorThreshold, double colorBalance[]) : classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
 	{
-		this->img = img;
+		if(! img.isContinuous() )
+		{
+			img = cv::Mat( cv::Size(200,100), CV_8UC(channels), cv::Scalar(0));
+			cv::putText(img, "not coninuous", cv::Point(0,0), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200,200,250), 1, 8, false);
+			this->img = img;
+		}
+		else { this->img = img; }
 	}
 
 	template <class TYPE> std::vector<IndexTransition> IterateProcess<TYPE>::iterate_H()
@@ -17,7 +23,7 @@ double const prealocate = 0.01;
 		for(uint i = 0; i < img.rows; i++)		
 		{
 			uint rowIndex = i * img.step;
-			for(uint j = 0; j < img.cols - channels; j += channels)
+			for(uint j = 0; j < img.cols - channels; j += channels * sizeof(TYPE))
 			{
 				classifier.copy_pix(img.data + rowIndex + j, img.data + rowIndex + j + channels);
 				switch (classifier.f_classifier())
@@ -36,7 +42,7 @@ double const prealocate = 0.01;
 		std::vector<IndexTransition> result;
 		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
-		for(uint col = 0; col < img.cols - channels; col += channels)		
+		for(uint col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))		
 		{
 			for(uint row = 0; row < img.rows - 1; row++)
 			{
@@ -151,7 +157,8 @@ double const prealocate = 0.01;
 		Classifier<TYPE> specifyCL(1, 1.0, 1.0, x);
 		specifyCL.copy_pix(pix, pix);
 		specifyCL.f_classifier();
-		IterateProcess<TYPE> specifyIT(cv::Mat_<TYPE>(0,0), 1, 1.0, 1.0, x);
+		cv::Mat_<TYPE> mat(0,0);
+		IterateProcess<TYPE> specifyIT( mat, 1, 1.0, 1.0, x );
 		specifyIT.iterate_HV();
 	#ifdef WITH_TESTS
 		specifyCL.set_parameters(1, 1.0, 1.0, x);

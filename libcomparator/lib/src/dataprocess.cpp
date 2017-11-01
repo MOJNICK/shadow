@@ -31,3 +31,8 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	data.clear();
 	std::copy(listData.begin(), listData.end(), back_inserter(data));
 }
+
+void DataProcess::vector_to_2Darray(std::vector<IndexTransition>& vec, int rows, int cols)
+{
+	
+}

@@ -58,7 +58,7 @@
 		class IterateProcess
 		{
 		public:
-			IterateProcess( cv::Mat_<TYPE>, TYPE, double, double, double[] );
+			IterateProcess( cv::Mat&, TYPE, double, double, double[] );
 			std::vector<IndexTransition> iterate_HV();
 		private:		
 			cv::Mat_<TYPE> img;//reference by default
