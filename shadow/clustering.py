@@ -1,6 +1,22 @@
 import numpy as np
 import math
 
+class CApi:
+    def __init__(self):
+        pass
+
+    def call_points_clustering( self, eps, minPts, cPointer, length, pointerType ):
+        npArray = self.uchar_pointer_to_np( cPointer, length, pointerType )
+        clustering = Clustering( npArray, Distance.distance_fast, eps, minPts )
+        clustering.points_clustering( clustering.check_point_zone_linear )
+        clustering.npArray = clustering.npArray.reshape( 1, -1 )
+        retun 
+
+    def uchar_pointer_to_np(self, cPointer, length, pointerType):
+        npArray = np.fromiter(cPointer, np.int, length)
+        npArray = npArray.reshape(length/2, 2)
+        return npArray
+
 
 class Clustering:
 
