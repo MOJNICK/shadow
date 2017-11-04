@@ -9,15 +9,33 @@
 
 int main( int argc, char** argv )
 {
-    PyObject *modname, *mod, *mdict, *func, *expr, *val1, *val2, *vars, *args, *rslt;           
+    // PyObject *modname, *mod, *mdict, *func, *expr, *val1, *val2, *vars, *args, *rslt;           
 
     Py_Initialize();
 
     PyRun_SimpleString("import sys, os");
     PyRun_SimpleString("sys.path.append(os.path.join(os.path.dirname( os.getcwd()),'../shadow'))");
-    PyRun_SimpleString("import clustering");
-    modname = PyString_FromString("clustering");
-    mod = PyImport_Import(modname);
+    // PyRun_SimpleString("import clustering");
+    // modname = PyString_FromString("clustering");
+    // mod = PyImport_Import(modname);
+
+    size_t size = 12;
+    int array = { 1,2,3,4,5,6,7,8,9,10,11,12 };
+    PyObject *mymodule = PyImport_ImportModule( "clustering" );
+    PyObject *myfunc = PyObject_GetAttrString( mymodule, "CApi.call_points_clustering" );
+    PyObject *mylist = PyList_New(size);
+    for (size_t i = 0; i != size; ++i) {
+        PyList_SET_ITEM(mylist, i, PyInt_FromLong(array[i]));
+    }
+    PyObject *arglist = Py_BuildValue("(o)", mylist);
+    PyObject *result = PyObject_CallObject(myfunc, arglist);
+    int retval = (int)PyInt_AsLong(result);
+    Py_DECREF(result);
+    Py_DECREF(arglist);
+    Py_DECREF(mylist);
+    Py_DECREF(myfunc);
+    Py_DECREF(mymodule);
+    return retval;
 
     Py_Finalize();
 

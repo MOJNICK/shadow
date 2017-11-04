@@ -5,12 +5,20 @@ class CApi:
     def __init__(self):
         pass
 
-    def call_points_clustering( self, eps, minPts, cPointer, length, pointerType ):
-        npArray = self.uchar_pointer_to_np( cPointer, length, pointerType )
+    # def call_points_clustering( self, eps, minPts, cPointer, length, pointerType ):
+    #     npArray = self.uchar_pointer_to_np( cPointer, length, pointerType )
+    #     clustering = Clustering( npArray, Distance.distance_fast, eps, minPts )
+    #     clustering.points_clustering( clustering.check_point_zone_linear )
+    #     clustering.npArray = clustering.npArray.reshape( 1, -1 )
+    #     return 
+
+    @staticmethod
+    def call_points_clustering( self, npArray ):
+        eps = 4
+        minPts = 2
         clustering = Clustering( npArray, Distance.distance_fast, eps, minPts )
         clustering.points_clustering( clustering.check_point_zone_linear )
-        clustering.npArray = clustering.npArray.reshape( 1, -1 )
-        retun 
+        return 13
 
     def uchar_pointer_to_np(self, cPointer, length, pointerType):
         npArray = np.fromiter(cPointer, np.int, length)
@@ -51,8 +59,8 @@ class Clustering:
 
     def points_clustering(self, check_point_zone_function):
         #   returns npArray: [pixelX, pixelY, clusterNumber]
-        if self.clusters.shape[1] != 3:
-            raise ValueError("Passed array is not the right shape")
+        # if self.clusters.shape[1] != 3:
+        #     raise ValueError("Passed array is not the right shape")
 
         for indexX in xrange(self.clusters.shape[0]):
             check_point_zone_function(indexX)
