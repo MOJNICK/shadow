@@ -1,6 +1,9 @@
 import numpy as np
 import math
 
+def try_not_to_laugh()
+    print ("====================================")
+
 class CApi:
     def __init__(self):
         pass
@@ -14,10 +17,11 @@ class CApi:
 
     @staticmethod
     def call_points_clustering( self, npArray ):
-        eps = 4
-        minPts = 2
-        clustering = Clustering( npArray, Distance.distance_fast, eps, minPts )
-        clustering.points_clustering( clustering.check_point_zone_linear )
+        # eps = 4
+        # minPts = 2
+        # clustering = Clustering( npArray, Distance.distance_fast, eps, minPts )
+        # clustering.points_clustering( clustering.check_point_zone_linear )
+        print ("call_points_clustering====================================")
         return 13
 
     def uchar_pointer_to_np(self, cPointer, length, pointerType):

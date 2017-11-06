@@ -25,7 +25,7 @@ int main( int argc, char** argv )
         PyObject* sysmodule = PyImport_ImportModule("sys");        
         
         PyObject* syspath = PyObject_GetAttrString( sysmodule, "path" );
-        // PyObject_Print( syspath, stdout, 0 );
+        PyObject_Print( syspath, stdout, 0 );
         PyObject* ospath = PyObject_GetAttrString( osmodule, "path" );
         PyObject* osgetcwd = PyObject_GetAttrString( osmodule, "getcwd" );
         PyObject* osgetcwdresult = PyObject_CallObject( osgetcwd, NULL );
@@ -42,9 +42,10 @@ int main( int argc, char** argv )
         PyList_Append( list, shadowstring );
         PyObject* emptystring = PyString_FromString("");
         PyObject* ospathjoinresult = PyObject_CallMethod( emptystring, (char *)"join", (char *)"O", list );
-        
+    
+
         PyList_Append( syspath, ospathjoinresult );
-        
+        PyObject_Print( syspath, stdout, 0 );        
         
 
         // PyObject* dirnamestring = PyString_FromString("dirname");
@@ -61,7 +62,7 @@ int main( int argc, char** argv )
         // PyRun_SimpleString("print( sys.path )");
         PyObject* clusteringmodule = PyImport_ImportModule("clustering");
 
-        
+        PyObject_Print(clusteringmodule, stdout, 0);
         PyObject *key, *value;
         Py_ssize_t pos = 0;
         while (PyDict_Next(clusteringmodule, &pos, &key, &value))
