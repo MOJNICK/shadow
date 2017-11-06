@@ -61,6 +61,7 @@ int main( int argc, char** argv )
 
         // PyRun_SimpleString("print( sys.path )");
         PyObject* clusteringmodule = PyImport_ImportModule("clustering");
+        if( !clusteringmodule ){std::cout<< "clusteringmodule"; return -1;}
 
         PyObject_Print(clusteringmodule, stdout, 0);
         PyObject *key, *value;
@@ -87,16 +88,17 @@ int main( int argc, char** argv )
 
         PyObject *clusteringCApi = PyObject_GetAttrString( clusteringmodule, "CApi" );
         PyObject* myfunc = PyObject_GetAttrString( clusteringCApi, "call_points_clustering");
-        if(myfunc == NULL)
-            { return -1; }
+        if(myfunc == NULL){ std::cout<<"myfunc"; return -1; }
 
         // Py_intptr_t dims = 1;
         import_array1(0);
         npy_intp dims = 1;
         PyObject* numpyList = PyArray_SimpleNewFromData( 12 , &dims,  NPY_INT32, array);
-        // PyErr_Print();
+        if(numpyList == NULL){ std::cout<<"numpyList"; return -1; }
+
         PyObject_Print(numpyList, stdout, 0);
         PyObject *result = PyObject_CallObject(myfunc, mylist);
+        if(result == NULL){ std::cout<<"Callobject myfunc"; return -1; }
         // PyObject_Print(result, stdout, 0);
         int retval = (int)PyInt_AsLong(result);
 

@@ -1,9 +1,6 @@
 import numpy as np
 import math
 
-def try_not_to_laugh()
-    print ("====================================")
-
 class CApi:
     def __init__(self):
         pass
