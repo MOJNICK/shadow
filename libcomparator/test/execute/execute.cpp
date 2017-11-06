@@ -9,6 +9,13 @@
 // #include "ndarrayobject.h"
 #include "numpy/arrayobject.h"
 
+// PyMODINIT_FUNC
+// initclustering(void)
+// {
+//     Py_InitModule("clustering", ClusteringMethods);
+//     import_array1(0);
+// }
+
 int main( int argc, char** argv )
 {
     {
@@ -54,7 +61,7 @@ int main( int argc, char** argv )
         // PyRun_SimpleString("print( sys.path )");
         PyObject* clusteringmodule = PyImport_ImportModule("clustering");
 
-        PyObject_Print(clusteringmodule, stdout, 0);
+        
         PyObject *key, *value;
         Py_ssize_t pos = 0;
         while (PyDict_Next(clusteringmodule, &pos, &key, &value))
@@ -87,17 +94,18 @@ int main( int argc, char** argv )
         npy_intp dims = 1;
         PyObject* numpyList = PyArray_SimpleNewFromData( 12 , &dims,  NPY_INT32, array);
         // PyErr_Print();
-        
+        PyObject_Print(numpyList, stdout, 0);
         PyObject *result = PyObject_CallObject(myfunc, mylist);
         // PyObject_Print(result, stdout, 0);
         int retval = (int)PyInt_AsLong(result);
 
-        Py_DECREF(result);
+        
         Py_DECREF(arglist);
         Py_DECREF(mylist);
         Py_DECREF(myfunc);
         Py_DECREF(clusteringmodule);
-
+        Py_DECREF(numpyList);
+        Py_DECREF(result);
 
         Py_Finalize();
     }
