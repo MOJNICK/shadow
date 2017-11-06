@@ -67,7 +67,10 @@ int main( int argc, char** argv )
 
 
         size_t size = 12;
-        int array[] = { 1,2,3,4,5,6,7,8,9,10,11,12 };
+        // int array[] = { 1,2,3,4,5,6,7,8,9,10,11,12 };
+        int* array = new int[12];
+        for(int i = 0; i<12;i++){array[i]=3+i;}
+
         PyObject *mylist = PyList_New(size);
         for (size_t i = 0; i != size; ++i) {
             PyList_SET_ITEM(mylist, i, PyInt_FromLong(array[i]));
@@ -79,8 +82,11 @@ int main( int argc, char** argv )
         if(myfunc == NULL)
             { return -1; }
 
-        Py_intptr_t dims = 1; //npy_intp
-        PyObject* numpyList = PyArray_SimpleNewFromData( 2 , &dims,  NPY_INT_32, array);
+        // Py_intptr_t dims = 1;
+        import_array1(0);
+        npy_intp dims = 1;
+        PyObject* numpyList = PyArray_SimpleNewFromData( 12 , &dims,  NPY_INT32, array);
+        // PyErr_Print();
         
         PyObject *result = PyObject_CallObject(myfunc, mylist);
         // PyObject_Print(result, stdout, 0);
