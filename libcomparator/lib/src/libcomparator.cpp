@@ -20,17 +20,17 @@ double const prealocate = 0.01;
 		std::vector<IndexTransition> result;
 		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
-		for(uint i = 0; i < img.rows; i++)		
+		for(uint row = 0; row < img.rows; row++)		
 		{
-			uint rowIndex = i * img.step;
-			for(uint j = 0; j < img.cols - channels; j += channels * sizeof(TYPE))
+			uint rowIndex = row * img.step;
+			for(uint col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))
 			{
-				classifier.copy_pix(img.data + rowIndex + j, img.data + rowIndex + j + channels);
+				classifier.copy_pix(img.data + rowIndex + col, img.data + rowIndex + col + channels);
 				switch (classifier.f_classifier())
 				{
 					case no: continue; break;
-					case fwd: result.push_back(IndexTransition{rowIndex + j + channels, lToR}); break;
-					case back: result.push_back(IndexTransition{rowIndex + j, rToL}); break;
+					case fwd: result.push_back( IndexTransition{ row, col + channels, lToR } ); break;
+					case back: result.push_back( IndexTransition{ row, col, rToL } ); break;
 				}
 			}
 		}
@@ -50,8 +50,8 @@ double const prealocate = 0.01;
 				switch (classifier.f_classifier())
 				{
 					case no: continue; break;
-					case fwd: result.push_back(IndexTransition{((row + 1) * img.step) + col, upToDw}); break;
-					case back: result.push_back(IndexTransition{row * img.step + col, dwToUp}); break;
+					case fwd: result.push_back( IndexTransition{ row + 1, col, upToDw } ); break;
+					case back: result.push_back( IndexTransition{ row, col, dwToUp } ); break;
 				}
 			}
 		}
@@ -140,13 +140,6 @@ double const prealocate = 0.01;
 	template<class TYPE> void Classifier<TYPE>::swap()//unused
 	{
 
-	}
-
-
-	template<class TYPE> Main<TYPE>::Main(cv::Mat_<TYPE> img, double lightThreshold, double colorThreshold, double colorBalance[]) :
-	 iterateProcess(lightThreshold, colorThreshold, colorBalance)
-	{
-		executionResult = DataProcess::concatenate_HV(iterateProcess.iterate_HV());
 	}
 
 
