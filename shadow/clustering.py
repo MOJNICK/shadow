@@ -13,7 +13,7 @@ class CApi:
     #     return 
 
     @staticmethod
-    def call_points_clustering( self, npArray ):
+    def call_points_clustering( self ):
         # eps = 4
         # minPts = 2
         # clustering = Clustering( npArray, Distance.distance_fast, eps, minPts )
@@ -26,6 +26,7 @@ class CApi:
         npArray = npArray.reshape(length/2, 2)
         return npArray
 
+capiObject = CApi()
 
 class Clustering:
 

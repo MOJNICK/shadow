@@ -90,14 +90,18 @@ int main( int argc, char** argv )
         PyObject* myfunc = PyObject_GetAttrString( clusteringCApi, "call_points_clustering");
         if(myfunc == NULL){ std::cout<<"myfunc"; return -1; }
 
+
+        PyObject* clusteringcapiObject = PyObject_GetAttrString( clusteringmodule, "capiObject" );
+        PyObject* clusteringcapiObjectresult = PyObject_CallMethod (clusteringcapiObject, (char *)"call_points_clustering", NULL );
+
         // Py_intptr_t dims = 1;
         import_array1(0);
         npy_intp dims = 1;
-        PyObject* numpyList = PyArray_SimpleNewFromData( 12 , &dims,  NPY_INT32, array);
-        if(numpyList == NULL){ std::cout<<"numpyList"; return -1; }
+        // PyObject* numpyList = PyArray_SimpleNewFromData( 12 , &dims,  NPY_INT32, array);
+        // if(numpyList == NULL){ std::cout<<"numpyList"; return -1; }
 
-        PyObject_Print(numpyList, stdout, 0);
-        PyObject *result = PyObject_CallObject(myfunc, mylist);
+        // PyObject_Print(numpyList, stdout, 0);
+        PyObject *result = PyObject_CallObject(myfunc, NULL);
         if(result == NULL){ std::cout<<"Callobject myfunc"; return -1; }
         // PyObject_Print(result, stdout, 0);
         int retval = (int)PyInt_AsLong(result);
@@ -107,7 +111,7 @@ int main( int argc, char** argv )
         Py_DECREF(mylist);
         Py_DECREF(myfunc);
         Py_DECREF(clusteringmodule);
-        Py_DECREF(numpyList);
+        // Py_DECREF(numpyList);
         Py_DECREF(result);
 
         Py_Finalize();
