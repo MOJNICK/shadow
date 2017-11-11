@@ -1,11 +1,15 @@
 #include <opencv2/ts/ts.hpp>
 #include "dataprocess.hpp"
 
+uint const shuffleNumber = 1;
+
 class DataProcessTestMethods : public cvtest::BaseTest
 {
 public:
-  DataProcessTestMethods(){}
+  DataProcessTestMethods( int shuffleNumber ): shuffleNumber{shuffleNumber}{}
 protected:
+  int shuffleNumber;
+  
   void compareVecIndexTransition(std::vector<IndexTransition> expectedVec, std::vector<IndexTransition> actualVec)
   {
     ASSERT_EQ(expectedVec.size(), actualVec.size());
@@ -15,13 +19,23 @@ protected:
       ASSERT_EQ( expectedVec[i].transition, actualVec[i].transition );
     }
   }
+  
+  void shuffleAndTest(std::vector<IndexTransition>& expectedVec, std::vector<IndexTransition>& inputVec)
+  {
+    for(int i = 0; i < shuffleNumber; ++i)
+    { 
+      std::random_shuffle( inputVec.begin(), inputVec.end() );
+      DataProcess::concatenate_HV( inputVec );
+      compareVecIndexTransition(expectedVec, inputVec);
+    }
+  }
 };
 
 class ConcatenateHV : public DataProcessTestMethods
 {
 public:
-    ConcatenateHV() : shuffleNumber{1}{}
-    ConcatenateHV(int shuffleNumber) : shuffleNumber{shuffleNumber}{}
+    ConcatenateHV() : DataProcessTestMethods( ::shuffleNumber ){}
+    ConcatenateHV( int shuffleNumber ) : DataProcessTestMethods( shuffleNumber ){}
 protected:
   void run(int)
   { 
@@ -54,17 +68,6 @@ protected:
     inputVec = { IndexTransition{ 1, 2, lToR}, IndexTransition{ 1, 3, rToL},
                  IndexTransition{ 1, 5, upToDw}, IndexTransition{ 1, 4, dwToUp}};
     shuffleAndTest(expectedVec, inputVec);
-  }
-private:
-  int shuffleNumber;
-  void shuffleAndTest(std::vector<IndexTransition>& expectedVec, std::vector<IndexTransition>& inputVec)
-  {
-    for(int i = 0; i < shuffleNumber; ++i)
-    { 
-      std::random_shuffle( inputVec.begin(), inputVec.end() );
-      DataProcess::concatenate_HV( inputVec );
-      compareVecIndexTransition(expectedVec, inputVec);
-    }
   }
 };
 TEST(ComparatorLibDataProcessSuite, ConcatenateHV)

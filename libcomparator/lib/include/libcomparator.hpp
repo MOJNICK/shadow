@@ -34,12 +34,12 @@
 			biLUp = lToR | upToDw,
 			biLDw = biLUp << 1,
 			biRDw = biLUp << 2,
-			biRUp = biLUp << 3,
+			biRUp = upToDw | rToL,
 			
-			biLR = lToR | rToL,
-			biUpDw = biLR << 1,
-			
-			all = biLR | biUpDw,
+			biUpDw = upToDw | dwToUp,
+			biLR = biUpDw << 1,
+						
+			all = biLR | biUpDw
 		};
 
 		inline Transition& operator|=(Transition& a, const Transition& b)
