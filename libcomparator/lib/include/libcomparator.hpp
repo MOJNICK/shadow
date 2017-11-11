@@ -43,8 +43,19 @@
 
 		struct IndexTransition
 		{
-			long unsigned int index;
+			unsigned int row;
+			unsigned int col;
 			Transition transition;
+
+			bool same_position( IndexTransition& b )
+			{
+				return ( ( row == b.row ) && ( col == b.col ) ) ? true : false;
+			}
+
+			unsigned int index(cv::Mat& img)
+			{
+				return row * img.step + col;
+			}
 		};
 		
 
@@ -95,17 +106,6 @@
 
 			bool brighter();
 			void swap();
-		};
-
-
-		template <class TYPE>
-		class Main
-		{
-		public:
-			Main(cv::Mat_<TYPE>, double, double, double[]);
-			std::vector<IndexTransition> executionResult;
-		private:
-			IterateProcess<TYPE> iterateProcess;
 		};
 
 

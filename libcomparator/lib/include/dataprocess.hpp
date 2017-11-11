@@ -8,7 +8,6 @@
 	public:
 		DataProcess();
 		static void concatenate_HV(std::vector<IndexTransition>&);
-		static void vector_to_2Darray(std::vector<IndexTransition>&, int, int);
 	};
 
 #endif

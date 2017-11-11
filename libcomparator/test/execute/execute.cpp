@@ -32,9 +32,9 @@ int main( int argc, char** argv )
     if(image.isContinuous())
     {
     	for_each(result.begin(), result.end(), [&image](auto el){
-    		image.data[el.index] = 255;
-    		image.data[el.index + 1] = 0; 
-    		image.data[el.index + 2] = 255;
+    		image.data[el.index( image )] = 255;
+    		image.data[el.index( image ) + 1] = 0; 
+    		image.data[el.index( image ) + 2] = 255;
     	});
     	
 	    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );// Create a window for display.
