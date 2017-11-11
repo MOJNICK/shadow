@@ -4,30 +4,25 @@ DataProcess::DataProcess(){};
 
 void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 {
-	std::list<IndexTransition> listData(data.begin(), data.end());
-	listData.sort([](const IndexTransition& a, const IndexTransition& b){return a.row < b.row;});
-	std::transform(listData.begin(), --listData.end(), ++listData.begin(), ++listData.begin(),[](IndexTransition& a, IndexTransition& b)
+	if(data.size() < 2)
+		return;
+
+	std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.col < b.col; });
+	std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.row < b.row; });
+
+	uint validIdx = 0;
+	for (uint idx = 1; idx < data.size(); idx++)
 	{
-		if( a.same_position( b ) )
+		if( data[ validIdx ].same_position( data[ idx ] ) )
 		{
-			return IndexTransition{a.row, a.col, static_cast<Transition>(a.transition | b.transition)};
+			data[ validIdx ].transition |= data[ idx ].transition;
+			
 		}
 		else
 		{
-			return b;
+			std::swap( data[ ++validIdx ], data[ idx ] );
 		}
-	} );
-	if( (*listData.begin()).same_position(*(++listData.begin())) )
-	{
-		 (*(listData.begin())).transition |=  (*(++listData.begin())).transition;
-	}
 
-	for(auto it = listData.begin(); it != listData.end();)
-	{
-		if( (*it).same_position(*(++it)) )
-			it = listData.erase(--it);
 	}
-
-	data.clear();
-	std::copy(listData.begin(), listData.end(), back_inserter(data));
+	data.resize(++validIdx);
 }

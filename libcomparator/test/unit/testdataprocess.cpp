@@ -20,7 +20,7 @@ protected:
 class ConcatenateHV : public DataProcessTestMethods
 {
 public:
-    ConcatenateHV() : shuffleNumber{100}{}
+    ConcatenateHV() : shuffleNumber{1}{}
     ConcatenateHV(int shuffleNumber) : shuffleNumber{shuffleNumber}{}
 protected:
   void run(int)
@@ -36,7 +36,7 @@ protected:
     shuffleAndTest(expectedVec, inputVec);
 
     expectedVec = { IndexTransition{ 1, 3, biRUp }, IndexTransition{ 1, 4, biLDw } };
-    inputVec = { IndexTransition{ 1, 3, lToR }, IndexTransition{ 1, 3, rToL },
+    inputVec = { IndexTransition{ 1, 4, lToR }, IndexTransition{ 1, 3, rToL },
                  IndexTransition{ 1, 3, upToDw }, IndexTransition{ 1, 4, dwToUp }};
     shuffleAndTest(expectedVec, inputVec);
     
@@ -45,14 +45,14 @@ protected:
                  IndexTransition{ 1, 3, upToDw}, IndexTransition{ 1, 4, dwToUp }};
     shuffleAndTest(expectedVec, inputVec);
     
-    expectedVec = { IndexTransition{  1, 2, lToR}, IndexTransition{  1, 3, biRUp}, IndexTransition{  1, 4, dwToUp} };
-    inputVec = { IndexTransition{  1, 2, lToR}, IndexTransition{  1, 3, rToL},
-                 IndexTransition{  1, 3, upToDw}, IndexTransition{  1, 4, dwToUp}};
+    expectedVec = { IndexTransition{ 1, 2, lToR}, IndexTransition{ 1, 3, biRUp}, IndexTransition{ 1, 4, dwToUp} };
+    inputVec = { IndexTransition{ 1, 2, lToR}, IndexTransition{ 1, 3, rToL},
+                 IndexTransition{ 1, 3, upToDw}, IndexTransition{ 1, 4, dwToUp}};
     shuffleAndTest(expectedVec, inputVec);
 
-    expectedVec = { IndexTransition{  1, 2, lToR}, IndexTransition{  1, 3, rToL}, IndexTransition{  1, 4, dwToUp}, IndexTransition{  1, 5, upToDw} };
-    inputVec = { IndexTransition{  1, 2, lToR}, IndexTransition{  1, 3, rToL},
-                 IndexTransition{  1, 5, upToDw}, IndexTransition{  1, 4, dwToUp}};
+    expectedVec = { IndexTransition{ 1, 2, lToR}, IndexTransition{ 1, 3, rToL}, IndexTransition{ 1, 4, dwToUp}, IndexTransition{ 1, 5, upToDw} };
+    inputVec = { IndexTransition{ 1, 2, lToR}, IndexTransition{ 1, 3, rToL},
+                 IndexTransition{ 1, 5, upToDw}, IndexTransition{ 1, 4, dwToUp}};
     shuffleAndTest(expectedVec, inputVec);
   }
 private:
