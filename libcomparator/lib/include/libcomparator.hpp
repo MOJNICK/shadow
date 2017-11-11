@@ -26,10 +26,17 @@
 			back = 1 << 2,
 			biFwdBack= fwd | back,
 
-			lToR = 1 << 3,
-			dwToUp = lToR << 1,
-			rToL = lToR << 2,
-			upToDw = lToR << 3,
+			upToDw = 1 << 3,
+			lToR = upToDw << 1,
+			dwToUp = upToDw << 2,
+			rToL = upToDw << 3,
+			upToDw = upToDw << 4,
+
+			biLUp = lToR | upToDw,
+			biLDw = biLUp << 1,
+			biRDw = biLUp << 2,
+			biRUp = biLUp << 3,
+			
 
 			biLDw = lToR | dwToUp,
 			biRDw = biLDw << 1,

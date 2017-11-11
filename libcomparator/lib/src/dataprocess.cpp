@@ -26,3 +26,64 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	}
 	data.resize(++validIdx);
 }
+
+ColorBalance::ColorBalance( cv::Mat const & img, TYPE acceptanceLevel, uint distance = 1 ):
+img{ img }, distance{ distance }, balance{ 0, 0 ,0 }, weight{ 0 }
+{
+	std::min( acceptanceLevel, 1 );
+}
+
+void ColorBalance::balance( std::vector< const IndexTransition > const & position )
+{
+	for_each( position.begin(), position.end(), []( IndexTransition const & el )
+	{
+		element_balance( el );
+	});
+	for_each( balance, balance + channels, []( double& el )
+	{
+		el /= weight;
+	});
+}
+
+void ColorBalence::element_balance( IndexTransition const & el )
+{
+	if( !is_valid( el ) )
+		return;
+
+	uint shadowRow = el.row;
+	uint shadowCol = el.col;
+	
+	Transition const & transition = el.transition;
+	if( transition & ( Transition::upToDw ) ){ el.row += distance; }
+	if( transition & ( Transition::lToR ) ){ el.col += distance; }
+	if( transition & ( Transition::dwToUp ) ){ el.row -= distance; }
+	if( transition & ( Transition::rToL ) ){ el.col -= distance; }
+
+	if( ( 0 <= shadowRow && shadowRow < img.rows ) && ( 0 <= shadowCol && shadowCol < img.cols ))
+		{
+			for( uint i = 0; i < channels; ++i )
+				if( img.data[ shadowRow * img.step + shadowCol + i ] < acceptanceLevel )
+				{
+					return;
+				} 
+				balance[ i ] += img.data[ el.row * img.step + el.col + i ] / static_cast< double >( img.data[ shadowRow * img.step + shadowCol + i ] );
+				++weight;
+		}
+}
+
+bool ColorBalence::is_valid( IndexTransition const & el )
+{
+	switch( el.transition )
+	{
+		case upToDw: break;
+		case lToR: break;
+		case dwToUp: break;
+		case rToL: break;		
+		case biLUp: break;
+		case biLDw: break;
+		case biRDw: break;
+		case biRUp: break;
+		default: return false;
+	}
+	return true;
+}
