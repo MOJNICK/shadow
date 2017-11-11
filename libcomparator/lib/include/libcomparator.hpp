@@ -25,16 +25,20 @@
 			fwd = 1 << 1,
 			back = 1 << 2,
 			biFwdBack= fwd | back,
-			upToDw = 1 << 3,
-			dwToUp = 1 << 4,
-			biUpDw = upToDw | dwToUp,
-			lToR = 1 << 5,
-			rToL = 1 << 6,
-			biLR = lToR | rToL,
-			biLUp = lToR | upToDw,
+
+			lToR = 1 << 3,
+			dwToUp = lToR << 1,
+			rToL = lToR << 2,
+			upToDw = lToR << 3,
+
 			biLDw = lToR | dwToUp,
-			biRUp = rToL | upToDw,
-			biRDw = rToL | dwToUp,
+			biRDw = biLDw << 1,
+			biRUp = biLDw << 2,
+			biLUp = biLDw << 3,
+
+			biLR = lToR | rToL,
+			biUpDw = biLR << 1,
+			
 			all = biLR | biUpDw,
 		};
 
@@ -107,7 +111,6 @@
 			bool brighter();
 			void swap();
 		};
-
 
 		extern "C"
 		{
