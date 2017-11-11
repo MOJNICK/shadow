@@ -75,3 +75,64 @@ TEST(ComparatorLibDataProcessSuite, ConcatenateHV)
   ConcatenateHV ConcatenateHV;
   ConcatenateHV.safe_run();
 }
+
+class ColorBalanceBalance : public cvtest::BaseTest
+{
+public:
+protected:
+  void run(int)
+  {
+    cv::Mat_<TYPE> mat(3, 3 * channels, 100);
+    mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
+    TYPE acceptanceLevel = 1;
+  }
+};
+
+#ifdef TEST_PRIVATE_PART
+  class ColorBalanceIsValid : public cvtest::BaseTest
+  {
+  public:
+    ColorBalanceIsValid(){}
+  protected:
+    void run(int)
+    {
+      // ColorBalance colorBalance(cv::Mat(), 0, 0);
+      Transition transition;
+
+      transition = Transition::lToR;
+      ASSERT_TRUE( ColorBalance::is_valid( transition ) );
+
+      transition = Transition::rToL;
+      ASSERT_TRUE( ColorBalance::is_valid( transition ) );
+
+      transition = Transition::biLDw;
+      ASSERT_TRUE( ColorBalance::is_valid( transition ) );
+
+      transition = Transition::biRUp;
+      ASSERT_TRUE( ColorBalance::is_valid( transition ) );
+
+      transition = Transition::biLR;
+      ASSERT_FALSE( ColorBalance::is_valid( transition ) );
+
+      transition = Transition::all;
+      ASSERT_FALSE( ColorBalance::is_valid( transition ) );
+
+      transition = Transition::back;
+      ASSERT_FALSE( ColorBalance::is_valid( transition ) );
+
+      transition = Transition::fwd;
+      ASSERT_FALSE( ColorBalance::is_valid( transition ) );
+
+      transition = Transition::back | Transition::upToDw;
+      ASSERT_FALSE( ColorBalance::is_valid( transition ) );
+
+      transition = Transition::biRDw | Transition::upToDw;
+      ASSERT_FALSE( ColorBalance::is_valid( transition ) );
+    }
+  };
+  TEST(ColorBalancePrivateSuite, ColorBalanceIsValid)
+  {
+    ColorBalanceIsValid colorBalanceIsValid;
+    colorBalanceIsValid.safe_run();
+  }
+#endif

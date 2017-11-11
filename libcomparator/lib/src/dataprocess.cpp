@@ -47,7 +47,7 @@ void ColorBalance::balance( std::vector< IndexTransition >& position )
 
 void ColorBalance::element_balance( IndexTransition const & el )
 {
-	if( !is_valid( el ) )
+	if( !is_valid( el.transition ) )
 		return;
 
 	uint shadowRow = el.row;
@@ -73,9 +73,9 @@ void ColorBalance::element_balance( IndexTransition const & el )
 		}
 }
 
-bool ColorBalance::is_valid( IndexTransition const & el )
+bool ColorBalance::is_valid( Transition const & transition )
 {
-	switch( el.transition )
+	switch( transition )
 	{
 		case upToDw: break;
 		case lToR: break;

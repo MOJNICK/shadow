@@ -24,7 +24,7 @@
 			no = 1 << 0,
 			fwd = 1 << 1,
 			back = 1 << 2,
-			biFwdBack= fwd | back,
+			biFwdBack = fwd | back,
 
 			upToDw = 1 << 3,
 			lToR = upToDw << 1,
@@ -42,8 +42,11 @@
 			all = biLR | biUpDw
 		};
 
-		inline Transition& operator|=(Transition& a, const Transition& b)
-		{return a = static_cast<Transition>((a) | (b));}
+		inline Transition& operator|=( Transition& a, Transition const & b )
+		{ return a = static_cast< Transition >( a | b ); }
+
+		inline Transition operator|( Transition const & a, Transition const & b )
+		{ return static_cast< Transition >( static_cast< int >( a ) | static_cast< int >( b ) ); }
 
 		struct IndexTransition
 		{

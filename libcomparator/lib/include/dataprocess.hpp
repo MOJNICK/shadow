@@ -21,7 +21,7 @@
 		TYPE acceptanceLevel;
 		double colorBalance[ channels ];
 		uint weight;
-		bool is_valid( IndexTransition const & );
+		static bool is_valid( Transition const & );
 		void element_balance( IndexTransition const & );
 	};
 #endif
