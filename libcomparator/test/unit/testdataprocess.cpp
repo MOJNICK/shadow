@@ -11,8 +11,8 @@ protected:
     ASSERT_EQ(expectedVec.size(), actualVec.size());
     for(int i = 0; i < expectedVec.size(); ++i)
     {
-      ASSERT_EQ(expectedVec[i].index, actualVec[i].index);
-      ASSERT_EQ(expectedVec[i].transition, actualVec[i].transition);
+      ASSERT_TRUE( expectedVec[i].same_position( actualVec[i] ) );
+      ASSERT_EQ( expectedVec[i].transition, actualVec[i].transition );
     }
   }
 };
@@ -30,29 +30,29 @@ protected:
     std::vector<IndexTransition> expectedVec;
     std::vector<IndexTransition> inputVec;
 
-    expectedVec = { IndexTransition{12, all} };
-    inputVec = { IndexTransition{12, lToR}, IndexTransition{12, rToL},
-                 IndexTransition{12, upToDw}, IndexTransition{12, dwToUp}};
+    expectedVec = { IndexTransition{ 1, 3, all } };
+    inputVec = { IndexTransition{ 1, 3, lToR }, IndexTransition{ 1, 3, rToL },
+                 IndexTransition{ 1, 3, upToDw}, IndexTransition{ 1, 3, dwToUp }};
     shuffleAndTest(expectedVec, inputVec);
 
-    expectedVec = { IndexTransition{12, biRUp}, IndexTransition{13, biLDw} };
-    inputVec = { IndexTransition{13, lToR}, IndexTransition{12, rToL},
-                 IndexTransition{12, upToDw}, IndexTransition{13, dwToUp}};
+    expectedVec = { IndexTransition{ 1, 3, biRUp }, IndexTransition{ 1, 4, biLDw } };
+    inputVec = { IndexTransition{ 1, 3, lToR }, IndexTransition{ 1, 3, rToL },
+                 IndexTransition{ 1, 3, upToDw }, IndexTransition{ 1, 4, dwToUp }};
     shuffleAndTest(expectedVec, inputVec);
     
-    expectedVec = { IndexTransition{12, biRUp}, IndexTransition{13, dwToUp}, IndexTransition{114, lToR} };
-    inputVec = { IndexTransition{114, lToR}, IndexTransition{12, rToL},
-                 IndexTransition{12, upToDw}, IndexTransition{13, dwToUp}};
+    expectedVec = { IndexTransition{ 1, 3, biRUp}, IndexTransition{ 1, 4, dwToUp }, IndexTransition{ 2, 30, lToR} };
+    inputVec = { IndexTransition{ 2, 30, lToR }, IndexTransition{ 1, 3, rToL },
+                 IndexTransition{ 1, 3, upToDw}, IndexTransition{ 1, 4, dwToUp }};
     shuffleAndTest(expectedVec, inputVec);
     
-    expectedVec = { IndexTransition{11, lToR}, IndexTransition{12, biRUp}, IndexTransition{13, dwToUp} };
-    inputVec = { IndexTransition{11, lToR}, IndexTransition{12, rToL},
-                 IndexTransition{12, upToDw}, IndexTransition{13, dwToUp}};
+    expectedVec = { IndexTransition{  1, 2, lToR}, IndexTransition{  1, 3, biRUp}, IndexTransition{  1, 4, dwToUp} };
+    inputVec = { IndexTransition{  1, 2, lToR}, IndexTransition{  1, 3, rToL},
+                 IndexTransition{  1, 3, upToDw}, IndexTransition{  1, 4, dwToUp}};
     shuffleAndTest(expectedVec, inputVec);
 
-    expectedVec = { IndexTransition{11, lToR}, IndexTransition{12, rToL}, IndexTransition{13, dwToUp}, IndexTransition{14, upToDw} };
-    inputVec = { IndexTransition{11, lToR}, IndexTransition{12, rToL},
-                 IndexTransition{14, upToDw}, IndexTransition{13, dwToUp}};
+    expectedVec = { IndexTransition{  1, 2, lToR}, IndexTransition{  1, 3, rToL}, IndexTransition{  1, 4, dwToUp}, IndexTransition{  1, 5, upToDw} };
+    inputVec = { IndexTransition{  1, 2, lToR}, IndexTransition{  1, 3, rToL},
+                 IndexTransition{  1, 5, upToDw}, IndexTransition{  1, 4, dwToUp}};
     shuffleAndTest(expectedVec, inputVec);
   }
 private:
@@ -61,8 +61,8 @@ private:
   {
     for(int i = 0; i < shuffleNumber; ++i)
     { 
-      std::random_shuffle (inputVec.begin(), inputVec.end());
-      DataProcess::concatenate_HV(inputVec);
+      std::random_shuffle( inputVec.begin(), inputVec.end() );
+      DataProcess::concatenate_HV( inputVec );
       compareVecIndexTransition(expectedVec, inputVec);
     }
   }

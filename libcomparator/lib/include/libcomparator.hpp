@@ -47,9 +47,14 @@
 			unsigned int col;
 			Transition transition;
 
-			bool same_position(IndexTransition& b)
+			bool same_position( IndexTransition& b )
 			{
-				return (row == b.row && col == b.col) ? true : false;
+				return ( row == b.row && col == b.col ) ? true : false;
+			}
+
+			unsigned int index(cv::Mat& img)
+			{
+				return row * img.step + col;
 			}
 		};
 		

@@ -8,7 +8,7 @@ public:
 protected:
   void compareIndexTransition(IndexTransition& expected, IndexTransition& actual)
   {
-    ASSERT_EQ(expected.index, actual.index);
+    ASSERT_TRUE( expected.same_position( actual ) );
     ASSERT_EQ(expected.transition, actual.transition);
   }
 };
@@ -37,13 +37,13 @@ protected:
     std::vector<IndexTransition> result = iterateProcess.iterate_HV();
 
     ASSERT_EQ(result.size(), 4);
-    auto expected = IndexTransition{12, lToR};
+    auto expected = IndexTransition{ 1, 3, lToR };
     compareIndexTransition(result[0], expected);
-    expected = IndexTransition{12, rToL};
+    expected = IndexTransition{ 1, 3, rToL };
     compareIndexTransition(result[1], expected);
-    expected = IndexTransition{12, upToDw};
+    expected = IndexTransition{ 1, 3, upToDw };
     compareIndexTransition(result[2], expected);
-    expected = IndexTransition{12, dwToUp};
+    expected = IndexTransition{ 1, 3, dwToUp };
     compareIndexTransition(result[3], expected);
   }
 };
@@ -77,9 +77,9 @@ TEST(ComparatorLibSuite, IterateHV)
       std::vector<IndexTransition> result = iterateProcess.iterate_H();
 
       ASSERT_EQ(result.size(), 2);
-      auto expected = IndexTransition{12, lToR};
+      auto expected = IndexTransition{ 1, 3, lToR };
       compareIndexTransition(expected, result[0]);
-      expected = IndexTransition{12, rToL};
+      expected = IndexTransition{ 1, 3, rToL };
       compareIndexTransition(expected, result[1]);
     }
   };
@@ -112,9 +112,9 @@ TEST(ComparatorLibSuite, IterateHV)
       std::vector<IndexTransition> result = iterateProcess.iterate_V();
 
       ASSERT_EQ(result.size(), 2);
-      auto expected = IndexTransition{12, upToDw};
+      auto expected = IndexTransition{ 1, 3, upToDw };
       compareIndexTransition(expected, result[0]);
-      expected = IndexTransition{12, dwToUp};
+      expected = IndexTransition{ 1, 3, dwToUp };
       compareIndexTransition(expected, result[1]);
     }
   };
