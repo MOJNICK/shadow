@@ -12,16 +12,16 @@
 	class ColorBalance
 	{
 	public:
-		ColorBalance( cv::Mat const &, uint ){};
-		void balance( std::vector< const IndexTransition > & const );
+		ColorBalance( cv::Mat const &, TYPE, uint );
+		void balance( std::vector< IndexTransition >& );
 		~ColorBalance(){};
 	private:
 		cv::Mat const & img;
 		uint distance;
 		TYPE acceptanceLevel;
-		double balance[ channels ];
+		double colorBalance[ channels ];
 		uint weight;
-		bool is_valid( IndexTransition& );
-		void element_balance( IndexTransition& );
-	}
+		bool is_valid( IndexTransition const & );
+		void element_balance( IndexTransition const & );
+	};
 #endif

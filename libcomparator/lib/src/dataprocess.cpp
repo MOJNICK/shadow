@@ -28,24 +28,24 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 }
 
 ColorBalance::ColorBalance( cv::Mat const & img, TYPE acceptanceLevel, uint distance = 1 ):
-img{ img }, distance{ distance }, balance{ 0, 0 ,0 }, weight{ 0 }
+img( img ), distance{ distance }, colorBalance{ 0, 0 ,0 }, weight{ 0 }
 {
-	std::min( acceptanceLevel, 1 );
+	std::min( acceptanceLevel, static_cast< TYPE >( 1 ) );
 }
 
-void ColorBalance::balance( std::vector< const IndexTransition > const & position )
+void ColorBalance::balance( std::vector< IndexTransition >& position )
 {
-	for_each( position.begin(), position.end(), []( IndexTransition const & el )
+	std::for_each( position.begin(), position.end(), [ this ]( IndexTransition& el )
 	{
 		element_balance( el );
 	});
-	for_each( balance, balance + channels, []( double& el )
+	std::for_each( colorBalance, colorBalance + channels, [ this ]( double& el )
 	{
 		el /= weight;
 	});
 }
 
-void ColorBalence::element_balance( IndexTransition const & el )
+void ColorBalance::element_balance( IndexTransition const & el )
 {
 	if( !is_valid( el ) )
 		return;
@@ -54,24 +54,26 @@ void ColorBalence::element_balance( IndexTransition const & el )
 	uint shadowCol = el.col;
 	
 	Transition const & transition = el.transition;
-	if( transition & ( Transition::upToDw ) ){ el.row += distance; }
-	if( transition & ( Transition::lToR ) ){ el.col += distance; }
-	if( transition & ( Transition::dwToUp ) ){ el.row -= distance; }
-	if( transition & ( Transition::rToL ) ){ el.col -= distance; }
+	if( transition & ( Transition::upToDw ) ){ shadowRow += distance; }
+	if( transition & ( Transition::lToR ) ){ shadowCol += distance; }
+	if( transition & ( Transition::dwToUp ) ){ shadowRow -= distance; }
+	if( transition & ( Transition::rToL ) ){ shadowCol -= distance; }
 
 	if( ( 0 <= shadowRow && shadowRow < img.rows ) && ( 0 <= shadowCol && shadowCol < img.cols ))
 		{
 			for( uint i = 0; i < channels; ++i )
+			{
 				if( img.data[ shadowRow * img.step + shadowCol + i ] < acceptanceLevel )
 				{
 					return;
-				} 
-				balance[ i ] += img.data[ el.row * img.step + el.col + i ] / static_cast< double >( img.data[ shadowRow * img.step + shadowCol + i ] );
+				}
+				colorBalance[ i ] += img.data[ el.row * img.step + el.col + i ] / static_cast< double >( img.data[ shadowRow * img.step + shadowCol + i ] );
 				++weight;
+			}
 		}
 }
 
-bool ColorBalence::is_valid( IndexTransition const & el )
+bool ColorBalance::is_valid( IndexTransition const & el )
 {
 	switch( el.transition )
 	{

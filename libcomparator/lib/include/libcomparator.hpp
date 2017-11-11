@@ -30,19 +30,12 @@
 			lToR = upToDw << 1,
 			dwToUp = upToDw << 2,
 			rToL = upToDw << 3,
-			upToDw = upToDw << 4,
 
 			biLUp = lToR | upToDw,
 			biLDw = biLUp << 1,
 			biRDw = biLUp << 2,
 			biRUp = biLUp << 3,
 			
-
-			biLDw = lToR | dwToUp,
-			biRDw = biLDw << 1,
-			biRUp = biLDw << 2,
-			biLUp = biLDw << 3,
-
 			biLR = lToR | rToL,
 			biUpDw = biLR << 1,
 			
