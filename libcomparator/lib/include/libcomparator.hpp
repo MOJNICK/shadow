@@ -24,29 +24,34 @@
 			no = 1 << 0,
 			fwd = 1 << 1,
 			back = 1 << 2,
-			biFwdBack= fwd | back,
+			biFwdBack = fwd | back,
 
-			lToR = 1 << 3,
-			dwToUp = lToR << 1,
-			rToL = lToR << 2,
-			upToDw = lToR << 3,
+			upToDw = 1 << 3,
+			lToR = upToDw << 1,
+			dwToUp = upToDw << 2,
+			rToL = upToDw << 3,
 
-			biLDw = lToR | dwToUp,
-			biRDw = biLDw << 1,
-			biRUp = biLDw << 2,
-			biLUp = biLDw << 3,
-
-			biLR = lToR | rToL,
-			biUpDw = biLR << 1,
+			biLUp = lToR | upToDw,
+			biLDw = biLUp << 1,
+			biRDw = biLUp << 2,
+			biRUp = upToDw | rToL,
 			
-			all = biLR | biUpDw,
+			biUpDw = upToDw | dwToUp,
+			biLR = biUpDw << 1,
+						
+			all = biLR | biUpDw
 		};
 
-		inline Transition& operator|=(Transition& a, const Transition& b)
-		{return a = static_cast<Transition>((a) | (b));}
+		inline Transition operator|( Transition const & a, Transition const & b )
+		{ return static_cast< Transition >( static_cast< int >( a ) | static_cast< int >( b ) ); }
 
-		struct IndexTransition
+		inline Transition& operator|=( Transition& a, Transition const & b )
+		{ return a = a | b; }
+
+
+		class IndexTransition
 		{
+		public:
 			unsigned int row;
 			unsigned int col;
 			Transition transition;
@@ -76,7 +81,7 @@
 			IterateProcess( cv::Mat&, TYPE, double, double, double[] );
 			std::vector<IndexTransition> iterate_HV();
 		private:		
-			cv::Mat_<TYPE> img;//reference by default
+			cv::Mat_<TYPE> img;//reference by default?
 			Classifier<TYPE> classifier;
 
 			std::vector<IndexTransition> iterate_H();
