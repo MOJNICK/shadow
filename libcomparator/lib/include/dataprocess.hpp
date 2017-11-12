@@ -9,6 +9,11 @@
 		static void concatenate_HV( std::vector< IndexTransition >& );
 	};
 
+	struct ColorStruct
+	{
+		double color[channels];
+	};
+
 	class ColorBalance
 	{
 	public:
@@ -16,15 +21,14 @@
 		void balance( std::vector< IndexTransition >& );
 		~ColorBalance(){};
 		#ifdef WITH_TESTS
-			double* getColorBalance();
+			ColorStruct getColorBalance();
 			void clear_balance();
 		#endif
 	private:
 		cv::Mat const & img;
 		uint distance;
 		TYPE acceptanceLevel;
-		double colorBalance[ channels ];
-		uint weight;
+		std::vector< ColorStruct > colorBalance;
 		static bool is_valid( Transition const & );
 		void element_balance( IndexTransition const & );
 	};

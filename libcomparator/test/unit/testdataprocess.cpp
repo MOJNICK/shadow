@@ -80,11 +80,11 @@ class ColorBalanceTestMethods : public cvtest::BaseTest
 {
 public:
 protected:
-  void compareColorBalance( std::vector< double > const & expected, double const * const actual )
+  void compareColorBalance( std::vector< double > const & expected, ColorStruct const & actual )
   {
     for( int i = 0; i < channels; ++i )
     {
-      ASSERT_DOUBLE_EQ( expected[i], actual[i] );
+      ASSERT_DOUBLE_EQ( expected[i], actual.color[i] );
     }
   }
 };
