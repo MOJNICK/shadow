@@ -13,11 +13,11 @@
 	{
 		double color[channels];
 
-		ColorStruct& operator=( std::initializer_list< double > l )
-		{
-			std::transform( l.begin(), l.end(), color, []( double ld ){ return ld;});
-			return *this;
-		}
+		ColorStruct();
+		ColorStruct( std::initializer_list< double > l );
+		ColorStruct& operator+=( ColorStruct const & src );
+		ColorStruct& operator/=( double const divisor );
+		ColorStruct& operator=( std::initializer_list< double > l );
 	};
 
 	class ColorBalance

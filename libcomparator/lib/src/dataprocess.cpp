@@ -27,29 +27,63 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	data.resize(++validIdx);
 }
 
+ColorStruct::ColorStruct()
+{
+	std::fill( color, color + channels, 0);
+}
+
+ColorStruct::ColorStruct( std::initializer_list< double > l )
+{
+	std::transform( l.begin(), l.end(), color, []( double ld ){ return ld; } );
+}
+
+ColorStruct& ColorStruct::operator+=( ColorStruct const & src )
+{
+	for( int i = 0; i < channels; ++i )
+	{
+		color[ i ] += src.color[ i ];
+	}
+	return *this;
+}
+
+ColorStruct& ColorStruct::operator/=( double const divisor )
+{
+	for( int i = 0; i < channels; ++i )
+	{
+		color[ i ] /= divisor;
+	}
+	return *this;
+}
+
+ColorStruct& ColorStruct::operator=( std::initializer_list< double > l )
+{
+	std::transform( l.begin(), l.end(), color, []( double ld ){ return ld; } );
+	return *this;
+}
+
 ColorBalance::ColorBalance( cv::Mat const & img, TYPE acceptanceLevel_, uint distance = 1 ):
 img( img ), distance{ distance } //, colorBalance{ ColorStruct{ 0, 0 , 0 } }
 {
 	acceptanceLevel = std::max( acceptanceLevel_, static_cast< TYPE >( 1 ) );
 }
 
-void ColorBalance::balance( std::vector< IndexTransition >& position )
+void ColorBalance::balance( std::vector< IndexTransition >& positions )
 {
-	std::for_each( position.begin(), position.end(), [ this ]( IndexTransition& el )
+	std::for_each( positions.begin(), positions.end(), [ this ]( IndexTransition & el )
 	{
 		element_balance( el );
 	});
+		// outliner();
+	ColorStruct sumBalance;
 
-	// double normalize = 0.0;
-	// std::for_each( colorBalance, colorBalance + channels, [ this, &normalize ]( double& el )
-	// {
-	// 	normalize += el;
-	// });
-	// normalize /= channels;
-	// std::for_each( colorBalance, colorBalance + channels, [ this, &normalize ]( double& el )
-	// {
-	// 	el /= 11111 * normalize;
-	// });
+	std::for_each( colorBalance.begin(), colorBalance.end(), [ &sumBalance ]( ColorStruct const & el )
+	{
+		sumBalance += el;
+	} );
+
+	double normalizer = ( sumBalance.color[0] + sumBalance.color[1] + sumBalance.color[2] ) / channels;
+
+	sumBalance /= colorBalance.size() * normalizer;
 }
 
 void ColorBalance::element_balance( IndexTransition const & shadow )
@@ -77,7 +111,7 @@ void ColorBalance::element_balance( IndexTransition const & shadow )
 					return;
 				}
 			}
-			ColorStruct _colorBalance;
+			ColorStruct _colorBalance { .0, .0, .0 };
 			for( uint i = 0; i < channels; ++i )
 			{
 				_colorBalance.color[i] = static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
