@@ -54,13 +54,13 @@ void ColorBalance::balance( std::vector< IndexTransition >& position )
 
 void ColorBalance::element_balance( IndexTransition const & shadow )
 {
+	Transition const & shtransition = shadow.transition;
 	if( !is_valid( shadow.transition ) )
 		return;
 
 	uint brightRow = shadow.row;
 	uint brightCol = shadow.col;
 	
-	Transition const & shtransition = shadow.transition;
 	if( shtransition & ( Transition::upToDw ) ){ brightRow += distance; }
 	if( shtransition & ( Transition::lToR ) ){ brightCol += distance * channels; }
 	if( shtransition & ( Transition::dwToUp ) ){ brightRow -= distance; }
@@ -74,8 +74,6 @@ void ColorBalance::element_balance( IndexTransition const & shadow )
 				{
 					return;
 				}
-				TYPE bright = img.data[ brightRow * img.step + brightCol + i ];
-				TYPE sh = img.data[ shadow.row * img.step + shadow.col + i ];
 				colorBalance[ i ] += static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
 				++weight;
 			}

@@ -42,14 +42,16 @@
 			all = biLR | biUpDw
 		};
 
-		inline Transition& operator|=( Transition& a, Transition const & b )
-		{ return a = static_cast< Transition >( a | b ); }
-
 		inline Transition operator|( Transition const & a, Transition const & b )
 		{ return static_cast< Transition >( static_cast< int >( a ) | static_cast< int >( b ) ); }
 
-		struct IndexTransition
+		inline Transition& operator|=( Transition& a, Transition const & b )
+		{ return a = a | b; }
+
+
+		class IndexTransition
 		{
+		public:
 			unsigned int row;
 			unsigned int col;
 			Transition transition;
@@ -79,7 +81,7 @@
 			IterateProcess( cv::Mat&, TYPE, double, double, double[] );
 			std::vector<IndexTransition> iterate_HV();
 		private:		
-			cv::Mat_<TYPE> img;//reference by default
+			cv::Mat_<TYPE> img;//reference by default?
 			Classifier<TYPE> classifier;
 
 			std::vector<IndexTransition> iterate_H();
