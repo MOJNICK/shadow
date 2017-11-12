@@ -80,11 +80,11 @@ class ColorBalanceTestMethods : public cvtest::BaseTest
 {
 public:
 protected:
-  void compareColorBalance( std::vector< double > const & expected, ColorStruct const & actual )
+  void compareColorBalance( ColorStruct const & expected, ColorStruct const & actual )
   {
     for( int i = 0; i < channels; ++i )
     {
-      ASSERT_DOUBLE_EQ( expected[i], actual.color[i] );
+      ASSERT_DOUBLE_EQ( expected.color[i], actual.color[i] );
     }
   }
 };
@@ -122,7 +122,7 @@ protected:
       IndexTransition indexTransition{ 1, 3, rToL };
       mat( 1, 3 ) = 10; mat( 1, 4 ) = 25; mat( 1, 5 ) = 50;
       mat( 1, 6 ) = 50; mat( 1, 7 ) = 50; mat( 1, 8 ) = 50;
-      std::vector< double > expectedBalance = {5.0, 2.0, 1.0};
+      ColorStruct expectedBalance = {5.0, 2.0, 1.0};
       colorBalance.element_balance( indexTransition );
       compareColorBalance( expectedBalance, colorBalance.getColorBalance() );
 
@@ -181,7 +181,7 @@ protected:
       IndexTransition indexTransition{ 0, 3, lToR };
       mat( 0, 3 ) = 10; mat( 0, 4 ) = 20; mat( 0, 5 ) = 30;
       mat( 0, 0 ) = 120; mat( 0, 1 ) = 120; mat( 0, 2 ) = 120;
-       std::vector< double > expectedBalance = { 12.0, 6.0, 4.0 };
+      ColorStruct expectedBalance = { 12.0, 6.0, 4.0 };
       colorBalance.element_balance( indexTransition );
       compareColorBalance( expectedBalance, colorBalance.getColorBalance() );
 

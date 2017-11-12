@@ -12,6 +12,12 @@
 	struct ColorStruct
 	{
 		double color[channels];
+
+		ColorStruct& operator=( std::initializer_list< double > l )
+		{
+			std::transform( l.begin(), l.end(), color, []( double ld ){ return ld;});
+			return *this;
+		}
 	};
 
 	class ColorBalance
