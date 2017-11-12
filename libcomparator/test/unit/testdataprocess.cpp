@@ -85,10 +85,49 @@ protected:
     cv::Mat_<TYPE> mat(3, 3 * channels, 100);
     mat(1,3)=0; mat(1,4)=0; mat(1,5)=0;
     TYPE acceptanceLevel = 1;
+    uint distance = 1;
+    ColorBalance colorBalance(cv::Mat(), acceptanceLevel, distance);
   }
 };
 
 #ifdef TEST_PRIVATE_PART
+  class ColorBalancePrivateTestMethods : public cvtest::BaseTest
+  {
+  public:
+  protected:
+    void compareColorBalance( double const * const expected, double const * const actual )
+    {
+      for( int i = 0; i < channels; ++i )
+      {
+        ASSERT_DOUBLE_EQ( expected[i], actual[i] );
+      }
+    }
+  };
+  
+  class ColorBalanceElementBalance : public ColorBalancePrivateTestMethods
+  {
+  public:
+  protected:
+    void run(int)
+    {
+      cv::Mat_<TYPE> mat( 3, 3 * channels, 100 );
+      mat( 1, 3 ) = 10; mat( 1, 4 ) = 20; mat( 1, 5 ) = 50;
+      TYPE acceptanceLevel = 10;
+      uint distance = 1;
+      ColorBalance colorBalance( mat, acceptanceLevel, distance );
+
+      IndexTransition indexTransition{ 1, 3, rToL };
+      double expectedBalance[] = {10.0, 5.0, 2.0};
+      colorBalance.element_balance( indexTransition );
+      compareColorBalance( expectedBalance, colorBalance.colorBalance );
+    }
+  };
+  TEST(ColorBalancePrivateSuite, ColorBalanceElementBalance)
+  {
+    ColorBalanceElementBalance colorBalanceElementBalance;
+    colorBalanceElementBalance.safe_run();
+  }
+
   class ColorBalanceIsValid : public cvtest::BaseTest
   {
   public:
@@ -96,7 +135,6 @@ protected:
   protected:
     void run(int)
     {
-      // ColorBalance colorBalance(cv::Mat(), 0, 0);
       Transition transition;
 
       transition = Transition::lToR;

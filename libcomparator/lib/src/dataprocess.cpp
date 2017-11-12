@@ -30,7 +30,7 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 ColorBalance::ColorBalance( cv::Mat const & img, TYPE acceptanceLevel, uint distance = 1 ):
 img( img ), distance{ distance }, colorBalance{ 0, 0 ,0 }, weight{ 0 }
 {
-	std::min( acceptanceLevel, static_cast< TYPE >( 1 ) );
+	std::max( acceptanceLevel, static_cast< TYPE >( 1 ) );
 }
 
 void ColorBalance::balance( std::vector< IndexTransition >& position )
@@ -39,35 +39,44 @@ void ColorBalance::balance( std::vector< IndexTransition >& position )
 	{
 		element_balance( el );
 	});
-	std::for_each( colorBalance, colorBalance + channels, [ this ]( double& el )
+
+	double normalize = 0.0;
+	std::for_each( colorBalance, colorBalance + channels, [ this, &normalize ]( double& el )
 	{
-		el /= weight;
+		normalize += el;
+	});
+	normalize /= channels;
+	std::for_each( colorBalance, colorBalance + channels, [ this, &normalize ]( double& el )
+	{
+		el /= weight * normalize;
 	});
 }
 
-void ColorBalance::element_balance( IndexTransition const & el )
+void ColorBalance::element_balance( IndexTransition const & shadow )
 {
-	if( !is_valid( el.transition ) )
+	if( !is_valid( shadow.transition ) )
 		return;
 
-	uint shadowRow = el.row;
-	uint shadowCol = el.col;
+	uint brightRow = shadow.row;
+	uint brightCol = shadow.col;
 	
-	Transition const & transition = el.transition;
-	if( transition & ( Transition::upToDw ) ){ shadowRow += distance; }
-	if( transition & ( Transition::lToR ) ){ shadowCol += distance; }
-	if( transition & ( Transition::dwToUp ) ){ shadowRow -= distance; }
-	if( transition & ( Transition::rToL ) ){ shadowCol -= distance; }
+	Transition const & shtransition = shadow.transition;
+	if( shtransition & ( Transition::upToDw ) ){ brightRow += distance; }
+	if( shtransition & ( Transition::lToR ) ){ brightCol += distance * channels; }
+	if( shtransition & ( Transition::dwToUp ) ){ brightRow -= distance; }
+	if( shtransition & ( Transition::rToL ) ){ brightCol -= distance * channels; }
 
-	if( ( 0 <= shadowRow && shadowRow < img.rows ) && ( 0 <= shadowCol && shadowCol < img.cols ))
+	if( ( 0 <= brightRow && brightRow < img.rows ) && ( 0 <= brightCol && brightCol < img.cols ))
 		{
 			for( uint i = 0; i < channels; ++i )
 			{
-				if( img.data[ shadowRow * img.step + shadowCol + i ] < acceptanceLevel )
+				if( img.data[ brightRow * img.step + brightCol + i ] < acceptanceLevel )
 				{
 					return;
 				}
-				colorBalance[ i ] += img.data[ el.row * img.step + el.col + i ] / static_cast< double >( img.data[ shadowRow * img.step + shadowCol + i ] );
+				TYPE bright = img.data[ brightRow * img.step + brightCol + i ];
+				TYPE sh = img.data[ shadow.row * img.step + shadow.col + i ];
+				colorBalance[ i ] += static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
 				++weight;
 			}
 		}
