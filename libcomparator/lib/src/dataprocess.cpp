@@ -28,7 +28,7 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 }
 
 ColorBalance::ColorBalance( cv::Mat const & img, TYPE acceptanceLevel_, uint distance = 1 ):
-img( img ), distance{ distance }, colorBalance{ 0, 0 ,0 }, weight{ 0 }
+img( img ), distance{ distance }, colorBalance{ 0, 0 , 0 }, weight{ 0 }
 {
 	acceptanceLevel = std::max( acceptanceLevel_, static_cast< TYPE >( 1 ) );
 }
@@ -70,12 +70,15 @@ void ColorBalance::element_balance( IndexTransition const & shadow )
 		{
 			for( uint i = 0; i < channels; ++i )
 			{
-				auto datadebug = img.data[ shadow.row * img.step + shadow.col + i ];
-				auto booldebug = img.data[ shadow.row * img.step + shadow.col + i ] < acceptanceLevel;
-				if( img.data[ shadow.row * img.step + shadow.col + i ] < acceptanceLevel )
+				bool rejectShadow = img.data[ shadow.row * img.step + shadow.col + i ] < acceptanceLevel;
+				bool rejectBright = img.data[ brightRow * img.step + brightCol + i ] < acceptanceLevel;
+				if( rejectShadow || rejectBright )
 				{
 					return;
 				}
+			}
+			for( uint i = 0; i < channels; ++i )
+			{
 				colorBalance[ i ] += static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
 				++weight;
 			}
@@ -99,7 +102,12 @@ bool ColorBalance::is_valid( Transition const & transition )
 	return true;
 }
 
-#ifdef TEST_PRIVATE_PART
+#ifdef WITH_TESTS
+	double* ColorBalance::getColorBalance()
+	{
+		return colorBalance;
+	}
+
 	void ColorBalance::clear_balance()
 	{
 		for(auto el = colorBalance; el != colorBalance + channels; ++el)
