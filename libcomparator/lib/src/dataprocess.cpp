@@ -27,29 +27,70 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	data.resize(++validIdx);
 }
 
+ColorStruct::ColorStruct()
+{
+	std::fill( color, color + channels, 0);
+}
+
+ColorStruct::ColorStruct( std::initializer_list< double > l )
+{
+	std::transform( l.begin(), l.end(), color, []( double ld ){ return ld; } );
+}
+
+ColorStruct& ColorStruct::operator+=( ColorStruct const & src )
+{
+	for( int i = 0; i < channels; ++i )
+	{
+		color[ i ] += src.color[ i ];
+	}
+	return *this;
+}
+
+ColorStruct& ColorStruct::operator/=( double const divisor )
+{
+	for( int i = 0; i < channels; ++i )
+	{
+		color[ i ] /= divisor;
+	}
+	return *this;
+}
+
+ColorStruct& ColorStruct::operator=( std::initializer_list< double > l )
+{
+	std::transform( l.begin(), l.end(), color, []( double ld ){ return ld; } );
+	return *this;
+}
+
+bool ColorStruct::operator<( ColorStruct const & first )
+{
+	return true;
+}
+
 ColorBalance::ColorBalance( cv::Mat const & img, TYPE acceptanceLevel_, uint distance = 1 ):
-img( img ), distance{ distance }, colorBalance{ 0, 0 , 0 }, weight{ 0 }
+img( img ), distance{ distance } //, colorBalance{ ColorStruct{ 0, 0 , 0 } }
 {
 	acceptanceLevel = std::max( acceptanceLevel_, static_cast< TYPE >( 1 ) );
 }
 
-void ColorBalance::balance( std::vector< IndexTransition >& position )
+void ColorBalance::balance( std::vector< IndexTransition >& positions )
 {
-	std::for_each( position.begin(), position.end(), [ this ]( IndexTransition& el )
+	std::for_each( positions.begin(), positions.end(), [ this ]( IndexTransition & el )
 	{
 		element_balance( el );
 	});
+	
+	// DataProcess::outliner( colorBalance, 1 );
+	
+	ColorStruct sumBalance;
 
-	double normalize = 0.0;
-	std::for_each( colorBalance, colorBalance + channels, [ this, &normalize ]( double& el )
+	std::for_each( colorBalance.begin(), colorBalance.end(), [ &sumBalance ]( ColorStruct const & el )
 	{
-		normalize += el;
-	});
-	normalize /= channels;
-	std::for_each( colorBalance, colorBalance + channels, [ this, &normalize ]( double& el )
-	{
-		el /= weight * normalize;
-	});
+		sumBalance += el;
+	} );
+
+	double normalizer = ( sumBalance.color[0] + sumBalance.color[1] + sumBalance.color[2] ) / channels;
+
+	sumBalance /= colorBalance.size() * normalizer;
 }
 
 void ColorBalance::element_balance( IndexTransition const & shadow )
@@ -77,11 +118,12 @@ void ColorBalance::element_balance( IndexTransition const & shadow )
 					return;
 				}
 			}
+			ColorStruct _colorBalance { .0, .0, .0 };
 			for( uint i = 0; i < channels; ++i )
 			{
-				colorBalance[ i ] += static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
-				++weight;
+				_colorBalance.color[i] = static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
 			}
+			colorBalance.push_back( _colorBalance );
 		}
 }
 
@@ -102,17 +144,75 @@ bool ColorBalance::is_valid( Transition const & transition )
 	return true;
 }
 
+template < class TYPE > void DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult )
+{
+    TYPE median( 0 );
+    TYPE Q1( 0 );
+    TYPE Q3( 0 );
+    TYPE diff( 0 );
+    TYPE downLim( 0 );
+    TYPE upLim( 0 );
+    double d_2_0 = 2.0;
+    std::sort( dataset.begin(), dataset.end() );
+
+    if( ( dataset.size() % 2 ) == 0 )
+        median = ( dataset )[ dataset.size() / 2 ];
+    else
+        median = ( ( dataset )[ static_cast< uint >( dataset.size() / d_2_0 ) ] + ( dataset )[ static_cast< uint >( dataset.size() / d_2_0 - 1.0 + 0.5) ] ) / d_2_0;
+
+    if( ( dataset.size() % 4 ) == 0 )
+        Q1 = ( dataset )[ dataset.size() / 4 ];
+    else
+        Q1 = ( ( dataset )[ static_cast< uint >( dataset.size() / 4.0 + 0.5 ) ] + ( dataset )[ static_cast< uint >( dataset.size() / 4.0 - 1 + 0.5 ) ] ) / d_2_0;
+
+    if( ( ( dataset.size() * 3 ) % 4 ) == 0 )
+        Q3 = ( dataset )[ dataset.size() * 3 / 4 ];
+    else
+        Q3 = ( ( dataset )[ static_cast< uint >( dataset.size() * 3.0/4.0 + 0.5 ) ] + ( dataset )[ static_cast< uint >( dataset.size() * 3.0/4.0 - 1 + 0.5 ) ] ) / d_2_0;
+
+    diff = Q3-Q1;
+    diff *= diffMult;
+    downLim = Q1 - diff;
+    upLim = Q3 + diff;
+
+    //higher upLim;
+    uint begg = 0;
+    for( begg = dataset.size() - 1; ; begg--) //dataset.size -1 == dataser.end
+    {
+        if( dataset[ begg ] > upLim )
+            continue;
+        else
+            break;
+    }
+
+    uint endd = 0;
+    for(endd = 0; ; endd++ )
+    {
+        if( dataset[ endd ] < downLim )
+            continue;
+        else
+            break;
+    }
+
+    dataset.resize( begg + 1 );//rm tail
+    dataset.erase( dataset.begin(), dataset.begin() + endd );//rm head
+}
+
 #ifdef WITH_TESTS
-	double* ColorBalance::getColorBalance()
+	ColorStruct ColorBalance::getColorBalance()
 	{
-		return colorBalance;
+		if( colorBalance.size() )
+		{
+			return colorBalance[0];
+		}
+		else
+		{
+			return ColorStruct{ .0, .0, .0 };
+		}
 	}
 
 	void ColorBalance::clear_balance()
 	{
-		for(auto el = colorBalance; el != colorBalance + channels; ++el)
-		{
-			*el = 0;
-		}
+		colorBalance.resize(0);
 	}
 #endif
