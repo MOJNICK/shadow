@@ -90,6 +90,7 @@ protected:
   }
 };
 
+
 #ifdef TEST_PRIVATE_PART
   class ColorBalancePrivateTestMethods : public cvtest::BaseTest
   {
@@ -117,8 +118,17 @@ protected:
       ColorBalance colorBalance( mat, acceptanceLevel, distance );
 
       IndexTransition indexTransition{ 1, 3, rToL };
-      mat( 1, 3 ) = 10; mat( 1, 4 ) = 20; mat( 1, 5 ) = 50;
-      std::vector< double > expectedBalance = {10.0, 5.0, 2.0};
+      mat( 1, 3 ) = 10; mat( 1, 4 ) = 25; mat( 1, 5 ) = 50;
+      mat( 1, 6 ) = 50; mat( 1, 7 ) = 50; mat( 1, 8 ) = 50;
+      std::vector< double > expectedBalance = {5.0, 2.0, 1.0};
+      colorBalance.element_balance( indexTransition );
+      compareColorBalance( expectedBalance, colorBalance.colorBalance );
+
+      colorBalance.clear_balance();
+      indexTransition = IndexTransition{ 1, 6, lToR };
+      mat( 1, 3 ) = 10; mat( 1, 4 ) = 25; mat( 1, 5 ) = 50;
+      mat( 1, 6 ) = 50; mat( 1, 7 ) = 50; mat( 1, 8 ) = 50;
+      expectedBalance = { 1/5.0, 1/2.0, 1/1.0};
       colorBalance.element_balance( indexTransition );
       compareColorBalance( expectedBalance, colorBalance.colorBalance );
     }

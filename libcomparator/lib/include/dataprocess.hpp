@@ -23,5 +23,8 @@
 		uint weight;
 		static bool is_valid( Transition const & );
 		void element_balance( IndexTransition const & );
+		#ifdef TEST_PRIVATE_PART
+			void clear_balance();
+		#endif
 	};
 #endif
