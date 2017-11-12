@@ -61,6 +61,11 @@ ColorStruct& ColorStruct::operator=( std::initializer_list< double > l )
 	return *this;
 }
 
+bool ColorStruct::operator<( ColorStruct const & first )
+{
+	return true;
+}
+
 ColorBalance::ColorBalance( cv::Mat const & img, TYPE acceptanceLevel_, uint distance = 1 ):
 img( img ), distance{ distance } //, colorBalance{ ColorStruct{ 0, 0 , 0 } }
 {
@@ -73,7 +78,9 @@ void ColorBalance::balance( std::vector< IndexTransition >& positions )
 	{
 		element_balance( el );
 	});
-		// outliner();
+	
+	// DataProcess::outliner( colorBalance, 1 );
+	
 	ColorStruct sumBalance;
 
 	std::for_each( colorBalance.begin(), colorBalance.end(), [ &sumBalance ]( ColorStruct const & el )
@@ -137,6 +144,60 @@ bool ColorBalance::is_valid( Transition const & transition )
 	return true;
 }
 
+template < class TYPE > void DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult )
+{
+    TYPE median( 0 );
+    TYPE Q1( 0 );
+    TYPE Q3( 0 );
+    TYPE diff( 0 );
+    TYPE downLim( 0 );
+    TYPE upLim( 0 );
+    double d_2_0 = 2.0;
+    std::sort( dataset.begin(), dataset.end() );
+
+    if( ( dataset.size() % 2 ) == 0 )
+        median = ( dataset )[ dataset.size() / 2 ];
+    else
+        median = ( ( dataset )[ static_cast< uint >( dataset.size() / d_2_0 ) ] + ( dataset )[ static_cast< uint >( dataset.size() / d_2_0 - 1.0 + 0.5) ] ) / d_2_0;
+
+    if( ( dataset.size() % 4 ) == 0 )
+        Q1 = ( dataset )[ dataset.size() / 4 ];
+    else
+        Q1 = ( ( dataset )[ static_cast< uint >( dataset.size() / 4.0 + 0.5 ) ] + ( dataset )[ static_cast< uint >( dataset.size() / 4.0 - 1 + 0.5 ) ] ) / d_2_0;
+
+    if( ( ( dataset.size() * 3 ) % 4 ) == 0 )
+        Q3 = ( dataset )[ dataset.size() * 3 / 4 ];
+    else
+        Q3 = ( ( dataset )[ static_cast< uint >( dataset.size() * 3.0/4.0 + 0.5 ) ] + ( dataset )[ static_cast< uint >( dataset.size() * 3.0/4.0 - 1 + 0.5 ) ] ) / d_2_0;
+
+    diff = Q3-Q1;
+    diff *= diffMult;
+    downLim = Q1 - diff;
+    upLim = Q3 + diff;
+
+    //higher upLim;
+    uint begg = 0;
+    for( begg = dataset.size() - 1; ; begg--) //dataset.size -1 == dataser.end
+    {
+        if( dataset[ begg ] > upLim )
+            continue;
+        else
+            break;
+    }
+
+    uint endd = 0;
+    for(endd = 0; ; endd++ )
+    {
+        if( dataset[ endd ] < downLim )
+            continue;
+        else
+            break;
+    }
+
+    dataset.resize( begg + 1 );//rm tail
+    dataset.erase( dataset.begin(), dataset.begin() + endd );//rm head
+}
+
 #ifdef WITH_TESTS
 	ColorStruct ColorBalance::getColorBalance()
 	{
@@ -153,9 +214,5 @@ bool ColorBalance::is_valid( Transition const & transition )
 	void ColorBalance::clear_balance()
 	{
 		colorBalance.resize(0);
-		// for( int i = 0; i < channels; ++i )
-		// {
-		// 	colorBalance[0].color[i] = 0;
-		// }
 	}
 #endif

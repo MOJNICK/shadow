@@ -102,7 +102,11 @@ protected:
     ColorBalance colorBalance(cv::Mat(), acceptanceLevel, distance);
   }
 };
-
+TEST(ColorBalanceSuite, ColorBalanceBalance)
+{
+  ColorBalanceBalance colorBalanceBalance;
+  colorBalanceBalance.safe_run();
+}
 
 #ifdef TEST_PRIVATE_PART
   
