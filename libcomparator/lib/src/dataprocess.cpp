@@ -61,7 +61,12 @@ ColorStruct& ColorStruct::operator=( std::initializer_list< double > l )
 	return *this;
 }
 
-bool ColorStruct::operator<( ColorStruct const & first )
+bool ColorStruct::compare_saturation( ColorStruct const & first, ColorStruct const & second )
+{
+	return true;
+}
+
+bool ColorStruct::compare_HUE( ColorStruct const & first, ColorStruct const & second )
 {
 	return true;
 }
@@ -146,7 +151,7 @@ bool ColorBalance::is_valid( Transition const & transition )
 
 template< class TYPE, class Compare >
 void
-DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, Compare fun )
+DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare fun )
 {
     TYPE median( 0 );
     TYPE Q1( 0 );
@@ -195,9 +200,12 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, Compare fun
         else
             break;
     }
+    
+    if( side & SideToClear{ tail } )
+    	dataset.resize( begg + 1 );//rm tail
 
-    dataset.resize( begg + 1 );//rm tail
-    dataset.erase( dataset.begin(), dataset.begin() + endd );//rm head
+    if( side & SideToClear{ head } )
+    	dataset.erase( dataset.begin(), dataset.begin() + endd );//rm head
 }
 
 #ifdef WITH_TESTS

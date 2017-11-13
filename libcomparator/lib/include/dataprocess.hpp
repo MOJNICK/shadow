@@ -2,6 +2,13 @@
 	#define DATAPOCESS_HPP
 	#include "libcomparator.hpp"
 
+	enum SideToClear
+	{
+		head = 0x01,
+		tail = 0x10,
+		both = head | tail
+	};
+
 	class DataProcess
 	{
 	public:
@@ -9,7 +16,7 @@
 		static void concatenate_HV( std::vector< IndexTransition >& );
 		template< class TYPE, class Compare > 
 			static void 
-			outliner( std::vector<TYPE> & dataset, double diffMult = 1, Compare fun = [](TYPE& a, TYPE& b){return a < b;});
+			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });
 	};
 
 	struct ColorStruct
@@ -21,7 +28,9 @@
 		ColorStruct& operator+=( ColorStruct const & src );
 		ColorStruct& operator/=( double const divisor );
 		ColorStruct& operator=( std::initializer_list< double > l );
-		bool operator<( ColorStruct const & first );
+
+		static bool compare_saturation( ColorStruct const & first, ColorStruct const & second );
+		static bool compare_HUE( ColorStruct const & first, ColorStruct const & second );
 	};
 
 	class ColorBalance
@@ -31,7 +40,7 @@
 		void balance( std::vector< IndexTransition >& );
 		template< class TYPE, class Compare >
 			friend void
-			DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, Compare fun  );
+			DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare fun  );
 		~ColorBalance(){};
 		#ifdef WITH_TESTS
 			ColorStruct getColorBalance();
