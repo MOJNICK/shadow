@@ -1,8 +1,15 @@
 #include "dataprocess.hpp"
 
+double const d0upLim = 0.00001;
+
 ColorStruct::ColorStruct()
 {
 	std::fill( color, color + channels, 0);
+}
+
+ColorStruct::ColorStruct( double value )
+{
+	std::fill( color, color + channels, value);
 }
 
 ColorStruct::ColorStruct( std::initializer_list< double > l )
@@ -49,7 +56,7 @@ double ColorStruct::saturation()
 	double max = *std::max_element(color, color + channels);
 	double min = *std::min_element(color, color + channels);
 	
-	if ( max < 0.00001 )
+	if ( max < d0upLim )
 		return 0.0;
 	else
 		return 1.0 - min / max ;
@@ -61,8 +68,11 @@ double ColorStruct::HUE()
 	double max_min = max - *std::min_element(color, color + channels);
     
     double hue = 0;
+    if( max_min < d0upLim )
+    	return hue;
+
     if( color[ 0 ] == max )
-      	hue = 240 + ( ( color[ 0 ] - color[ 1 ] ) *60 /( max_min ) );
+      	hue = -120 + ( ( color[ 2 ] - color[ 1 ] ) *60 /( max_min ) );
     if( color[ 1 ] == max)
       	hue = 120 + ( ( color[ 0 ] - color[ 2 ] ) *60 /( max_min ) );
 	if( color[ 2 ] == max )
@@ -87,7 +97,7 @@ void ColorBalance::balance( std::vector< IndexTransition >& positions )
 		element_balance( el );
 	});
 	
-	// DataProcess::outliner( colorBalance, 1 );
+	DataProcess::outliner( colorBalance, 1, both, ColorStruct::compare_saturation );
 	
 	ColorStruct sumBalance;
 
@@ -221,7 +231,7 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
 
 template< class TYPE, class Compare >
 void
-DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare fun )
+DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher )
 {
     TYPE median( 0 );
     TYPE Q1( 0 );
@@ -230,7 +240,7 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear
     TYPE downLim( 0 );
     TYPE upLim( 0 );
     double d_2_0 = 2.0;
-    std::sort( dataset.begin(), dataset.end(), fun );
+    std::sort( dataset.begin(), dataset.end(), less );
 
     if( ( dataset.size() % 2 ) == 0 )
         median = ( dataset )[ dataset.size() / 2 ];
@@ -256,7 +266,7 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear
     uint begg = 0;
     for( begg = dataset.size() - 1; ; begg--) //dataset.size -1 == dataser.end
     {
-        if( dataset[ begg ] > upLim )
+        if( higher( dataset[ begg ], upLim ))
             continue;
         else
             break;
@@ -265,7 +275,7 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear
     uint endd = 0;
     for(endd = 0; ; endd++ )
     {
-        if( dataset[ endd ] < downLim )
+        if( less( dataset[ endd ], downLim ))
             continue;
         else
             break;

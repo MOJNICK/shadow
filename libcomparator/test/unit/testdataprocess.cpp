@@ -76,23 +76,75 @@ TEST(ComparatorLibDataProcessSuite, ConcatenateHV)
   ConcatenateHV.safe_run();
 }
 
-
-class ColorStructHSV : public cvtest::BaseTest
+class ColorStructsaturation : public cvtest::BaseTest
 {
 public:
 protected:
   void run(int)
   {
+    ColorStruct::baseLevel = 0;
     ColorStruct cs{ 0, 0, 0};
+    ASSERT_DOUBLE_EQ( 0.0, cs.saturation() );
+
+    cs = { 10, 10, 10};
+    ASSERT_DOUBLE_EQ( 0.0, cs.saturation() );
+
+    cs = { 20, 0, 0};
+    ASSERT_DOUBLE_EQ( 1, cs.saturation() );
+
+    cs = { 0, 13, 0};
+    ASSERT_DOUBLE_EQ( 1, cs.saturation() );
+
+    cs = { 0, 0, 10};
+    ASSERT_DOUBLE_EQ( 1, cs.saturation() );
+
+    cs = { 0, 10, 10};
+    ASSERT_DOUBLE_EQ( 1, cs.saturation() );
+
+    cs = { 5, 10, 10};
+    ASSERT_DOUBLE_EQ( 0.5, cs.saturation() );
   }
 };
-TEST(ColorStructSuite, ColorStructHSV)
+TEST(ColorStructSuite, ColorStructsaturation)
 {
-  ColorStructHSV colorStructHSV;
-  colorStructHSV.safe_run();
+  ColorStructsaturation colorStructsaturation;
+  colorStructsaturation.safe_run();
 }
 
+class ColorStructHUE : public cvtest::BaseTest
+{
+public:
+protected:
+  void run(int)
+  {
+    ColorStruct::baseLevel = 0;
+    ColorStruct cs{ 0, 0, 0};
+    ASSERT_DOUBLE_EQ( 0.0, cs.HUE() );
 
+    cs = { 10, 10, 10};
+    ASSERT_DOUBLE_EQ( 0.0, cs.HUE() );
+
+    cs = { 20, 0, 0};
+    ASSERT_DOUBLE_EQ( -120.0, cs.HUE() );
+
+    cs = { 0, 13, 0};
+    ASSERT_DOUBLE_EQ( 120.0, cs.HUE() );
+
+    cs = { 0, 0, 10};
+    ASSERT_DOUBLE_EQ( 0.0, cs.HUE() );
+
+    cs = { 0, 10, 10};
+    ASSERT_DOUBLE_EQ( 60, cs.HUE() );
+
+    cs = { 5, 10, 10};
+    ASSERT_DOUBLE_EQ( 60, cs.HUE() );
+  }
+};
+TEST(ColorStructSuite, ColorStructHUE)
+{
+  ColorStructHUE colorStructHUE;
+  colorStructHUE.safe_run();
+}
 
 class ColorBalanceTestMethods : public cvtest::BaseTest
 {

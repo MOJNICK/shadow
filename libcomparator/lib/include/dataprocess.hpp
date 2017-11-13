@@ -18,6 +18,7 @@
 		double color[ channels ];
 
 		ColorStruct();
+		ColorStruct( double value );
 		ColorStruct( std::initializer_list< double > l );
 		ColorStruct& operator+=( ColorStruct const & src );
 		ColorStruct& operator/=( double const divisor );
