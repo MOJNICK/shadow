@@ -29,7 +29,7 @@
 		double saturation();
 		double HUE();
 	};
-	
+
 
 	class ColorBalance
 	{
@@ -39,7 +39,7 @@
 		void balance( std::vector< IndexTransition >& );
 		~ColorBalance(){};
 		#ifdef WITH_TESTS
-			ColorStruct getColorBalance();
+			ColorStruct getColorBalance( uint idx = 0 );
 			void clear_balance();
 		#endif
 	private:

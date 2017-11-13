@@ -365,8 +365,3 @@ TEST(ComparatorLibSuite, DataContainers)
   DataContainers DataContainers;
   DataContainers.safe_run();
 }
-      
-// TEST(ComparatorLibSuite, ATestThatFails) {
-//   bool mybool = false;
-//   ASSERT_TRUE(mybool);
-// }

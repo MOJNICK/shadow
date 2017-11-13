@@ -48,7 +48,11 @@ double ColorStruct::saturation()
 {
 	double max = *std::max_element(color, color + channels);
 	double min = *std::min_element(color, color + channels);
-	return max - min;
+	
+	if ( max < 0.00001 )
+		return 0.0;
+	else
+		return 1.0 - min / max ;
 }
 
 double ColorStruct::HUE()
@@ -149,11 +153,11 @@ bool ColorBalance::is_valid( Transition const & transition )
 }
 
 #ifdef WITH_TESTS
-	ColorStruct ColorBalance::getColorBalance()
+	ColorStruct ColorBalance::getColorBalance( uint idx )
 	{
 		if( colorBalance.size() )
 		{
-			return colorBalance[0];
+			return colorBalance[ idx ];
 		}
 		else
 		{
