@@ -1,32 +1,5 @@
 #include "dataprocess.hpp"
 
-DataProcess::DataProcess(){};
-
-void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
-{
-	if(data.size() < 2)
-		return;
-
-	std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.col < b.col; });
-	std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.row < b.row; });
-
-	uint validIdx = 0;
-	for (uint idx = 1; idx < data.size(); idx++)
-	{
-		if( data[ validIdx ].same_position( data[ idx ] ) )
-		{
-			data[ validIdx ].transition |= data[ idx ].transition;
-			
-		}
-		else
-		{
-			std::swap( data[ ++validIdx ], data[ idx ] );
-		}
-
-	}
-	data.resize(++validIdx);
-}
-
 ColorStruct::ColorStruct()
 {
 	std::fill( color, color + channels, 0);
@@ -61,14 +34,40 @@ ColorStruct& ColorStruct::operator=( std::initializer_list< double > l )
 	return *this;
 }
 
-bool ColorStruct::compare_saturation( ColorStruct const & first, ColorStruct const & second )
+bool ColorStruct::compare_saturation( ColorStruct & first, ColorStruct & second )
 {
-	return true;
+	return first.saturation() < second.saturation();
 }
 
-bool ColorStruct::compare_HUE( ColorStruct const & first, ColorStruct const & second )
+bool ColorStruct::compare_HUE( ColorStruct & first, ColorStruct & second )
 {
-	return true;
+	return first.HUE() < second.HUE();
+}
+
+double ColorStruct::saturation()
+{
+	double max = *std::max_element(color, color + channels);
+	double min = *std::min_element(color, color + channels);
+	return max - min;
+}
+
+double ColorStruct::HUE()
+{
+	double max = *std::max_element(color, color + channels);
+	double max_min = max - *std::min_element(color, color + channels);
+    
+    double hue = 0;
+    if( color[ 0 ] == max )
+      	hue = 240 + ( ( color[ 0 ] - color[ 1 ] ) *60 /( max_min ) );
+    if( color[ 1 ] == max)
+      	hue = 120 + ( ( color[ 0 ] - color[ 2 ] ) *60 /( max_min ) );
+	if( color[ 2 ] == max )
+      	hue = 000 + ( ( color[ 1 ] - color[ 0 ] ) *60 /( max_min ) );
+	
+	if( hue < -180 + baseLevel )
+		hue += 360;
+
+	return hue;
 }
 
 ColorBalance::ColorBalance( cv::Mat const & img, TYPE acceptanceLevel_, uint distance = 1 ):
@@ -149,6 +148,73 @@ bool ColorBalance::is_valid( Transition const & transition )
 	return true;
 }
 
+#ifdef WITH_TESTS
+	ColorStruct ColorBalance::getColorBalance()
+	{
+		if( colorBalance.size() )
+		{
+			return colorBalance[0];
+		}
+		else
+		{
+			return ColorStruct{ .0, .0, .0 };
+		}
+	}
+
+	void ColorBalance::clear_balance()
+	{
+		colorBalance.resize(0);
+	}
+#endif
+
+double ColorStruct::baseLevel = 0.0;
+
+DataProcess::DataProcess(){};
+
+void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
+{
+	if(data.size() < 2)
+		return;
+
+	std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.col < b.col; });
+	std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.row < b.row; });
+
+	uint validIdx = 0;
+	for (uint idx = 1; idx < data.size(); idx++)
+	{
+		if( data[ validIdx ].same_position( data[ idx ] ) )
+		{
+			data[ validIdx ].transition |= data[ idx ].transition;
+			
+		}
+		else
+		{
+			std::swap( data[ ++validIdx ], data[ idx ] );
+		}
+
+	}
+	data.resize(++validIdx);
+}
+
+double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
+{
+	static double _baseLevel = 0.0;
+	static int counter = 2;
+	if ( counter == 0)
+		return _baseLevel;
+	else
+	{
+		ColorStruct avg;
+		for_each( colorBalance.begin(), colorBalance.end(), [&avg]( ColorStruct const & cs ){ avg += cs;});
+		avg /= colorBalance.size();
+		_baseLevel = avg.HUE( );
+		ColorStruct::baseLevel = _baseLevel;
+
+		hue_base_level( colorBalance );
+		--counter;
+	}
+}
+
 template< class TYPE, class Compare >
 void
 DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare fun )
@@ -207,22 +273,3 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear
     if( side & SideToClear{ head } )
     	dataset.erase( dataset.begin(), dataset.begin() + endd );//rm head
 }
-
-#ifdef WITH_TESTS
-	ColorStruct ColorBalance::getColorBalance()
-	{
-		if( colorBalance.size() )
-		{
-			return colorBalance[0];
-		}
-		else
-		{
-			return ColorStruct{ .0, .0, .0 };
-		}
-	}
-
-	void ColorBalance::clear_balance()
-	{
-		colorBalance.resize(0);
-	}
-#endif
