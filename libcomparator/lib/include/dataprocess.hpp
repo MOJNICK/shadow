@@ -7,7 +7,9 @@
 	public:
 		DataProcess();
 		static void concatenate_HV( std::vector< IndexTransition >& );
-		template <class TYPE> static void outliner( std::vector<TYPE> & dataset, double diffMult = 1 );
+		template< class TYPE, class Compare > 
+			static void 
+			outliner( std::vector<TYPE> & dataset, double diffMult = 1, Compare fun = [](TYPE& a, TYPE& b){return a < b;});
 	};
 
 	struct ColorStruct
@@ -27,7 +29,9 @@
 	public:
 		ColorBalance( cv::Mat const &, TYPE, uint );
 		void balance( std::vector< IndexTransition >& );
-		template <class TYPE> friend void DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult );
+		template< class TYPE, class Compare >
+			friend void
+			DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, Compare fun  );
 		~ColorBalance(){};
 		#ifdef WITH_TESTS
 			ColorStruct getColorBalance();

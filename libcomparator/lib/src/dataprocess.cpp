@@ -144,7 +144,9 @@ bool ColorBalance::is_valid( Transition const & transition )
 	return true;
 }
 
-template < class TYPE > void DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult )
+template< class TYPE, class Compare >
+void
+DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, Compare fun )
 {
     TYPE median( 0 );
     TYPE Q1( 0 );
@@ -153,7 +155,7 @@ template < class TYPE > void DataProcess::outliner( std::vector<TYPE> & dataset,
     TYPE downLim( 0 );
     TYPE upLim( 0 );
     double d_2_0 = 2.0;
-    std::sort( dataset.begin(), dataset.end() );
+    std::sort( dataset.begin(), dataset.end(), fun );
 
     if( ( dataset.size() % 2 ) == 0 )
         median = ( dataset )[ dataset.size() / 2 ];
