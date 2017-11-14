@@ -137,7 +137,12 @@ void ColorBalance::balance( std::vector< IndexTransition >& positions )
 		element_balance( el );
 	});
 	
-	DataProcess::outliner( colorBalance, 1, both, ColorStruct::less_saturation );
+	DataProcess::outliner( colorBalance, 1, both,
+							ColorStruct::less_saturation,
+							ColorStruct::higher_saturation,
+							ColorStruct::add_saturation,
+							ColorStruct::subtract_saturation,
+							ColorStruct::saturation_cast );
 	
 	ColorStruct sumBalance;
 
