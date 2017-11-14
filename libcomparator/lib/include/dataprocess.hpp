@@ -23,8 +23,14 @@
 		ColorStruct& operator+=( ColorStruct const & src );
 		ColorStruct& operator/=( double const divisor );
 		ColorStruct& operator=( std::initializer_list< double > l );
+		static bool add_HUE( ColorStruct & first, ColorStruct & second );
+		static bool add_saturation( ColorStruct & first, ColorStruct & second );
+		static bool subtract_HUE( ColorStruct & first, ColorStruct & second );
+		static bool subtract_saturation( ColorStruct & first, ColorStruct & second );
 		static bool compare_saturation( ColorStruct & first, ColorStruct & second );
+		static bool higher_saturation( ColorStruct & first, ColorStruct & second );
 		static bool compare_HUE( ColorStruct & first, ColorStruct & second );
+		static bool higher_HUE( ColorStruct & first, ColorStruct & second );
 	private:
 		static double baseLevel; //temporary workaround ..?
 		double saturation();
@@ -63,5 +69,14 @@
 		template< class TYPE, class Compare >
 			static void 
 			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });
+
+		template< class TYPE, class Compare, class BaseArithm >
+			static void
+			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both,
+						Compare less = []( TYPE& a, TYPE& b ){ return a < b; },
+						Compare higher = []( TYPE& a, TYPE& b ){ return a > b; },
+						BaseArithm add = []( TYPE& a, TYPE& b ){ return a + b; },
+						BaseArithm subtract = []( TYPE& a, TYPE& b ){ return a - b; }
+					)
 	};
 #endif

@@ -229,9 +229,9 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
 	}
 }
 
-template< class TYPE, class Compare >
+template< class TYPE, class Compare, class BaseArithm >
 void
-DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher )
+DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher, BaseArithm add, BaseArithm subtract )
 {
     TYPE median( 0 );
     TYPE Q1( 0 );
