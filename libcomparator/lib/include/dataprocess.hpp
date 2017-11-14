@@ -23,13 +23,13 @@
 		ColorStruct& operator+=( ColorStruct const & src );
 		ColorStruct& operator/=( double const divisor );
 		ColorStruct& operator=( std::initializer_list< double > l );
-		static bool add_HUE( ColorStruct & first, ColorStruct & second );
 		static bool add_saturation( ColorStruct & first, ColorStruct & second );
-		static bool subtract_HUE( ColorStruct & first, ColorStruct & second );
 		static bool subtract_saturation( ColorStruct & first, ColorStruct & second );
-		static bool compare_saturation( ColorStruct & first, ColorStruct & second );
+		static bool less_saturation( ColorStruct & first, ColorStruct & second );
 		static bool higher_saturation( ColorStruct & first, ColorStruct & second );
-		static bool compare_HUE( ColorStruct & first, ColorStruct & second );
+		static bool add_HUE( ColorStruct & first, ColorStruct & second );
+		static bool subtract_HUE( ColorStruct & first, ColorStruct & second );
+		static bool less_HUE( ColorStruct & first, ColorStruct & second );
 		static bool higher_HUE( ColorStruct & first, ColorStruct & second );
 	private:
 		static double baseLevel; //temporary workaround ..?

@@ -41,14 +41,44 @@ ColorStruct& ColorStruct::operator=( std::initializer_list< double > l )
 	return *this;
 }
 
-bool ColorStruct::compare_saturation( ColorStruct & first, ColorStruct & second )
+ColorStruct ColorStruct::add_saturation( ColorStruct & first, ColorStruct & second )
+{
+	return first.saturation() + second.saturation();
+}
+
+ColorStruct ColorStruct::subtract_saturation( ColorStruct & first, ColorStruct & second )
+{
+	return first.saturation() - second.saturation();
+}
+
+bool ColorStruct::less_saturation( ColorStruct & first, ColorStruct & second )
 {
 	return first.saturation() < second.saturation();
 }
 
-bool ColorStruct::compare_HUE( ColorStruct & first, ColorStruct & second )
+bool higher_saturation( ColorStruct & first, ColorStruct & second )
+{
+	return first.saturation() > second.saturation();
+}
+
+ColorStruct ColorStruct::add_HUE( ColorStruct & first, ColorStruct & second )
+{
+	return first.HUE() + second.HUE();
+}
+
+ColorStruct ColorStruct::subtract_HUE( ColorStruct & first, ColorStruct & second )
+{
+	return first.HUE() - second.HUE();
+}
+
+bool ColorStruct::less_HUE( ColorStruct & first, ColorStruct & second )
 {
 	return first.HUE() < second.HUE();
+}
+
+bool higher_HUE( ColorStruct & first, ColorStruct & second );
+{
+	return first.HUE() > second.HUE();
 }
 
 double ColorStruct::saturation()
@@ -97,7 +127,7 @@ void ColorBalance::balance( std::vector< IndexTransition >& positions )
 		element_balance( el );
 	});
 	
-	DataProcess::outliner( colorBalance, 1, both, ColorStruct::compare_saturation );
+	DataProcess::outliner( colorBalance, 1, both, ColorStruct::less_saturation );
 	
 	ColorStruct sumBalance;
 
