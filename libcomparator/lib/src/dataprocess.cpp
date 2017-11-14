@@ -41,12 +41,12 @@ ColorStruct& ColorStruct::operator=( std::initializer_list< double > l )
 	return *this;
 }
 
-ColorStruct ColorStruct::add_saturation( ColorStruct & first, ColorStruct & second )
+double ColorStruct::add_saturation( ColorStruct & first, ColorStruct & second )
 {
 	return first.saturation() + second.saturation();
 }
 
-ColorStruct ColorStruct::subtract_saturation( ColorStruct & first, ColorStruct & second )
+double ColorStruct::subtract_saturation( ColorStruct & first, ColorStruct & second )
 {
 	return first.saturation() - second.saturation();
 }
@@ -61,12 +61,12 @@ bool higher_saturation( ColorStruct & first, ColorStruct & second )
 	return first.saturation() > second.saturation();
 }
 
-ColorStruct ColorStruct::add_HUE( ColorStruct & first, ColorStruct & second )
+double ColorStruct::add_HUE( ColorStruct & first, ColorStruct & second )
 {
 	return first.HUE() + second.HUE();
 }
 
-ColorStruct ColorStruct::subtract_HUE( ColorStruct & first, ColorStruct & second )
+double ColorStruct::subtract_HUE( ColorStruct & first, ColorStruct & second )
 {
 	return first.HUE() - second.HUE();
 }
@@ -76,7 +76,7 @@ bool ColorStruct::less_HUE( ColorStruct & first, ColorStruct & second )
 	return first.HUE() < second.HUE();
 }
 
-bool higher_HUE( ColorStruct & first, ColorStruct & second );
+bool higher_HUE( ColorStruct & first, ColorStruct & second )
 {
 	return first.HUE() > second.HUE();
 }
@@ -88,8 +88,9 @@ double ColorStruct::saturation()
 
 double ColorStruct::saturation_cast( ColorStruct* const cs )
 {
-	double max = *std::max_element( cs->color, cs->color + channels);
-	double min = *std::min_element( cs->color, cs->color + channels);
+	double* color = cs->color;
+	double max = *std::max_element( color, color + channels);
+	double min = *std::min_element( color, color + channels);
 	
 	if ( max < d0upLim )
 		return 0.0;
@@ -104,8 +105,9 @@ double ColorStruct::HUE()
 
 double ColorStruct::HUE_cast( ColorStruct* const cs )
 {
-	double max = *std::max_element( cs->color, cs->color + channels);
-	double max_min = max - *std::min_element( cs->color, cs->color + channels);
+	double* color = cs->color;
+	double max = *std::max_element( color, color + channels);
+	double max_min = max - *std::min_element( color, color + channels);
     
     double hue = 0;
     if( max_min < d0upLim )
