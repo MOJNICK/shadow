@@ -83,8 +83,13 @@ bool higher_HUE( ColorStruct & first, ColorStruct & second );
 
 double ColorStruct::saturation()
 {
-	double max = *std::max_element(color, color + channels);
-	double min = *std::min_element(color, color + channels);
+	return saturation_cast( this );
+}
+
+double ColorStruct::saturation_cast( ColorStruct* const cs )
+{
+	double max = *std::max_element( cs->color, cs->color + channels);
+	double min = *std::min_element( cs->color, cs->color + channels);
 	
 	if ( max < d0upLim )
 		return 0.0;
@@ -94,8 +99,13 @@ double ColorStruct::saturation()
 
 double ColorStruct::HUE()
 {
-	double max = *std::max_element(color, color + channels);
-	double max_min = max - *std::min_element(color, color + channels);
+	return HUE_cast( this );
+}
+
+double ColorStruct::HUE_cast( ColorStruct* const cs )
+{
+	double max = *std::max_element( cs->color, cs->color + channels);
+	double max_min = max - *std::min_element( cs->color, cs->color + channels);
     
     double hue = 0;
     if( max_min < d0upLim )
@@ -259,9 +269,9 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
 	}
 }
 
-template< class TYPE, class Compare, class BaseArithm >
+template< class TYPE, class Compare, class BaseArithm, class Cast >
 void
-DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher, BaseArithm add, BaseArithm subtract )
+DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher, BaseArithm add, BaseArithm subtract, Cast cast_arithm_arg )
 {
     TYPE median( 0 );
     TYPE Q1( 0 );
@@ -269,23 +279,23 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear
     TYPE diff( 0 );
     TYPE downLim( 0 );
     TYPE upLim( 0 );
-    double d_2_0 = 2.0;
+    double const d_2_0 = 2.0;
     std::sort( dataset.begin(), dataset.end(), less );
 
     if( ( dataset.size() % 2 ) == 0 )
         median = ( dataset )[ dataset.size() / 2 ];
     else
-        median = ( ( dataset )[ static_cast< uint >( dataset.size() / d_2_0 ) ] + ( dataset )[ static_cast< uint >( dataset.size() / d_2_0 - 1.0 + 0.5) ] ) / d_2_0;
+        median = add( dataset[ static_cast< uint >( dataset.size() / d_2_0 ) ], dataset[ static_cast< uint >( dataset.size() / d_2_0 - 1.0 + 0.5 ) ] ) / d_2_0;
 
     if( ( dataset.size() % 4 ) == 0 )
-        Q1 = ( dataset )[ dataset.size() / 4 ];
+        Q1 = dataset[ dataset.size() / 4 ];
     else
-        Q1 = ( ( dataset )[ static_cast< uint >( dataset.size() / 4.0 + 0.5 ) ] + ( dataset )[ static_cast< uint >( dataset.size() / 4.0 - 1 + 0.5 ) ] ) / d_2_0;
+        Q1 = add( dataset[ static_cast< uint >( dataset.size() / 4.0 + 0.5 ) ], dataset[ static_cast< uint >( dataset.size() / 4.0 - 1 + 0.5 ) ] ) / d_2_0;
 
     if( ( ( dataset.size() * 3 ) % 4 ) == 0 )
-        Q3 = ( dataset )[ dataset.size() * 3 / 4 ];
+        Q3 = dataset[ dataset.size() * 3 / 4 ];
     else
-        Q3 = ( ( dataset )[ static_cast< uint >( dataset.size() * 3.0/4.0 + 0.5 ) ] + ( dataset )[ static_cast< uint >( dataset.size() * 3.0/4.0 - 1 + 0.5 ) ] ) / d_2_0;
+        Q3 = add( dataset[ static_cast< uint >( dataset.size() * 3.0/4.0 + 0.5 ) ], dataset[ static_cast< uint >( dataset.size() * 3.0/4.0 - 1 + 0.5 ) ] ) / d_2_0;
 
     diff = Q3-Q1;
     diff *= diffMult;
@@ -296,7 +306,7 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear
     uint begg = 0;
     for( begg = dataset.size() - 1; ; begg--) //dataset.size -1 == dataser.end
     {
-        if( higher( dataset[ begg ], upLim ))
+        if( higher( cast_arithm_arg( dataset[ begg ] ), upLim ))
             continue;
         else
             break;
@@ -305,7 +315,7 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear
     uint endd = 0;
     for(endd = 0; ; endd++ )
     {
-        if( less( dataset[ endd ], downLim ))
+        if( less( cast_arithm_arg( dataset[ endd ] ), downLim ))
             continue;
         else
             break;

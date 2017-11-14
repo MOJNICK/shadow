@@ -34,7 +34,9 @@
 	private:
 		static double baseLevel; //temporary workaround ..?
 		double saturation();
+		static double saturation_cast( ColorStruct* const cs );
 		double HUE();
+		static double HUE_cast( ColorStruct* const cs );
 	};
 
 
@@ -70,13 +72,14 @@
 			static void 
 			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });
 
-		template< class TYPE, class Compare, class BaseArithm >
+		template< class TYPE, class Compare, class BaseArithm, class Cast >
 			static void
 			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both,
 						Compare less = []( TYPE& a, TYPE& b ){ return a < b; },
 						Compare higher = []( TYPE& a, TYPE& b ){ return a > b; },
 						BaseArithm add = []( TYPE& a, TYPE& b ){ return a + b; },
-						BaseArithm subtract = []( TYPE& a, TYPE& b ){ return a - b; }
+						BaseArithm subtract = []( TYPE& a, TYPE& b ){ return a - b; },
+						Cast cast_arithm_arg = [](TYPE& a){ return a; }
 					)
 	};
 #endif
