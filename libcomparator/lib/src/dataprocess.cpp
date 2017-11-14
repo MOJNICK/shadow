@@ -276,35 +276,35 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
 	}
 }
 
-template< class TYPE, class Compare, class BaseArithm, class Cast >
+template< class TYPE, class Compare, class BaseArithm, template< class TYPE2 > class Cast >
 void
-DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher, BaseArithm add, BaseArithm subtract, Cast cast_arithm_arg )
+DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher, BaseArithm add, BaseArithm subtract, Cast<TYPE2> cast_arithm_arg )
 {
-    TYPE median( 0 );
-    TYPE Q1( 0 );
-    TYPE Q3( 0 );
-    TYPE diff( 0 );
-    TYPE downLim( 0 );
-    TYPE upLim( 0 );
+    TYPE2 median( 0 );
+    TYPE2 Q1( 0 );
+    TYPE2 Q3( 0 );
+    TYPE2 diff( 0 );
+    TYPE2 downLim( 0 );
+    TYPE2 upLim( 0 );
     double const d_2_0 = 2.0;
     std::sort( dataset.begin(), dataset.end(), less );
 
     if( ( dataset.size() % 2 ) == 0 )
-        median = ( dataset )[ dataset.size() / 2 ];
+        median = cast_arithm_arg( dataset[ dataset.size() / 2 ] );
     else
         median = add( dataset[ static_cast< uint >( dataset.size() / d_2_0 ) ], dataset[ static_cast< uint >( dataset.size() / d_2_0 - 1.0 + 0.5 ) ] ) / d_2_0;
 
     if( ( dataset.size() % 4 ) == 0 )
-        Q1 = dataset[ dataset.size() / 4 ];
+        Q1 = cast_arithm_arg( dataset[ dataset.size() / 4 ] );
     else
         Q1 = add( dataset[ static_cast< uint >( dataset.size() / 4.0 + 0.5 ) ], dataset[ static_cast< uint >( dataset.size() / 4.0 - 1 + 0.5 ) ] ) / d_2_0;
 
     if( ( ( dataset.size() * 3 ) % 4 ) == 0 )
-        Q3 = dataset[ dataset.size() * 3 / 4 ];
+        Q3 = cast_arithm_arg( dataset[ dataset.size() * 3 / 4 ] );
     else
         Q3 = add( dataset[ static_cast< uint >( dataset.size() * 3.0/4.0 + 0.5 ) ], dataset[ static_cast< uint >( dataset.size() * 3.0/4.0 - 1 + 0.5 ) ] ) / d_2_0;
 
-    diff = Q3-Q1;
+    diff = Q3 - Q1;
     diff *= diffMult;
     downLim = Q1 - diff;
     upLim = Q3 + diff;
