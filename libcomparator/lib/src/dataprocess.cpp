@@ -83,12 +83,12 @@ bool higher_HUE( ColorStruct & first, ColorStruct & second )
 
 double ColorStruct::saturation()
 {
-	return saturation_cast( this );
+	return ColorStruct::saturation_cast( *this );
 }
 
-double ColorStruct::saturation_cast( ColorStruct* const cs )
+double ColorStruct::saturation_cast( ColorStruct const & cs )
 {
-	double* color = cs->color;
+	double const * color = cs.color;
 	double max = *std::max_element( color, color + channels);
 	double min = *std::min_element( color, color + channels);
 	
@@ -100,12 +100,12 @@ double ColorStruct::saturation_cast( ColorStruct* const cs )
 
 double ColorStruct::HUE()
 {
-	return HUE_cast( this );
+	return HUE_cast( *this );
 }
 
-double ColorStruct::HUE_cast( ColorStruct* const cs )
+double ColorStruct::HUE_cast( ColorStruct const & cs )
 {
-	double* color = cs->color;
+	double const * color = cs.color;
 	double max = *std::max_element( color, color + channels);
 	double max_min = max - *std::min_element( color, color + channels);
     
@@ -139,7 +139,7 @@ void ColorBalance::balance( std::vector< IndexTransition >& positions )
 		element_balance( el );
 	});
 	
-	DataProcess::outliner( colorBalance, 1, both,
+	DataProcess::outliner<double>( colorBalance, 1, both,
 							ColorStruct::less_saturation,
 							ColorStruct::higher_saturation,
 							ColorStruct::add_saturation,
@@ -276,16 +276,16 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
 	}
 }
 
-template< class TYPE, class Compare, class BaseArithm, template< class TYPE2 > class Cast >
+template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >
 void
-DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher, BaseArithm add, BaseArithm subtract, Cast<TYPE2> cast_arithm_arg )
+DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher, BaseArithm add, BaseArithm subtract, Cast cast_arithm_arg )
 {
-    TYPE2 median( 0 );
-    TYPE2 Q1( 0 );
-    TYPE2 Q3( 0 );
-    TYPE2 diff( 0 );
-    TYPE2 downLim( 0 );
-    TYPE2 upLim( 0 );
+    TypeIn median( 0 );
+    TypeIn Q1( 0 );
+    TypeIn Q3( 0 );
+    TypeIn diff( 0 );
+    TypeIn downLim( 0 );
+    TypeIn upLim( 0 );
     double const d_2_0 = 2.0;
     std::sort( dataset.begin(), dataset.end(), less );
 

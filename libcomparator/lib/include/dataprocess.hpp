@@ -34,10 +34,9 @@
 	private:
 		static double baseLevel; //temporary workaround ..?
 		double saturation();
-		template< TYPE >
-		static TYPE saturation_cast( ColorStruct* const cs );
+		static double saturation_cast( ColorStruct const & cs );
 		double HUE();
-		static double HUE_cast( ColorStruct* const cs );
+		static double HUE_cast( ColorStruct const & cs );
 	};
 
 
@@ -69,19 +68,18 @@
 		DataProcess();
 		static void concatenate_HV( std::vector< IndexTransition >& );
 		static double hue_base_level( std::vector< ColorStruct > colorBalance );
-		template< class TYPE, class Compare >
+		/*template< class TYPE, class Compare >
 			static void 
-			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });
+			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });*/
 
-		template< class TYPE, class Compare, class BaseArithm, template< class TYPE2 > class Cast >
+		template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >
 			static void
 			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both,
 						Compare less = []( TYPE& a, TYPE& b ){ return a < b; },
 						Compare higher = []( TYPE& a, TYPE& b ){ return a > b; },
 						BaseArithm add = []( TYPE& a, TYPE& b ){ return a + b; },
 						BaseArithm subtract = []( TYPE& a, TYPE& b ){ return a - b; },
-						template< TYPE2 >
-						Cast cast_arithm_arg = [](TYPE& a)->TYPE2{ return a; }
+						Cast cast_arithm_arg = [](TYPE& a)->TypeIn{ return static_cast<TypeIn>(a); }
 					);
 	};
 #endif
