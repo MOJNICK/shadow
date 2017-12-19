@@ -313,7 +313,7 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear
     uint begg = 0;
     for( begg = dataset.size() - 1; ; begg--) //dataset.size -1 == dataser.end
     {
-        if( higher( cast_arithm_arg( dataset[ begg ] ), upLim ))
+        if( cast_arithm_arg( dataset[ begg ] ) > upLim )
             continue;
         else
             break;
@@ -322,7 +322,7 @@ DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear
     uint endd = 0;
     for(endd = 0; ; endd++ )
     {
-        if( less( cast_arithm_arg( dataset[ endd ] ), downLim ))
+        if( cast_arithm_arg( dataset[ endd ] ) < downLim )
             continue;
         else
             break;
