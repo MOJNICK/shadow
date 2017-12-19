@@ -13,5 +13,6 @@ cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D PYTHON2_
 cd shadow
 cmake ./libcomparator -DWITH_TESTS=ON -DTEST_PRIVATE_PART=ON
 
-./libcomparator/test/execute/execute 
+./libcomparator/test/execute/execute
+
 ./libcomparator/test/unit/testcomparator
