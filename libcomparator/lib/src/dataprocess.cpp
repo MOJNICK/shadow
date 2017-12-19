@@ -141,7 +141,6 @@ void ColorBalance::balance( std::vector< IndexTransition >& positions )
 	
 	DataProcess::outliner<double>( colorBalance, 1, both,
 							ColorStruct::less_saturation,
-							ColorStruct::higher_saturation,
 							ColorStruct::add_saturation,
 							ColorStruct::subtract_saturation,
 							ColorStruct::saturation_cast );
@@ -278,7 +277,7 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
 
 template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >
 void
-DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, Compare higher, BaseArithm add, BaseArithm subtract, Cast cast_arithm_arg )
+DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, BaseArithm add, BaseArithm subtract, Cast cast_arithm_arg )
 {
     TypeIn median( 0 );
     TypeIn Q1( 0 );
