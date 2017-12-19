@@ -76,6 +76,76 @@ TEST(ComparatorLibDataProcessSuite, ConcatenateHV)
   ConcatenateHV.safe_run();
 }
 
+class ColorStructsaturation : public cvtest::BaseTest
+{
+public:
+protected:
+  void run(int)
+  {
+    ColorStruct::baseLevel = 0;
+    ColorStruct cs{ 0, 0, 0};
+    ASSERT_DOUBLE_EQ( 0.0, cs.saturation() );
+
+    cs = { 10, 10, 10};
+    ASSERT_DOUBLE_EQ( 0.0, cs.saturation() );
+
+    cs = { 20, 0, 0};
+    ASSERT_DOUBLE_EQ( 1, cs.saturation() );
+
+    cs = { 0, 13, 0};
+    ASSERT_DOUBLE_EQ( 1, cs.saturation() );
+
+    cs = { 0, 0, 10};
+    ASSERT_DOUBLE_EQ( 1, cs.saturation() );
+
+    cs = { 0, 10, 10};
+    ASSERT_DOUBLE_EQ( 1, cs.saturation() );
+
+    cs = { 5, 10, 10};
+    ASSERT_DOUBLE_EQ( 0.5, cs.saturation() );
+  }
+};
+TEST(ColorStructSuite, ColorStructsaturation)
+{
+  ColorStructsaturation colorStructsaturation;
+  colorStructsaturation.safe_run();
+}
+
+class ColorStructHUE : public cvtest::BaseTest
+{
+public:
+protected:
+  void run(int)
+  {
+    ColorStruct::baseLevel = 0;
+    ColorStruct cs{ 0, 0, 0};
+    ASSERT_DOUBLE_EQ( 0.0, cs.HUE() );
+
+    cs = { 10, 10, 10};
+    ASSERT_DOUBLE_EQ( 0.0, cs.HUE() );
+
+    cs = { 20, 0, 0};
+    ASSERT_DOUBLE_EQ( -120.0, cs.HUE() );
+
+    cs = { 0, 13, 0};
+    ASSERT_DOUBLE_EQ( 120.0, cs.HUE() );
+
+    cs = { 0, 0, 10};
+    ASSERT_DOUBLE_EQ( 0.0, cs.HUE() );
+
+    cs = { 0, 10, 10};
+    ASSERT_DOUBLE_EQ( 60, cs.HUE() );
+
+    cs = { 5, 10, 10};
+    ASSERT_DOUBLE_EQ( 60, cs.HUE() );
+  }
+};
+TEST(ColorStructSuite, ColorStructHUE)
+{
+  ColorStructHUE colorStructHUE;
+  colorStructHUE.safe_run();
+}
+
 class ColorBalanceTestMethods : public cvtest::BaseTest
 {
 public:
@@ -100,6 +170,7 @@ protected:
     TYPE acceptanceLevel = 1;
     uint distance = 1;
     ColorBalance colorBalance(cv::Mat(), acceptanceLevel, distance);
+    //balance TBD
   }
 };
 TEST(ColorBalanceSuite, ColorBalanceBalance)
@@ -154,13 +225,33 @@ TEST(ColorBalanceSuite, ColorBalanceBalance)
       colorBalance.element_balance( indexTransition );
       compareColorBalance( expectedBalance, colorBalance.getColorBalance() );
 
-      colorBalance.clear_balance();
       indexTransition = IndexTransition{ 3, 6, biLUp };
       mat( 3, 6 ) = 30; mat( 3, 7 ) = 10; mat( 3, 8 ) = 20;
       mat( 2, 3 ) = 120; mat( 2, 4 ) = 120; mat( 2, 5 ) = 120;
-      expectedBalance = { 4.0, 12.0, 6.0 };
       colorBalance.element_balance( indexTransition );
-      compareColorBalance( expectedBalance, colorBalance.getColorBalance() );
+      expectedBalance = { 1/4.0, 1/12.0, 1/6.0 };
+      compareColorBalance( expectedBalance, colorBalance.getColorBalance( 0 ) );
+      expectedBalance = { 4.0, 12.0, 6.0 };
+      compareColorBalance( expectedBalance, colorBalance.getColorBalance( 1 ) );
+
+      indexTransition = IndexTransition{ 0, 0, biRDw };
+      mat( 0, 0 ) = 30; mat( 0, 1 ) = 10; mat( 0, 2 ) = 20;
+      mat( 1, 3 ) = 120; mat( 1, 4 ) = 120; mat( 1, 5 ) = 120;
+      colorBalance.element_balance( indexTransition );
+      expectedBalance = { 1/4.0, 1/12.0, 1/6.0 };
+      compareColorBalance( expectedBalance, colorBalance.getColorBalance( 0 ) );
+      expectedBalance = { 4.0, 12.0, 6.0 };
+      compareColorBalance( expectedBalance, colorBalance.getColorBalance( 1 ) );
+      expectedBalance = { 4.0, 12.0, 6.0};
+      compareColorBalance( expectedBalance, colorBalance.getColorBalance( 2 ) );
+
+      colorBalance.clear_balance();
+      indexTransition = IndexTransition{ 0, 0, biRDw };
+      mat( 0, 0 ) = 30; mat( 0, 1 ) = 10; mat( 0, 2 ) = 20;
+      mat( 1, 3 ) = 120; mat( 1, 4 ) = 120; mat( 1, 5 ) = 120;
+      expectedBalance = { 4.0, 12.0, 6.0};
+      colorBalance.element_balance( indexTransition );
+      compareColorBalance( expectedBalance, colorBalance.getColorBalance( 0 ) );
     }
   };
   TEST(ColorBalancePrivateSuite, ColorBalanceElementBalance)
