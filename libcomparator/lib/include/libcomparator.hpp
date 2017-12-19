@@ -56,6 +56,8 @@
 			unsigned int col;
 			Transition transition;
 
+			IndexTransition(IndexTransition const & indexTransition): row{indexTransition.row}, col{indexTransition.col}, transition{indexTransition.transition}{}
+
 			bool same_position( IndexTransition& b )
 			{
 				return ( ( row == b.row ) && ( col == b.col ) ) ? true : false;
