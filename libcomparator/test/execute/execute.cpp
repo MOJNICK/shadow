@@ -9,7 +9,7 @@
 int main( int argc, char** argv )
 {
 	cv::Mat image;
-    image = cv::imread("/home/szozda/Downloads/reference_image2.jpg", CV_LOAD_IMAGE_COLOR);   // Read the file "/Downloads/reference_image.jpg"
+    image = cv::imread("/home/szozda/Downloads/circle.png", CV_LOAD_IMAGE_COLOR);   // Read the file "/Downloads/reference_image.jpg"
 
 
     if(! image.data )                              // Check for invalid input
@@ -18,7 +18,7 @@ int main( int argc, char** argv )
         return -1;
     }
 
-    double factor = 0.25;
+    double factor = 1;//0.25;
     cv::resize(image, image, cv::Size(), factor, factor);
 
     TYPE acceptanceLevel = 50;
@@ -44,6 +44,19 @@ int main( int argc, char** argv )
 	{
 		std::cout<<"notcontionuous\n";
 	}
+    cv::waitKey(0);                                          // Wait for a keystroke in the window
+
+    cv::Mat blackImage(image.rows, image.cols, CV_8UC3, cv::Scalar(0,0,0));
+    for_each(result.begin(), result.end(), [&blackImage](auto el){
+        blackImage.data[el.index( blackImage )] = 255;
+        blackImage.data[el.index( blackImage ) + 1] = 0; 
+        blackImage.data[el.index( blackImage ) + 2] = 255;
+    });
+    
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );// Create a window for display.
+    cv::imshow( "Display window", blackImage );                   // Show our image inside it.
+    
+
     cv::waitKey(0);                                          // Wait for a keystroke in the window
     return 0;
 }
