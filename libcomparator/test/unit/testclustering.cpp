@@ -49,9 +49,9 @@ protected:
     void run(int)
     {
         std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
-        std::vector<IndexTransitionCluster> expected{ IndexTransition{1, 2, lToR}, IndexTransition{2, 3, rToL}, IndexTransition{3, 4, rToL},
-                                                      IndexTransition{4, 2, lToR}, IndexTransition{5, 7, rToL}, IndexTransition{6, 8, rToL},
-                                                      IndexTransition{8, 8, rToL}, IndexTransition{9, 2, lToR}, IndexTransition{11, 2, lToR}, IndexTransition{12, 2, lToR}};
+        std::vector<IndexTransitionCluster> expected{ {1, 2, lToR, 0}, {2, 3, rToL, 0}, {3, 4, rToL, 0},
+                                                      {4, 2, lToR, 0}, {5, 7, rToL, 0}, {6, 8, rToL, 0},
+                                                      {8, 8, rToL, 0}, {9, 2, lToR, 0}, {11, 2, lToR, 0}, {12, 2, lToR, 0}};
 
         ASSERT_EQ(expected, actual);
 
@@ -72,14 +72,19 @@ protected:
     void run(int)
     {
         std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
-        std::vector<IndexTransitionCluster> expected{ IndexTransition{1, 2, lToR}, IndexTransition{2, 3, rToL}, IndexTransition{3, 4, rToL},
-                                                      IndexTransition{4, 2, lToR}, IndexTransition{5, 7, rToL}, IndexTransition{6, 8, rToL},
-                                                      IndexTransition{8, 8, rToL}, IndexTransition{9, 2, lToR}, IndexTransition{11, 2, lToR}, IndexTransition{12, 2, lToR}};
+        for(int i = 1; i < 4; ++ i)
+        {
+            actual[i].clusterNumber = 1;
+        }
+        for(int i = 6; i < 9; ++ i)
+        {
+            actual[i].clusterNumber = 6;
+        }
+
+        std::vector<IndexTransitionCluster> expected{   {2, 3, rToL, 1}, {3, 4, rToL, 1}, {4, 2, lToR, 1},
+                                                        {8, 8, rToL, 6}, {9, 2, lToR, 6}, {11, 2, lToR, 6}  };
 
         ASSERT_EQ(expected, actual);
-
-        /*std::vector<IndexTransitionCluster> expected{{1, 2, lToR, 0}, {2, 3, rToL, 0}, {3, 4, rToL, 0}, {4, 2, lToR, 0}, {5, 7, rToL, 0},
-                                                    {6, 8, rToL, 0}, {8, 8, rToL, 0}, {9, 2, lToR, 0}, {11, 2, lToR, 0}, {12, 2, lToR, 0}};*/
     }
 };
 TEST(ClusteringSuite, ClusteringSmallAndNoise)
