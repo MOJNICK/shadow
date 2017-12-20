@@ -32,13 +32,21 @@ public:
         int siz1;
         double eps;
         uint minPts;
-        std::vector<IndexTransition> vIndexTransition;
+        std::vector<IndexTransition> const vIndexTransition;
         Clustering objectClustering;
     TestClustering(): siz0{10}, siz1{2}, eps{2.0}, minPts{3}, vIndexTransition{ {1, 2, lToR}, {4, 2, lToR}, {11, 2, lToR},
                       {12, 2, lToR}, {9, 2, lToR}, {6, 8, rToL}, {8, 8, rToL}, {2, 3, rToL}, {3, 4, rToL}, {5, 7, rToL} },
                       objectClustering( vIndexTransition, Distance::distance_fast, eps, minPts)
     {
         
+    }
+    void SetUp()
+    {
+        siz0 = 10;
+        siz1 =2;
+        eps = 2.0;
+        minPts = 3;     
+        objectClustering = Clustering( vIndexTransition, Distance::distance_fast, eps, minPts);
     }
 };
 
@@ -49,14 +57,11 @@ protected:
     void run(int)
     {
         std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
-        std::vector<IndexTransitionCluster> expected{ {1, 2, lToR, 0}, {2, 3, rToL, 0}, {3, 4, rToL, 0},
-                                                      {4, 2, lToR, 0}, {5, 7, rToL, 0}, {6, 8, rToL, 0},
-                                                      {8, 8, rToL, 0}, {9, 2, lToR, 0}, {11, 2, lToR, 0}, {12, 2, lToR, 0}};
+        std::vector<IndexTransitionCluster> expected{   {1, 2, lToR, 0}, {2, 3, rToL, 0}, {3, 4, rToL, 0},
+                                                        {4, 2, lToR, 0}, {5, 7, rToL, 0}, {6, 8, rToL, 0},
+                                                        {8, 8, rToL, 0}, {9, 2, lToR, 0}, {11, 2, lToR, 0}, {12, 2, lToR, 0}  };
 
         ASSERT_EQ(expected, actual);
-
-        /*std::vector<IndexTransitionCluster> expected{{1, 2, lToR, 0}, {2, 3, rToL, 0}, {3, 4, rToL, 0}, {4, 2, lToR, 0}, {5, 7, rToL, 0},
-                                                    {6, 8, rToL, 0}, {8, 8, rToL, 0}, {9, 2, lToR, 0}, {11, 2, lToR, 0}, {12, 2, lToR, 0}};*/
     }
 };
 TEST(ClusteringSuite, ClusteringConstructor)
@@ -71,6 +76,7 @@ public:
 protected:
     void run(int)
     {
+        SetUp();
         std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
         for(int i = 1; i < 4; ++ i)
         {
@@ -80,10 +86,25 @@ protected:
         {
             actual[i].clusterNumber = 6;
         }
+        objectClustering.remove_small_clusters_and_noise();
 
         std::vector<IndexTransitionCluster> expected{   {2, 3, rToL, 1}, {3, 4, rToL, 1}, {4, 2, lToR, 1},
                                                         {8, 8, rToL, 6}, {9, 2, lToR, 6}, {11, 2, lToR, 6}  };
+        ASSERT_EQ(expected, actual);
 
+        
+        SetUp();
+        for(int i = 1; i < 4; ++ i)
+        {
+            actual[i].clusterNumber = 1;
+        }
+        for(int i = 7; i < 9; ++ i)
+        {
+            actual[i].clusterNumber = 6;
+        }
+        objectClustering.remove_small_clusters_and_noise();
+
+        expected = {   {2, 3, rToL, 1}, {3, 4, rToL, 1}, {4, 2, lToR, 1}   };
         ASSERT_EQ(expected, actual);
     }
 };
@@ -95,21 +116,6 @@ TEST(ClusteringSuite, ClusteringSmallAndNoise)
 
 /*
 
-
-
-    def test_remove_small_clusters_and_noise_first(self):
-        self.objectClustering.clusters[1:4,2] = 1
-        self.objectClustering.clusters[6:9, 2] = 6
-        self.objectClustering.remove_small_clusters_and_noise()
-        np.testing.assert_equal(self.objectClustering.clusters, np.array([[2, 3, 1], [3, 4, 1], [4, 2, 1],
-                                                                         [8, 8, 6], [9, 2, 6], [11, 2, 6]], dtype=np.int), 'not removing correctly')
-
-
-    def test_remove_small_clusters_and_noise_second(self):
-        self.objectClustering.clusters[1:4,2] = 1
-        self.objectClustering.clusters[7:9, 2] = 6
-        self.objectClustering.remove_small_clusters_and_noise()
-        np.testing.assert_equal(self.objectClustering.clusters, np.array([[2, 3, 1], [3, 4, 1], [4, 2, 1]], dtype=np.int), 'not removing correctly')
 
 
     def test_remove_small_clusters_and_noise_third(self):
@@ -180,4 +186,18 @@ TEST(ClusteringSuite, ClusteringSmallAndNoise)
         self.assertEqual(self.objectClustering.clusters.shape, (self.siz0, self.siz1 + 1), 'missed size')
         np.testing.assert_equal(self.objectClustering.clusters, np.array([[1, 2, 0], [2, 3, 0], [3, 4, 0], [4, 2, 0], [5, 7, 0],
                                                                           [6, 8, 0], [8, 8, 0], [9, 2, 0], [11, 2, 0], [12, 2, 0]], dtype=np.int), 'not sorted or missing cluster number')
+
+
+    def test_remove_small_clusters_and_noise_first(self):
+        self.objectClustering.clusters[1:4,2] = 1
+        self.objectClustering.clusters[6:9, 2] = 6
+        self.objectClustering.remove_small_clusters_and_noise()
+        np.testing.assert_equal(self.objectClustering.clusters, np.array([[2, 3, 1], [3, 4, 1], [4, 2, 1],
+                                                                         [8, 8, 6], [9, 2, 6], [11, 2, 6]], dtype=np.int), 'not removing correctly')
+
+    def test_remove_small_clusters_and_noise_second(self):
+        self.objectClustering.clusters[1:4,2] = 1
+        self.objectClustering.clusters[7:9, 2] = 6
+        self.objectClustering.remove_small_clusters_and_noise()
+        np.testing.assert_equal(self.objectClustering.clusters, np.array([[2, 3, 1], [3, 4, 1], [4, 2, 1]], dtype=np.int), 'not removing correctly')
 */
