@@ -23,21 +23,22 @@
         Clustering( npArray, distance_function, eps, minPts );
         int create_new_cluster();
         int get_cluster_number();
-        int points_clustering( check_point_zone_function);
-        void check_point_zone_linear( indexX );
+        void points_clustering( void (*check_point_zone_function)(int) );
+        void check_point_zone_linear( int indexX );
         void remove_small_clusters_and_noise();
     private:
-        int nowClusterNumber;
+        uint nowClusterNumber;
         double eps;
         uint minPts;
-        double (*distance_function)(cv::Point_<uint>, cv::Point_<uint>);
+        IndexTransitionClusterVec clusters;
+        double (*distance_function)( IndexTransitionCluster const & , IndexTransitionCluster const & );
     }
 
 
     class Distance
     {
     public:
-        static double distance_fast(cv::Point pixelA, cv::Point pixelB);        
-        static double distance_slow(cv::Point pixelA, cv::Point pixelB);
+        static double distance_fast(IndexTransitionCluster const & pixelA, IndexTransitionCluster const & pixelB);
+        static double distance_slow(IndexTransitionCluster const & pixelA, IndexTransitionCluster const & pixelB);
     }
 #endif
