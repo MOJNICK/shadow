@@ -136,6 +136,28 @@ TEST(ClusteringSuite, ClusteringSmallAndNoise)
   clusteringSmallAndNoise.safe_run();
 }
 
+class ClusteringPointZoneLinear: public TestClustering
+{
+public:
+protected:
+    void run(int)
+    {
+        SetUp();
+        std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
+        objectClustering.check_point_zone_linear(2);
+
+        std::vector<IndexTransitionCluster> expected{   {1, 2, lToR, 0}, {2, 3, rToL, 1}, {3, 4, rToL, 1},
+                                                        {4, 2, lToR, 0}, {5, 7, rToL, 0}, {6, 8, rToL, 0},
+                                                        {8, 8, rToL, 0}, {9, 2, lToR, 0}, {11, 2, lToR, 0}, {12, 2, lToR, 0}  };
+        ASSERT_EQ(expected, actual);
+    }
+};
+TEST(ClusteringSuite, ClusteringPointZoneLinear)
+{
+  ClusteringPointZoneLinear clusteringPointZoneLinear;
+  clusteringPointZoneLinear.safe_run();
+}
+
 /*
     def test_point_zone_linear_first(self):
         self.objectClustering.check_point_zone_linear(2)
