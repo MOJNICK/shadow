@@ -21,7 +21,7 @@ protected:
   
   void compareIndexTransitionClusterVec( std::vector<IndexTransitionCluster> const & expected, std::vector<IndexTransitionCluster> const & actual )
   {
-      expected == actual;
+      ASSERT_EQ( expected, actual );
   }
 };
 
@@ -48,9 +48,16 @@ public:
 protected:
     void run(int)
     {
-     //   self.assertEqual(self.objectClustering.clusters.shape, (self.siz0, self.siz1 + 1), 'missed size')
-//        np.testing.assert_equal(objectClustering.vIndexTransitionCluster, np.array([[1, 2, 0], [2, 3, 0], [3, 4, 0], [4, 2, 0], [5, 7, 0],
-  //                                                                        [6, 8, 0], [8, 8, 0], [9, 2, 0], [11, 2, 0], [12, 2, 0]], dtype=np.int), 'not sorted or missing cluster number')
+
+        std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
+//        np.testing.assert_equal(objectClustering.vIndexTransitionCluster,
+        std::vector<IndexTransitionCluster> expected{ IndexTransition{1, 2, lToR}, IndexTransition{2, 3, rToL}, IndexTransition{3, 4, rToL},
+                                                      IndexTransition{4, 2, lToR}, IndexTransition{5, 7, rToL}, IndexTransition{6, 8, rToL},
+                                                      IndexTransition{8, 8, rToL}, IndexTransition{9, 2, lToR}, IndexTransition{11, 2, lToR}, IndexTransition{12, 2, lToR}};
+
+        /*std::vector<IndexTransitionCluster> expected{{1, 2, lToR, 0}, {2, 3, rToL, 0}, {3, 4, rToL, 0}, {4, 2, lToR, 0}, {5, 7, rToL, 0},
+                                                    {6, 8, rToL, 0}, {8, 8, rToL, 0}, {9, 2, lToR, 0}, {11, 2, lToR, 0}, {12, 2, lToR, 0}};*/
+        ASSERT_EQ(expected, actual);
     }
 };
 TEST(ClusteringSuite, ClusteringConstructor)
