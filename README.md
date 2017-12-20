@@ -11,7 +11,10 @@ installation:
 cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D PYTHON2_EXECUTABLE=/usr/bin/python2.7 -D PYTHON_INCLUDE_DIR=/usr/include/python2.7/ -D PYTHON_INCLUDE_DIR2=/usr/include/x86_64-linux-gnu/python2.7 -D PYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython2.7.so -D PYTHON2_NUMPY_INCLUDE_DIRS=/usr/lib/python2.7/dist-packages/numpy/core/include/ -D WITH_FFMPEG=ON ..
 
 cd shadow
-cmake ./libcomparator -DWITH_TESTS=ON -DTEST_PRIVATE_PART=ON
+cmake ./libcomparator -DWITH_TESTS=ON -DTEST_PRIVATE_PART=ON -DCMAKE_BUILD_TYPE=Debug
 
-./libcomparator/test/execute/execute 
+./libcomparator/test/execute/execute
+
 ./libcomparator/test/unit/testcomparator
+
+python -m unittest test.testClustering.TestClustering

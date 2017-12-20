@@ -1,0 +1,3 @@
+#ifndef IMAGEPROCESS_HPP
+	#define IMAGEPROCESS_HPP
+#endif

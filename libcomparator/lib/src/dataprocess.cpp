@@ -1,6 +1,6 @@
 #include "dataprocess.hpp"
 
-double const d0upLim = 0.00001;
+double const d0upLim = 0.00001;//hue 0 limit
 
 ColorStruct::ColorStruct()
 {
@@ -136,7 +136,7 @@ void ColorBalance::balance( std::vector< IndexTransition >& positions )
 {
 	std::for_each( positions.begin(), positions.end(), [ this ]( IndexTransition & el )
 	{
-		element_balance( el );
+		push_element_balance( el );
 	});
 	
 	DataProcess::outliner<double>( colorBalance, 1, both,
@@ -157,7 +157,7 @@ void ColorBalance::balance( std::vector< IndexTransition >& positions )
 	sumBalance /= colorBalance.size() * normalizer;
 }
 
-void ColorBalance::element_balance( IndexTransition const & shadow )
+void ColorBalance::push_element_balance( IndexTransition const & shadow )
 {
 	Transition const & shtransition = shadow.transition;
 	if( !is_valid( shadow.transition ) )

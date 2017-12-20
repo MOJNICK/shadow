@@ -57,7 +57,7 @@
 		TYPE acceptanceLevel;
 		std::vector< ColorStruct > colorBalance;
 
-		void element_balance( IndexTransition const & );
+		void push_element_balance( IndexTransition const & );
 		static bool is_valid( Transition const & );
 	};
 

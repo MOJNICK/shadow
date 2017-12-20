@@ -1,7 +1,7 @@
 #include "libcomparator.hpp"
 #include "dataprocess.hpp"
 
-double const prealocate = 0.01;
+double const prealocate = 0.01;//vector reserve
 
 
 	template <class TYPE> IterateProcess<TYPE>::IterateProcess(cv::Mat& img, TYPE acceptanceLevel, double lightThreshold, double colorThreshold, double colorBalance[]) : classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
