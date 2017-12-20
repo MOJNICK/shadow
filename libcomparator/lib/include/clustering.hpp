@@ -11,7 +11,6 @@
         IndexTransitionCluster( uint row, uint col, Transition transition, uint clusterNumber ): IndexTransition{ row, col, transition}, clusterNumber{clusterNumber}{}
         #ifdef WITH_TESTS
             #ifdef TEST_PRIVATE_PART
-            uint getCluster();
             bool operator ==(const IndexTransitionCluster &itc) const
             {
                 if( static_cast<IndexTransition const &>(*this) == static_cast<IndexTransition const &>(itc) && this->clusterNumber == itc.clusterNumber )

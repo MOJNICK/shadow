@@ -3,11 +3,6 @@
 Clustering::Clustering( std::vector<IndexTransition> vIndexTransition, double (*distance_function)(IndexTransitionCluster const &, IndexTransitionCluster const &), double eps, uint minPts):
 eps{eps}, minPts{minPts}, nowClusterNumber{0}, distance_function{distance_function}
 {
-    //""npArray with only possitive detection points npArray=[[pixelX, pixelY]]
-    //dist_function must be a vector norm
-    //eps - maximum point to point distance to belong to cluster
-    //minPts minimum points amount to make new cluster
-    //npArray = npArray[npArray[:, 0].argsort()];  // sort by first column
     std::for_each(vIndexTransition.begin(), vIndexTransition.end(), [ this ]( IndexTransition const & indexTransition ){
         vIndexTransitionCluster.push_back( IndexTransitionCluster( indexTransition ) );
     });
@@ -37,12 +32,8 @@ uint Clustering::get_cluster_number()
 
 
 void Clustering::points_clustering( void (Clustering::*check_point_zone_function)(int) )
-//    #   returns npArray: [pixelX, pixelY, clusterNumber]
 {
-//    if (self.clusters.shape[1] != 3)
-//        throw ValueError("Passed array is not the right shape")
-
-    for( int indexX = 0; indexX < vIndexTransitionCluster.size(); ++indexX )// in xrange(self.clusters.shape[0]):
+    for( int indexX = 0; indexX < vIndexTransitionCluster.size(); ++indexX )
     {
         (this->*check_point_zone_function)(indexX);
     }
@@ -67,7 +58,7 @@ void Clustering::check_point_zone_linear( int indexX )
     double minX = point.row - eps;
     double maxX = point.row + eps;
 
-    for( int i = 0; i < vIndexTransitionCluster.size(); ++i )//:#all elements
+    for( int i = 0; i < vIndexTransitionCluster.size(); ++i )
     {
         if( vIndexTransitionCluster[i].row < minX)
             continue;
@@ -99,7 +90,7 @@ void Clustering::remove_small_clusters_and_noise()
         {
             return false;
         }
-    });//clusters[:,2])
+    });
     uint maxClusterNumber = maxClusterNumberIterator->clusterNumber;
 
     std::vector<uint>clusterOccurences(maxClusterNumber + 1, 0);
