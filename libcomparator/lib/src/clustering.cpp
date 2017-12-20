@@ -122,13 +122,13 @@ void Clustering::remove_small_clusters_and_noise()
     }), vIndexTransitionCluster.end());
 }
 
-static double distance_fast( IndexTransitionCluster const & pixelA, IndexTransitionCluster const & pixelB )
+double Distance::distance_fast( IndexTransitionCluster const & pixelA, IndexTransitionCluster const & pixelB )
 {
     return abs( pixelA.row - pixelB.row ) + abs( pixelA.col - pixelB.col );
 }
 
 
-static double distance_slow( IndexTransitionCluster const & pixelA, IndexTransitionCluster const & pixelB )
+double Distance::distance_slow( IndexTransitionCluster const & pixelA, IndexTransitionCluster const & pixelB )
 {
     return sqrt( pow( ( pixelA.row - pixelB.row ), 2.0 ) + pow( ( pixelA.col - pixelB.col ), 2.0 ) );
 }

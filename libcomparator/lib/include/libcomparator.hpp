@@ -57,6 +57,16 @@
 			Transition transition;
 
 			//IndexTransition(IndexTransition const & indexTransition): row{indexTransition.row}, col{indexTransition.col}, transition{indexTransition.transition}{}
+			bool operator ==( IndexTransition const &it) const
+			{
+				if( this->row == it.row && this->col == it.col && this->transition == it.transition )
+				{
+					return true;
+				}
+				{
+					return false;
+				}
+			}
 
 			bool same_position( IndexTransition& b )
 			{

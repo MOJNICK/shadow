@@ -5,8 +5,20 @@
     
     struct IndexTransitionCluster: public IndexTransition
     {
+    public:
         IndexTransitionCluster( IndexTransition indexTransition ): IndexTransition( indexTransition ), clusterNumber{0}{}
         uint getCluster();
+        bool operator ==(const IndexTransitionCluster &itc) const
+        {
+            if( static_cast<IndexTransition const &>(*this) == static_cast<IndexTransition const &>(itc) && this->clusterNumber == itc.clusterNumber )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     private:
         uint clusterNumber;
     };

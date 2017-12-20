@@ -11,41 +11,54 @@ protected:
     ASSERT_TRUE( expected.same_position( actual ) );
     ASSERT_EQ(expected.transition, actual.transition);
   }
+  void compareIndexTransitionCluster( IndexTransitionCluster const & expected, IndexTransitionCluster const & actual )
+  {
+    ASSERT_EQ(expected.row, actual.row);
+    ASSERT_EQ(expected.col, actual.col);
+    ASSERT_EQ(expected.transition, actual.transition);
+    ASSERT_EQ(expected.clusterNumber, actual.clusterNumber);
+  }
+  
+  void compareIndexTransitionClusterVec( std::vector<IndexTransitionCluster> const & expected, std::vector<IndexTransitionCluster> const & actual )
+  {
+      expected == actual;
+  }
 };
-/*
-class ColorStructsaturation : public cvtest::BaseTest
+
+class TestClustering : public TestClusteringMethods
+{
+public:
+        int siz0;
+        int siz1;
+        double eps;
+        uint minPts;
+        std::vector<IndexTransition> vIndexTransition;
+        Clustering objectClustering;
+    TestClustering(): siz0{10}, siz1{2}, eps{2.0}, minPts{3}, vIndexTransition{ {1, 2, lToR}, {4, 2, lToR}, {11, 2, lToR},
+                      {12, 2, lToR}, {9, 2, lToR}, {6, 8, rToL}, {8, 8, rToL}, {2, 3, rToL}, {3, 4, rToL}, {5, 7, rToL} },
+                      objectClustering( vIndexTransition, Distance::distance_fast, eps, minPts)
+    {
+        
+    }
+};
+
+class ClusteringConstructor : public TestClustering
 {
 public:
 protected:
     void run(int)
     {
-        ColorStruct::baseLevel = 0;
-        ColorStruct cs{ 0, 0, 0};
-        ASSERT_DOUBLE_EQ( 0.0, cs.saturation() );
+     //   self.assertEqual(self.objectClustering.clusters.shape, (self.siz0, self.siz1 + 1), 'missed size')
+//        np.testing.assert_equal(objectClustering.vIndexTransitionCluster, np.array([[1, 2, 0], [2, 3, 0], [3, 4, 0], [4, 2, 0], [5, 7, 0],
+  //                                                                        [6, 8, 0], [8, 8, 0], [9, 2, 0], [11, 2, 0], [12, 2, 0]], dtype=np.int), 'not sorted or missing cluster number')
     }
 };
-TEST(ColorStructSuite, ColorStructsaturation)
+TEST(ClusteringSuite, ClusteringConstructor)
 {
-  ColorStructsaturation colorStructsaturation;
-  colorStructsaturation.safe_run();
+  ClusteringConstructor clusteringConstructor;
+  clusteringConstructor.safe_run();
 }
-*/
-class TestClustering : public TestClusteringMethods
-{
-    TestClustering()
-    {
-        int siz0 = 10;
-        int siz1 = 2;
-        std::vector<IndexTransition> vIndexTransition{ {1, 2, lToR}, {4, 2, lToR}, {11, 2, lToR}, {12, 2, lToR}, {9, 2, lToR}, 
-                                                        {6, 8, rToL}, {8, 8, rToL}, {2, 3, rToL}, {3, 4, rToL}, {5, 7, rToL} };
 
-        //self.npArray = np.array([[1, 2], [4, 2], [11, 2], [12, 2], [9, 2], [6, 8], [8, 8], [2, 3], [3, 4], [5, 7]],
-          //                      dtype=np.int)
-        double eps = 2;
-        uint minPts = 3;
-        Clustering objectClustering( vIndexTransition, Distance::distance_fast, eps, minPts);
-    }
-};
 /*
     def setUp(self):
         self.siz0 = 10
