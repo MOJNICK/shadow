@@ -89,13 +89,13 @@ double const prealocate = 0.01;//vector reserve
 	template <class TYPE> Transition Classifier<TYPE>::f_classifier()
 	{
 		Transition result = back;
-		if(brighter())
+		if(brighter())// pix0 > pix1
 		{
 			std::swap(pix0, pix1);//pix0 is now the dimmer
 			result = fwd;
 		}
 
-		correct_pix0();
+		correct_pix0();//correct ballance
 		if(light_distance() > lightThreshold)
 			if(color_distance() < colorThreshold)
 				return result;
@@ -121,7 +121,7 @@ double const prealocate = 0.01;//vector reserve
 
 	template <class TYPE> double Classifier<TYPE>::light_distance()//pix0 have to < pix1 and be corrected
 	{
-		std::for_each(pix0, pix0 + channels, [](TYPE& el){if(el == 0){el = 1;}});
+		std::for_each(pix0, pix0 + channels, [](TYPE& el){if(el == 0){el = 1;}});// 0 -> 1 division
 		lightDistance = static_cast<double>(pix1[0] + pix1[1] + pix1[2]) / static_cast<double>(pix0[0] + pix0[1] + pix0[2]);
 		return lightDistance;
 	}
