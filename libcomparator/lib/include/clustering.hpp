@@ -35,7 +35,7 @@
         Clustering( std::vector<IndexTransition> vIndexTransition, double (*distance_function)( IndexTransitionCluster const &, IndexTransitionCluster const & pixelA ), double eps, uint minPts);
         uint create_new_cluster();
         uint get_cluster_number();
-        void points_clustering( void (*check_point_zone_function)(int) );
+        void points_clustering( void (Clustering::*check_point_zone_function)(int) );
         void check_point_zone_linear( int indexX );
         void remove_small_clusters_and_noise();
     private:

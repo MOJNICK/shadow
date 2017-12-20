@@ -36,7 +36,7 @@ uint Clustering::get_cluster_number()
 }
 
 
-void Clustering::points_clustering( void (*check_point_zone_function)(int) )
+void Clustering::points_clustering( void (Clustering::*check_point_zone_function)(int) )
 //    #   returns npArray: [pixelX, pixelY, clusterNumber]
 {
 //    if (self.clusters.shape[1] != 3)
@@ -44,7 +44,7 @@ void Clustering::points_clustering( void (*check_point_zone_function)(int) )
 
     for( int indexX = 0; indexX < vIndexTransitionCluster.size(); ++indexX )// in xrange(self.clusters.shape[0]):
     {
-        check_point_zone_function(indexX);
+        (this->*check_point_zone_function)(indexX);
     }
 
     remove_small_clusters_and_noise();
