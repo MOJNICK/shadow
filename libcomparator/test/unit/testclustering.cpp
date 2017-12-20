@@ -106,6 +106,28 @@ protected:
 
         expected = {   {2, 3, rToL, 1}, {3, 4, rToL, 1}, {4, 2, lToR, 1}   };
         ASSERT_EQ(expected, actual);
+
+
+        SetUp();
+        objectClustering.minPts = 12;
+        for(int i = 1; i < 4; ++ i)
+        {
+            actual[i].clusterNumber = 1;
+        }
+        for(int i = 6; i < 9; ++ i)
+        {
+            actual[i].clusterNumber = 6;
+        }
+        objectClustering.remove_small_clusters_and_noise();
+
+        expected = { };
+        ASSERT_EQ(expected, actual);
+
+        SetUp();
+        objectClustering.minPts = 12;
+        objectClustering.remove_small_clusters_and_noise();
+        expected = { };
+        ASSERT_EQ(expected, actual);
     }
 };
 TEST(ClusteringSuite, ClusteringSmallAndNoise)
@@ -115,23 +137,6 @@ TEST(ClusteringSuite, ClusteringSmallAndNoise)
 }
 
 /*
-
-
-
-    def test_remove_small_clusters_and_noise_third(self):
-        self.objectClustering.minPts = 12
-        self.objectClustering.clusters[1:4,2] = 1
-        self.objectClustering.clusters[6:9, 2] = 6
-        self.objectClustering.remove_small_clusters_and_noise()
-        np.testing.assert_equal(self.objectClustering.clusters, np.empty([0, 3], dtype=np.int), 'problem with no big cluster')
-
-
-    def test_remove_small_clusters_and_noise_fourth(self):
-        self.objectClustering.minPts = 12
-        self.objectClustering.remove_small_clusters_and_noise()
-        np.testing.assert_equal(self.objectClustering.clusters, np.empty([0, 3], dtype=np.int), 'problem with no cluster')
-
-
     def test_point_zone_linear_first(self):
         self.objectClustering.check_point_zone_linear(2)
         np.testing.assert_equal(self.objectClustering.clusters, np.array([[1, 2, 0], [2, 3, 1], [3, 4, 1], [4, 2, 0], [5, 7, 0],
@@ -200,4 +205,15 @@ TEST(ClusteringSuite, ClusteringSmallAndNoise)
         self.objectClustering.clusters[7:9, 2] = 6
         self.objectClustering.remove_small_clusters_and_noise()
         np.testing.assert_equal(self.objectClustering.clusters, np.array([[2, 3, 1], [3, 4, 1], [4, 2, 1]], dtype=np.int), 'not removing correctly')
+    
+    def test_remove_small_clusters_and_noise_third(self):
+        self.objectClustering.minPts = 12
+        self.objectClustering.clusters[1:4,2] = 1
+        self.objectClustering.clusters[6:9, 2] = 6
+        self.objectClustering.remove_small_clusters_and_noise()
+        np.testing.assert_equal(self.objectClustering.clusters, np.empty([0, 3], dtype=np.int), 'problem with no big cluster')
+    def test_remove_small_clusters_and_noise_fourth(self):
+        self.objectClustering.minPts = 12
+        self.objectClustering.remove_small_clusters_and_noise()
+        np.testing.assert_equal(self.objectClustering.clusters, np.empty([0, 3], dtype=np.int), 'problem with no cluster')
 */
