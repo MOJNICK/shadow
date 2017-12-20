@@ -1,6 +1,6 @@
 #include "clustering.hpp"
 
-Clustering::Clustering( std::vector<IndexTransition> vIndexTransition, double (*distance_function)(cv::Point, cv::Point), double eps, uint minPts):
+Clustering::Clustering( std::vector<IndexTransition> vIndexTransition, double (*distance_function)(IndexTransitionCluster const &, IndexTransitionCluster const &), double eps, uint minPts):
 eps{eps}, minPts{minPts}, nowClusterNumber{0}
 {
     //""npArray with only possitive detection points npArray=[[pixelX, pixelY]]
