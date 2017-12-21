@@ -5,11 +5,22 @@
 #include "dataprocess.hpp"
 #include <iostream>
 
+void p_around(unsigned char* data, int before, int after)
+{
+    for(int i = -before; i < after; ++i )
+    {
+        if(i == 0)
+        {
+            std::cout << "MARKER";
+        }
+        std::cout<<data[i];
+    }
+}
 
 int main( int argc, char** argv )
 {
 	cv::Mat image;
-    image = cv::imread("/home/szozda/Downloads/reference_image2.jpg", CV_LOAD_IMAGE_COLOR);   // Read the file "/Downloads/reference_image.jpg"
+    image = cv::imread("/home/szozda/Downloads/refImg/circTst.png", CV_LOAD_IMAGE_COLOR);   // Read the file "/Downloads/reference_image.jpg"
 
 
     if(! image.data )                              // Check for invalid input
@@ -27,8 +38,8 @@ int main( int argc, char** argv )
 
     TYPE acceptanceLevel = 250;
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 0.3;
-    double colorThreshold = 0.01;
+    double lightThreshold = 1.0;
+    double colorThreshold = 100000;
     IterateProcess<TYPE> iterateProcess(image, acceptanceLevel, lightThreshold, colorThreshold, balance);
     auto result = iterateProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
@@ -40,7 +51,6 @@ int main( int argc, char** argv )
     		image.data[el.index( image ) + 1] = 0; 
     		image.data[el.index( image ) + 2] = 255;
     	});
-    	
 	    cv::imshow( "Display window", image );                   // Show our image inside it.
 	}
 	else
@@ -55,7 +65,6 @@ int main( int argc, char** argv )
         blackImage.data[el.index( blackImage ) + 1] = 0; 
         blackImage.data[el.index( blackImage ) + 2] = 255;
     });
-    
     cv::imshow( "Display window", blackImage );                   // Show our image inside it.
     cv::waitKey(0);                                          // Wait for a keystroke in the window
     return 0;
