@@ -3,6 +3,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "libcomparator.hpp"
 #include "dataprocess.hpp"
+#include "clustering.hpp"
 #include <iostream>
 
 void p_around(unsigned char* data, int before, int after)
@@ -17,13 +18,76 @@ void p_around(unsigned char* data, int before, int after)
     }
 }
 
+void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> const & result)
+{
+    std::vector<IndexTransitionCluster> textPoint(result);
+    sort( textPoint.begin(), textPoint.end(), [](auto el1, auto el2){
+        if(el1.getClusterNumber() < el2.getClusterNumber())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    } );
+    textPoint.erase( unique( textPoint.begin(), textPoint.end(), [](auto el1, auto el2){
+        if(el1.getClusterNumber() == el2.getClusterNumber())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    } ), textPoint.end() );
+    std::for_each(textPoint.begin(), textPoint.end(), [&image](auto el){
+        cv::putText(image, std::to_string(el.getClusterNumber()), cv::Point(el.col / 3, el.row ), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200,20,250), 1, 8, false);
+        std::cout<<el.getClusterNumber()<<" "<<el.row<<" "<<el.col<<"\n";
+    });
+    std::cout<< result.size()<< "\n";
+    std::cout<< textPoint.size()<< "\n";
+}
+
+void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & result)
+{
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Display window", image );                   
+    cv::waitKey(0);
+
+    if(image.isContinuous())
+    {
+        for_each(result.begin(), result.end(), [&image](auto el){
+            image.data[el.index( image )] = 255;
+            image.data[el.index( image ) + 1] = 0; 
+            image.data[el.index( image ) + 2] = 255;
+        });
+        draw_clusterNumber(image, result);
+        cv::imshow( "Display window", image );
+    }
+    else
+    {
+        std::cout<<"notcontionuous\n";
+        return;
+    }
+    cv::waitKey(0);
+
+    cv::Mat blackImage(image.rows, image.cols, CV_8UC3, cv::Scalar(0,0,0));
+    for_each(result.begin(), result.end(), [&blackImage](auto el){
+        blackImage.data[el.index( blackImage )] = 255;
+        blackImage.data[el.index( blackImage ) + 1] = 0; 
+        blackImage.data[el.index( blackImage ) + 2] = 255;
+    });
+    draw_clusterNumber(blackImage, result);
+    cv::imshow( "Display window", blackImage );
+    cv::waitKey(0);
+}
+
 int main( int argc, char** argv )
 {
 	cv::Mat image;
-    image = cv::imread("/home/szozda/Downloads/refImg/circTst.png", CV_LOAD_IMAGE_COLOR);   // Read the file "/Downloads/reference_image.jpg"
-
-
-    if(! image.data )                              // Check for invalid input
+    image = cv::imread("/home/szozda/Downloads/refImg/circTst.png", CV_LOAD_IMAGE_COLOR);
+    if(! image.data )
     {
     	std::cout<<"\nwrong path\n";
         return -1;
@@ -31,10 +95,6 @@ int main( int argc, char** argv )
 
     double factor = 1;
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
-
-    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );// Create a window for display.
-    cv::imshow( "Display window", image );                   // Show our image inside it.
-    cv::waitKey(0);                                          // Wait for a keystroke in the window
 
     TYPE acceptanceLevel = 250;
     double balance[] = {1.0, 1.0, 1.0};
@@ -44,28 +104,11 @@ int main( int argc, char** argv )
     auto result = iterateProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
   
-    if(image.isContinuous())
-    {
-    	for_each(result.begin(), result.end(), [&image](auto el){
-    		image.data[el.index( image )] = 255;
-    		image.data[el.index( image ) + 1] = 0; 
-    		image.data[el.index( image ) + 2] = 255;
-    	});
-	    cv::imshow( "Display window", image );                   // Show our image inside it.
-	}
-	else
-	{
-		std::cout<<"notcontionuous\n";
-	}
-    cv::waitKey(0);                                          // Wait for a keystroke in the window
+    show_result(image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
+    Clustering clustering( result, Distance::distance_fast, 10.0, 3);
+    clustering.points_clustering(&Clustering::check_point_zone_linear);
+    auto clusters = clustering.getRefVIndexTransitionCluster();
 
-    cv::Mat blackImage(image.rows, image.cols, CV_8UC3, cv::Scalar(0,0,0));
-    for_each(result.begin(), result.end(), [&blackImage](auto el){
-        blackImage.data[el.index( blackImage )] = 255;
-        blackImage.data[el.index( blackImage ) + 1] = 0; 
-        blackImage.data[el.index( blackImage ) + 2] = 255;
-    });
-    cv::imshow( "Display window", blackImage );                   // Show our image inside it.
-    cv::waitKey(0);                                          // Wait for a keystroke in the window
+    show_result(image, clusters);
     return 0;
 }

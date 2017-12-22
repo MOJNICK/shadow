@@ -1,6 +1,6 @@
 #include "clustering.hpp"
 
-Clustering::Clustering( std::vector<IndexTransition> vIndexTransition, double (*distance_function)(IndexTransitionCluster const &, IndexTransitionCluster const &), double eps, uint minPts):
+Clustering::Clustering( std::vector<IndexTransition> const & vIndexTransition, double (*distance_function)(IndexTransitionCluster const &, IndexTransitionCluster const &), double eps, uint minPts):
 eps{eps}, minPts{minPts}, nowClusterNumber{0}, distance_function{distance_function}
 {
     std::for_each(vIndexTransition.begin(), vIndexTransition.end(), [ this ]( IndexTransition const & indexTransition ){

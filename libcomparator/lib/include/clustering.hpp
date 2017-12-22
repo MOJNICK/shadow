@@ -9,6 +9,7 @@
         IndexTransitionCluster( IndexTransition indexTransition ): IndexTransition( indexTransition ), clusterNumber{0}{}
         IndexTransitionCluster( IndexTransition indexTransition, uint clusterNumber ): IndexTransition( indexTransition ), clusterNumber{clusterNumber}{}
         IndexTransitionCluster( uint row, uint col, Transition transition, uint clusterNumber ): IndexTransition{ row, col, transition}, clusterNumber{clusterNumber}{}
+        uint getClusterNumber(){ return clusterNumber; }
         #ifdef WITH_TESTS
             #ifdef TEST_PRIVATE_PART
             bool operator ==(const IndexTransitionCluster &itc) const
@@ -31,18 +32,18 @@
     class Clustering
     {
     public:
-        Clustering( std::vector<IndexTransition> vIndexTransition, double (*distance_function)( IndexTransitionCluster const &, IndexTransitionCluster const & pixelA ), double eps, uint minPts);
-
+        Clustering( std::vector<IndexTransition> const & vIndexTransition, double (*distance_function)( IndexTransitionCluster const &, IndexTransitionCluster const & pixelA ), double eps, uint minPts);
+        std::vector<IndexTransitionCluster> const & getRefVIndexTransitionCluster(){ return vIndexTransitionCluster; }
         void points_clustering( void (Clustering::*check_point_zone_function)(int) );
     private:
         uint nowClusterNumber;
-        double eps;
-        uint minPts;
+        double eps;//radious
+        uint minPts;//minimum points to make cluster
         std::vector<IndexTransitionCluster>  vIndexTransitionCluster;
         
         double (*distance_function)( IndexTransitionCluster const & , IndexTransitionCluster const & );
-        uint create_new_cluster();
-        uint get_cluster_number();
+        uint create_new_cluster();//not api
+        uint get_cluster_number();//not api
         void check_point_zone_linear( int indexX );
         void remove_small_clusters_and_noise();
     };
