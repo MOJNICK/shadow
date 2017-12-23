@@ -42,7 +42,7 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
         }
     } ), textPoint.end() );
     std::for_each(textPoint.begin(), textPoint.end(), [&image](auto el){
-        cv::putText(image, std::to_string(el.getClusterNumber()), cv::Point(el.col / channels, el.row ), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.4, cv::Scalar(200,20,250));//, 1, 8, false);
+        cv::putText(image, std::to_string(el.getClusterNumber()), cv::Point(el.col, el.row ), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.4, cv::Scalar(200,20,250));//, 1, 8, false);
         std::cout<<el.getClusterNumber()<<" "<<el.row<<" "<<el.col<<"\n";
     });
     std::cout<< result.size()<< "\n";

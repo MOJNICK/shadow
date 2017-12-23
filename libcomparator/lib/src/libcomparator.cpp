@@ -34,6 +34,9 @@ double const prealocate = 0.01;//vector reserve
 				}
 			}
 		}
+		std::for_each( result.begin(), result.end(), [](auto& it){
+			it.col /= 3;
+		});
 		return result;
 	}
 
@@ -55,6 +58,9 @@ double const prealocate = 0.01;//vector reserve
 				}
 			}
 		}
+		std::for_each( result.begin(), result.end(), [](auto& it){
+			it.col /= 3;
+		});
 		return result;
 	}
 

@@ -75,7 +75,7 @@
 
 			unsigned int index(cv::Mat& img)
 			{
-				return row * img.step + col;
+				return row * img.step + col * 3;
 			}
 		};
 		
