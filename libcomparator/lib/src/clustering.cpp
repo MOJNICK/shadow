@@ -7,7 +7,7 @@ eps{eps}, minPts{minPts}, nowClusterNumber{0}, distance_function{distance_functi
         vIndexTransitionCluster.push_back( IndexTransitionCluster( indexTransition ) );
     });
 
-    std::sort( vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), []( IndexTransitionCluster const & p1, IndexTransitionCluster const & p2 ){
+    std::stable_sort( vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), []( IndexTransitionCluster const & p1, IndexTransitionCluster const & p2 ){
         if( p1.row < p2.row )
         {
             return true;
@@ -89,9 +89,22 @@ void Clustering::check_point_zone_linear( int indexX )
     }
     std::sort(linkedClusters.begin(),linkedClusters.end());
     linkedClusters.erase(std::unique(linkedClusters.begin(), linkedClusters.end()), linkedClusters.end());
+    
+//transform linked
+    for_each(linkedClusters.begin(), linkedClusters.end(), [this](auto& cl){
+        if( cl < linkedTransform.size())
+        {
+            cl = linkedTransform[ cl ];
+        }
+        else
+        {
+            cl = cl;//no transform entry, no changes     
+        }
+    });
+
     uint minClusterNumber = linkedClusters.front();
 
-    linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), UINT32_MAX);//zeroes is one to one map (ex. if linkedTransform[2]==UINT32_MAX then cluster 2 maped to cluster2)
+    linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), UINT32_MAX);//UINT32_MAX is one to one map (ex. if linkedTransform[2]==UINT32_MAX then cluster 2 maped to cluster2)
 
     for_each(linkedClusters.begin(), linkedClusters.end(), [this, minClusterNumber]( uint cl){
         linkedTransform[cl] = std::min(linkedTransform[cl], minClusterNumber);

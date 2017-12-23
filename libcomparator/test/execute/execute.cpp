@@ -14,14 +14,14 @@ void p_around(unsigned char* data, int before, int after)
         {
             std::cout << "MARKER";
         }
-        std::cout<<data[i];
+        std::cout << data[i];
     }
 }
 
 void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> const & result)
 {
     std::vector<IndexTransitionCluster> textPoint(result);
-    sort( textPoint.begin(), textPoint.end(), [](auto el1, auto el2){
+    std::stable_sort( textPoint.begin(), textPoint.end(), [](auto el1, auto el2){
         if(el1.getClusterNumber() < el2.getClusterNumber())
         {
             return true;
@@ -42,7 +42,7 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
         }
     } ), textPoint.end() );
     std::for_each(textPoint.begin(), textPoint.end(), [&image](auto el){
-        cv::putText(image, std::to_string(el.getClusterNumber()), cv::Point(el.col / 3, el.row ), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200,20,250), 1, 8, false);
+        cv::putText(image, std::to_string(el.getClusterNumber()), cv::Point(el.col / channels, el.row ), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.4, cv::Scalar(200,20,250));//, 1, 8, false);
         std::cout<<el.getClusterNumber()<<" "<<el.row<<" "<<el.col<<"\n";
     });
     std::cout<< result.size()<< "\n";
@@ -118,7 +118,7 @@ int test_on_image(char const path[], double eps, uint minPts)
 
 int main( int argc, char** argv )
 {
-    test_on_image("/home/szozda/Downloads/refImg/circTst.png", 3.0, 5);
+    test_on_image("/home/szozda/Downloads/refImg/lines2.png", 3.0, 100);
 
     return 0;
 }
