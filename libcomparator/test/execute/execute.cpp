@@ -86,7 +86,7 @@ void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & resu
 int main( int argc, char** argv )
 {
 	cv::Mat image;
-    image = cv::imread("/home/szozda/Downloads/refImg/circTst.png", CV_LOAD_IMAGE_COLOR);
+    image = cv::imread("/home/szozda/Downloads/refImg/girlSharp.png", CV_LOAD_IMAGE_COLOR);
     if(! image.data )
     {
     	std::cout<<"\nwrong path\n";
@@ -98,14 +98,14 @@ int main( int argc, char** argv )
 
     TYPE acceptanceLevel = 250;
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 1.0;
+    double lightThreshold = 0.2;
     double colorThreshold = 100000;
     IterateProcess<TYPE> iterateProcess(image, acceptanceLevel, lightThreshold, colorThreshold, balance);
     auto result = iterateProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
   
     show_result(image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
-    Clustering clustering( result, Distance::distance_fast, 10.0, 3);
+    Clustering clustering( result, Distance::distance_fast, 3.0, 1);
     clustering.points_clustering(&Clustering::check_point_zone_linear);
     auto clusters = clustering.getRefVIndexTransitionCluster();
 

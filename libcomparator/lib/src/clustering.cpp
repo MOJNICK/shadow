@@ -43,6 +43,7 @@ void Clustering::points_clustering( void (Clustering::*check_point_zone_function
 
 void Clustering::check_point_zone_linear( int indexX )
 {
+    std::vector<uint> linkedClusters;
     uint currentClusterNumber = 0;
     IndexTransitionCluster point = vIndexTransitionCluster[indexX];
     if( point.clusterNumber == 0 )
@@ -54,10 +55,10 @@ void Clustering::check_point_zone_linear( int indexX )
     {
         currentClusterNumber = point.clusterNumber;
     }
+    linkedClusters.push_back(currentClusterNumber);
 
     double minX = point.row - eps;
     double maxX = point.row + eps;
-
     for( int i = 0; i < vIndexTransitionCluster.size(); ++i )
     {
         if( vIndexTransitionCluster[i].row < minX)
@@ -72,11 +73,30 @@ void Clustering::check_point_zone_linear( int indexX )
             {
                 if (distance_function(point, vIndexTransitionCluster[i]) <= eps )
                 {
-                    vIndexTransitionCluster[i].clusterNumber = currentClusterNumber;
+                    if( vIndexTransitionCluster[i].clusterNumber == 0 )
+                    {
+                        vIndexTransitionCluster[i].clusterNumber = currentClusterNumber;
+                    }
+                    else
+                    {
+                        linkedClusters.push_back( vIndexTransitionCluster[i].clusterNumber );
+                    }
                 }
             }
         }
     }
+    std::sort(linkedClusters.begin(),linkedClusters.end());
+    linkedClusters.erase(std::unique(linkedClusters.begin(), linkedClusters.end()), linkedClusters.end());
+    uint minClusterNumber = linkedClusters.front();
+
+    linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), 0);
+
+    for_each(linkedClusters.begin(), linkedClusters.end(), [this, minClusterNumber]( uint cl){
+        linkedTransform[cl] = std::min(linkedTransform[cl], minClusterNumber);
+    });
+        
+    
+    return;
 }
 
 void Clustering::remove_small_clusters_and_noise()
