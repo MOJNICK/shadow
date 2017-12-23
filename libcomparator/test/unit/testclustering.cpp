@@ -1,39 +1,16 @@
 #include <opencv2/ts/ts.hpp>
 #include "clustering.hpp"
 
-class TestClusteringMethods : public cvtest::BaseTest
-{
-public:
-  TestClusteringMethods(){}
-protected:
-  void compareIndexTransition(IndexTransition& expected, IndexTransition& actual)
-  {
-    ASSERT_TRUE( expected.same_position( actual ) );
-    ASSERT_EQ(expected.transition, actual.transition);
-  }
-  void compareIndexTransitionCluster( IndexTransitionCluster const & expected, IndexTransitionCluster const & actual )
-  {
-    ASSERT_EQ(expected.row, actual.row);
-    ASSERT_EQ(expected.col, actual.col);
-    ASSERT_EQ(expected.transition, actual.transition);
-    ASSERT_EQ(expected.clusterNumber, actual.clusterNumber);
-  }
-  
-  void compareIndexTransitionClusterVec( std::vector<IndexTransitionCluster> const & expected, std::vector<IndexTransitionCluster> const & actual )
-  {
-      ASSERT_EQ( expected, actual );
-  }
-};
 
-class TestClustering : public TestClusteringMethods
+class TestClustering : public cvtest::BaseTest
 {
 public:
-        int siz0;
-        int siz1;
-        double eps;
-        uint minPts;
-        std::vector<IndexTransition> const vIndexTransition;
-        Clustering objectClustering;
+    int siz0;
+    int siz1;
+    double eps;
+    uint minPts;
+    std::vector<IndexTransition> const vIndexTransition;
+    Clustering objectClustering;
     TestClustering(): siz0{10}, siz1{2}, eps{2.0}, minPts{3}, vIndexTransition{ {1, 2, lToR}, {4, 2, lToR}, {11, 2, lToR},
                       {12, 2, lToR}, {9, 2, lToR}, {6, 8, rToL}, {8, 8, rToL}, {2, 3, rToL}, {3, 4, rToL}, {5, 7, rToL} },
                       objectClustering( vIndexTransition, Distance::distance_fast, eps, minPts)
