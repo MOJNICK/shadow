@@ -91,7 +91,7 @@ void Clustering::check_point_zone_linear( int indexX )
     linkedClusters.erase(std::unique(linkedClusters.begin(), linkedClusters.end()), linkedClusters.end());
     uint minClusterNumber = linkedClusters.front();
 
-    linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), 0);//zeroes is one to one map (ex. if linkedTransform[2]==0 then cluster 2 maped to cluster2)
+    linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), UINT32_MAX);//zeroes is one to one map (ex. if linkedTransform[2]==UINT32_MAX then cluster 2 maped to cluster2)
 
     for_each(linkedClusters.begin(), linkedClusters.end(), [this, minClusterNumber]( uint cl){
         linkedTransform[cl] = std::min(linkedTransform[cl], minClusterNumber);
@@ -103,7 +103,7 @@ void Clustering::concatenate_clusters()
 {
     for(uint i = 0; i < linkedTransform.size(); ++i)//zeroes is one to one map (ex. if linkedTransform[2]==0 then cluster 2 maped to cluster 2)
     {
-        if(linkedTransform[i] == 0)
+        if(linkedTransform[i] == UINT32_MAX)
         {
             linkedTransform[i] = i;
         }
@@ -150,11 +150,11 @@ void Clustering::remove_small_clusters_and_noise()
 
 double Distance::distance_fast( IndexTransitionCluster const & pixelA, IndexTransitionCluster const & pixelB )
 {
-    return abs( pixelA.row - pixelB.row ) + abs( pixelA.col - pixelB.col );
+    return abs( pixelA.row - pixelB.row ) + abs( pixelA.col - pixelB.col ) / channels;//temporary workaround
 }
 
 
 double Distance::distance_slow( IndexTransitionCluster const & pixelA, IndexTransitionCluster const & pixelB )
 {
-    return sqrt( pow( ( pixelA.row - pixelB.row ), 2.0 ) + pow( ( pixelA.col - pixelB.col ), 2.0 ) );
+    return sqrt( pow( ( pixelA.row - pixelB.row ), 2.0 ) + pow( ( pixelA.col - pixelB.col ), 2.0 ) / channels );//temporary workaround
 }

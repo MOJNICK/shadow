@@ -83,15 +83,17 @@ void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & resu
     cv::waitKey(0);
 }
 
-int main( int argc, char** argv )
+int test_on_image(char const path[], double eps, uint minPts)
 {
-	cv::Mat image;
-    image = cv::imread("/home/szozda/Downloads/refImg/girlSharp.png", CV_LOAD_IMAGE_COLOR);
+    cv::Mat image;
+    image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
     if(! image.data )
     {
-    	std::cout<<"\nwrong path\n";
+        std::cout<<"\nwrong path\n";
         return -1;
     }
+    cv::Mat imageCpy = image.clone();
+
 
     double factor = 1;
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
@@ -103,12 +105,20 @@ int main( int argc, char** argv )
     IterateProcess<TYPE> iterateProcess(image, acceptanceLevel, lightThreshold, colorThreshold, balance);
     auto result = iterateProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
-  
+    
     show_result(image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
-    Clustering clustering( result, Distance::distance_fast, 3.0, 1);
+    
+    Clustering clustering( result, Distance::distance_fast, eps, minPts);
     clustering.points_clustering(&Clustering::check_point_zone_linear);
     auto clusters = clustering.getRefVIndexTransitionCluster();
+    show_result(imageCpy, clusters);
+    
+    return 0;
+}
 
-    show_result(image, clusters);
+int main( int argc, char** argv )
+{
+    test_on_image("/home/szozda/Downloads/refImg/circTst.png", 3.0, 5);
+
     return 0;
 }
