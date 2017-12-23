@@ -100,13 +100,17 @@ double const prealocate = 0.01;//vector reserve
 			std::swap(pix0, pix1);//pix0 is now the dimmer
 			result = fwd;
 		}
+		if(pix1[0] < acceptanceLevel | pix1[1] < acceptanceLevel | pix1[2] < acceptanceLevel )
+		{
+			return (Transition::no);
+		}
 
 		correct_pix0();//correct ballance
 		if(light_distance() > lightThreshold)
 			if(color_distance() < colorThreshold)
 				return result;
 
-		return (result = no);
+		return (Transition::no);
 	}
 	
 	#ifdef WITH_TESTS

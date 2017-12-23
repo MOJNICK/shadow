@@ -118,7 +118,7 @@ int test_on_image(char const path[], double eps, uint minPts)
 
 int main( int argc, char** argv )
 {
-    test_on_image("/home/szozda/Downloads/refImg/lines2.png", 3.0, 100);
+    test_on_image("/home/szozda/Downloads/refImg/cirRef.png", 3.0, 100);
 
     return 0;
 }

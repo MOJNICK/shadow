@@ -166,10 +166,10 @@ void ColorBalance::push_element_balance( IndexTransition const & shadow )
 	uint brightRow = shadow.row;
 	uint brightCol = shadow.col;
 	
-	if( shtransition & ( Transition::upToDw ) ){ brightRow -= distance; }
-	if( shtransition & ( Transition::lToR ) ){ brightCol -= distance * channels; }
-	if( shtransition & ( Transition::dwToUp ) ){ brightRow += distance; }
-	if( shtransition & ( Transition::rToL ) ){ brightCol += distance * channels; }
+	if( shtransition & ( Transition::upToDw ) )		{ brightRow -= distance; }
+	if( shtransition & ( Transition::lToR ) )		{ brightCol -= distance * channels; }
+	if( shtransition & ( Transition::dwToUp ) )		{ brightRow += distance; }
+	if( shtransition & ( Transition::rToL ) )		{ brightCol += distance * channels; }
 
 	if( ( 0 <= brightRow && brightRow < img.rows ) && ( 0 <= brightCol && brightCol < img.cols ))
 		{

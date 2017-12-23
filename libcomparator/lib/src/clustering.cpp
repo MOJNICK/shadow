@@ -91,7 +91,7 @@ void Clustering::check_point_zone_linear( int indexX )
     linkedClusters.erase(std::unique(linkedClusters.begin(), linkedClusters.end()), linkedClusters.end());
     
 //transform linked
-    for_each(linkedClusters.begin(), linkedClusters.end(), [this](auto& cl){
+    std::for_each(linkedClusters.begin(), linkedClusters.end(), [this](auto& cl){
         if( cl < linkedTransform.size())
         {
             cl = linkedTransform[ cl ];
@@ -106,7 +106,7 @@ void Clustering::check_point_zone_linear( int indexX )
 
     linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), UINT32_MAX);//UINT32_MAX is one to one map (ex. if linkedTransform[2]==UINT32_MAX then cluster 2 maped to cluster2)
 
-    for_each(linkedClusters.begin(), linkedClusters.end(), [this, minClusterNumber]( uint cl){
+    std::for_each(linkedClusters.begin(), linkedClusters.end(), [this, minClusterNumber]( uint cl){
         linkedTransform[cl] = std::min(linkedTransform[cl], minClusterNumber);
     });
     return;
@@ -122,7 +122,21 @@ void Clustering::concatenate_clusters()
         }
     }
 
-    for_each(vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), [this](auto& itc){
+    std::vector<uint> distinctClusters(linkedTransform);
+    std::sort(distinctClusters.begin(), distinctClusters.end());
+    distinctClusters.erase(std::unique(distinctClusters.begin(), distinctClusters.end()), distinctClusters.end());
+
+    std::vector<uint> transLinkedTransform(distinctClusters.back() + 1, 0);
+    for(int i = 0; i < distinctClusters.size(); ++i)
+    {
+        transLinkedTransform[distinctClusters[i]] = i;
+    }
+    std::for_each(linkedTransform.begin(), linkedTransform.end(), [&transLinkedTransform](auto& lt){
+        lt = transLinkedTransform[lt];
+    });
+    
+
+    std::for_each(vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), [this](auto& itc){
         itc.clusterNumber = linkedTransform[ itc.clusterNumber ];
     });
 }
