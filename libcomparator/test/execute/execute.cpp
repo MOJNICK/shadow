@@ -49,7 +49,7 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
     std::cout<< textPoint.size()<< "\n";
 }
 
-void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & result)
+void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & result )
 {
     cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Display window", image );                   
@@ -80,6 +80,7 @@ void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & resu
     });
     draw_clusterNumber(blackImage, result);
     cv::imshow( "Display window", blackImage );
+    cv::imwrite("/mnt/hgfs/dsk/refImg/result_cirRef2.png", blackImage);
     cv::waitKey(0);
 }
 
@@ -98,7 +99,7 @@ int test_on_image(char const path[], double eps, uint minPts)
     double factor = 1;
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
 
-    TYPE acceptanceLevel = 250;
+    TYPE acceptanceLevel = 0;
     double balance[] = {1.0, 1.0, 1.0};
     double lightThreshold = 0.2;
     double colorThreshold = 100000;
@@ -118,7 +119,10 @@ int test_on_image(char const path[], double eps, uint minPts)
 
 int main( int argc, char** argv )
 {
-    test_on_image("/home/szozda/Downloads/refImg/cirRef.png", 3.0, 100);
+    test_on_image("/home/szozda/Downloads/refImg/cirRef2.png", 3.0, 100);
+//    test_on_image("/home/szozda/Downloads/refImg/linThin.png", 3.0, 100);
+//    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 3.0, 100);
+//    test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 3.0, 100);
 
     return 0;
 }

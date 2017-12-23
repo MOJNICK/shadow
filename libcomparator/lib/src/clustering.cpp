@@ -63,7 +63,7 @@ void Clustering::check_point_zone_linear( int indexX )
     double maxX = point.row + eps;
     for( int i = 0; i < vIndexTransitionCluster.size(); ++i )
     {
-        if( vIndexTransitionCluster[i].row < minX)
+/*        if( vIndexTransitionCluster[i].row < minX)
             continue;
         else
         {
@@ -72,7 +72,7 @@ void Clustering::check_point_zone_linear( int indexX )
                 break;
             }
             else
-            {
+            {*/
                 if (distance_function(point, vIndexTransitionCluster[i]) <= eps )
                 {
                     if( vIndexTransitionCluster[i].clusterNumber == 0 )
@@ -84,14 +84,14 @@ void Clustering::check_point_zone_linear( int indexX )
                         linkedClusters.push_back( vIndexTransitionCluster[i].clusterNumber );
                     }
                 }
-            }
-        }
+            //}
+        //}
     }
     std::sort(linkedClusters.begin(),linkedClusters.end());
     linkedClusters.erase(std::unique(linkedClusters.begin(), linkedClusters.end()), linkedClusters.end());
     
 //transform linked
-    std::for_each(linkedClusters.begin(), linkedClusters.end(), [this](auto& cl){
+/*    std::for_each(linkedClusters.begin(), linkedClusters.end(), [this](auto& cl){
         if( cl < linkedTransform.size())
         {
             cl = linkedTransform[ cl ];
@@ -101,13 +101,20 @@ void Clustering::check_point_zone_linear( int indexX )
             cl = cl;//no transform entry, no changes     
         }
     });
-
-    uint minClusterNumber = linkedClusters.front();
+    std::sort(linkedClusters.begin(),linkedClusters.end());
+*/
+    
 
     linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), UINT32_MAX);//UINT32_MAX is one to one map (ex. if linkedTransform[2]==UINT32_MAX then cluster 2 maped to cluster2)
 
-    std::for_each(linkedClusters.begin(), linkedClusters.end(), [this, minClusterNumber]( uint cl){
-        linkedTransform[cl] = std::min(linkedTransform[cl], minClusterNumber);
+    uint minLinkedTransformByLinkedClusters = UINT32_MAX;
+
+    std::for_each(linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
+        minLinkedTransformByLinkedClusters = std::min(minLinkedTransformByLinkedClusters, linkedTransform[cl] );
+    });
+    
+    std::for_each(linkedClusters.begin(), linkedClusters.end(), [ this, minLinkedTransformByLinkedClusters ]( uint cl){
+        linkedTransform[cl] = minLinkedTransformByLinkedClusters;
     });
     return;
 }
@@ -121,7 +128,7 @@ void Clustering::concatenate_clusters()
             linkedTransform[i] = i;
         }
     }
-
+/*
     std::vector<uint> distinctClusters(linkedTransform);
     std::sort(distinctClusters.begin(), distinctClusters.end());
     distinctClusters.erase(std::unique(distinctClusters.begin(), distinctClusters.end()), distinctClusters.end());
@@ -133,7 +140,7 @@ void Clustering::concatenate_clusters()
     }
     std::for_each(linkedTransform.begin(), linkedTransform.end(), [&transLinkedTransform](auto& lt){
         lt = transLinkedTransform[lt];
-    });
+    });*/
     
 
     std::for_each(vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), [this](auto& itc){
@@ -144,7 +151,7 @@ void Clustering::concatenate_clusters()
 void Clustering::remove_small_clusters_and_noise()
 {
     auto maxClusterNumberIterator = std::max_element( vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), []( IndexTransitionCluster const & itc1, IndexTransitionCluster const & itc2){
-        if(itc1.clusterNumber < itc2.clusterNumber )
+        if( itc1.clusterNumber < itc2.clusterNumber )
         {
             return true;
         }
@@ -156,10 +163,10 @@ void Clustering::remove_small_clusters_and_noise()
     uint maxClusterNumber = maxClusterNumberIterator->clusterNumber;
 
     std::vector<uint>clusterOccurences(maxClusterNumber + 1, 0);
-    for_each( vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), [&clusterOccurences]( IndexTransitionCluster point){
-        if( point.clusterNumber != 0 )// new point without cluster occurrrence
+    for_each( vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), [&clusterOccurences]( IndexTransitionCluster const & itc ){
+        if( itc.clusterNumber != 0 )// new itc without cluster occurrrence
         {
-            clusterOccurences[point.clusterNumber] += 1;
+            clusterOccurences[itc.clusterNumber] += 1;
         }
     });
     
