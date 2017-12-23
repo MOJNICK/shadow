@@ -47,6 +47,7 @@
         uint create_new_cluster();//not api
         uint get_cluster_number();//not api
         void check_point_zone_linear( int indexX );
+        void concatenate_clusters();
         void remove_small_clusters_and_noise();
     };
 

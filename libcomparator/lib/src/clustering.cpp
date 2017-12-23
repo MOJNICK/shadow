@@ -38,6 +38,8 @@ void Clustering::points_clustering( void (Clustering::*check_point_zone_function
         (this->*check_point_zone_function)(indexX);
     }
 
+    concatenate_clusters();
+
     remove_small_clusters_and_noise();
 }
 
@@ -89,14 +91,27 @@ void Clustering::check_point_zone_linear( int indexX )
     linkedClusters.erase(std::unique(linkedClusters.begin(), linkedClusters.end()), linkedClusters.end());
     uint minClusterNumber = linkedClusters.front();
 
-    linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), 0);
+    linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), 0);//zeroes is one to one map (ex. if linkedTransform[2]==0 then cluster 2 maped to cluster2)
 
     for_each(linkedClusters.begin(), linkedClusters.end(), [this, minClusterNumber]( uint cl){
         linkedTransform[cl] = std::min(linkedTransform[cl], minClusterNumber);
     });
-        
-    
     return;
+}
+
+void Clustering::concatenate_clusters()
+{
+    for(uint i = 0; i < linkedTransform.size(); ++i)//zeroes is one to one map (ex. if linkedTransform[2]==0 then cluster 2 maped to cluster 2)
+    {
+        if(linkedTransform[i] == 0)
+        {
+            linkedTransform[i] = i;
+        }
+    }
+
+    for_each(vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), [this](auto& itc){
+        itc.clusterNumber = linkedTransform[ itc.clusterNumber ];
+    });
 }
 
 void Clustering::remove_small_clusters_and_noise()
