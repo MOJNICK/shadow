@@ -107,19 +107,30 @@ void Clustering::check_point_zone_linear( int indexX )
 
     linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), UINT32_MAX);//UINT32_MAX is one to one map (ex. if linkedTransform[2]==UINT32_MAX then cluster 2 maped to cluster2)
 
-    uint minLinkedTransformByLinkedClusters = linkedClusters.front();
-
+    uint minLinkedTransformByLinkedClusters = linkedClusters.front();//only for start, could be back() or what ever
     std::for_each( linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
         minLinkedTransformByLinkedClusters = std::min( minLinkedTransformByLinkedClusters, linkedTransform[cl] );
     });
     
-    std::for_each( linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
-        
-        //find all linkedTransform == linkedTransform[cl]
-        std::replace( linkedTransform.begin(), linkedTransform.end(), linkedTransform[ cl ], minLinkedTransformByLinkedClusters);
-        //linkedTransform[cl] = minLinkedTransformByLinkedClusters;
-
-    });
+    for(int i = 0; i < linkedClusters.size(); ++i)
+    {
+        uint cl = linkedClusters[i];
+        uint moveTo = linkedTransform[cl];
+        for(int j = 0; j < linkedTransform.size(); ++j)
+        {
+            if( linkedTransform[j] == moveTo)
+            {
+                linkedTransform[j] = minLinkedTransformByLinkedClusters;
+            }
+            else
+            {
+                continue;
+            }
+        }
+    }
+//    std::for_each( linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
+//        std::replace( linkedTransform.begin(), linkedTransform.end(), linkedTransform[ cl ], minLinkedTransformByLinkedClusters);
+//    });
     return;
 }
 
