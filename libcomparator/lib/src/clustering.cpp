@@ -111,7 +111,7 @@ void Clustering::check_point_zone_linear( int indexX )
     std::for_each( linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
         minLinkedTransformByLinkedClusters = std::min( minLinkedTransformByLinkedClusters, linkedTransform[cl] );
     });
-    
+/*    
     for(int i = 0; i < linkedClusters.size(); ++i)
     {
         uint cl = linkedClusters[i];
@@ -127,10 +127,11 @@ void Clustering::check_point_zone_linear( int indexX )
                 continue;
             }
         }
-    }
-//    std::for_each( linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
-//        std::replace( linkedTransform.begin(), linkedTransform.end(), linkedTransform[ cl ], minLinkedTransformByLinkedClusters);
-//    });
+    }*/
+    std::for_each( linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
+        uint oldValue = linkedTransform[cl];
+        std::replace( linkedTransform.begin(), linkedTransform.end(), oldValue, minLinkedTransformByLinkedClusters);
+    });
     return;
 }
 
