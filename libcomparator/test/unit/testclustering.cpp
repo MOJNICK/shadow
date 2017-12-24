@@ -185,7 +185,7 @@ protected:
                                                         {4, 2, lToR, 1}, {5, 7, rToL, 2}, {6, 8, rToL, 2},
                                                         {8, 8, rToL, 2}, {9, 2, lToR, 3}, {11, 2, lToR, 3}, {12, 2, lToR, 3}  };
         ASSERT_EQ(expected, actual);
-
+ 
         SetUp();
         objectClustering.eps = 3.0;
         objectClustering.minPts = 4;

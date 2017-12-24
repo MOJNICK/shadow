@@ -78,7 +78,7 @@ void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & resu
         blackImage.data[el.index( blackImage ) + 1] = 0; 
         blackImage.data[el.index( blackImage ) + 2] = 255;
     });
-    draw_clusterNumber(blackImage, result);
+    //draw_clusterNumber(blackImage, result);
     cv::imshow( "Display window", blackImage );
     cv::imwrite("/mnt/hgfs/dsk/refImg/result_cirRef2.png", blackImage);
     cv::waitKey(0);
@@ -119,7 +119,7 @@ int test_on_image(char const path[], double eps, uint minPts)
 
 int main( int argc, char** argv )
 {
-    test_on_image("/home/szozda/Downloads/refImg/cirRef4.png", 3.0, 100);
+    test_on_image("/home/szozda/Downloads/refImg/girSharp.png", 2.0, 40);
 //    test_on_image("/home/szozda/Downloads/refImg/linThin.png", 3.0, 0);
 //    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 3.0, 100);
 //    test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 3.0, 100);
