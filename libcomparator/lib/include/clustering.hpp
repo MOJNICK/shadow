@@ -8,7 +8,7 @@
     public:
         IndexTransitionCluster( IndexTransition indexTransition ): IndexTransition( indexTransition ), clusterNumber{0}{}
         IndexTransitionCluster( IndexTransition indexTransition, uint clusterNumber ): IndexTransition( indexTransition ), clusterNumber{clusterNumber}{}
-        IndexTransitionCluster( uint row, uint col, Transition transition, uint clusterNumber ): IndexTransition{ row, col, transition}, clusterNumber{clusterNumber}{}
+        IndexTransitionCluster( int row, int col, Transition transition, uint clusterNumber ): IndexTransition{ row, col, transition}, clusterNumber{clusterNumber}{}
         uint getClusterNumber(){ return clusterNumber; }
         #ifdef WITH_TESTS
             #ifdef TEST_PRIVATE_PART

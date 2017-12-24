@@ -20,10 +20,10 @@ double const prealocate = 0.01;//vector reserve
 		std::vector<IndexTransition> result;
 		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
-		for(uint row = 0; row < img.rows; row++)		
+		for( int row = 0; row < img.rows; row++)		
 		{
-			uint rowIndex = row * img.step;
-			for(uint col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))
+			int rowIndex = row * img.step;
+			for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))
 			{
 				classifier.copy_pix(img.data + rowIndex + col, img.data + rowIndex + col + channels);
 				switch (classifier.f_classifier())
@@ -45,9 +45,9 @@ double const prealocate = 0.01;//vector reserve
 		std::vector<IndexTransition> result;
 		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
-		for(uint col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))		
+		for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))		
 		{
-			for(uint row = 0; row < img.rows - 1; row++)
+			for(int row = 0; row < img.rows - 1; row++)
 			{
 				classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
 				switch (classifier.f_classifier())
