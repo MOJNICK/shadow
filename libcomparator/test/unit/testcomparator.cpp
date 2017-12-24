@@ -8,8 +8,8 @@ public:
 protected:
   void compareIndexTransition(IndexTransition& expected, IndexTransition& actual)
   {
-    ASSERT_TRUE( expected.same_position( actual ) );
-    ASSERT_EQ(expected.transition, actual.transition);
+    ASSERT_TRUE( expected == actual );
+    //ASSERT_EQ(expected.transition, actual.transition);
   }
 };
 
@@ -31,20 +31,11 @@ protected:
     double balance[] = {1.0, 1.0, 1.0};
     double lightThreshold = 1.0;
     double colorThreshold = 1.0;
-
     IterateProcess<TYPE> iterateProcess(mat, acceptanceLevel, lightThreshold, colorThreshold, balance);
-
+    
     std::vector<IndexTransition> result = iterateProcess.iterate_HV();
-
-    ASSERT_EQ(result.size(), 4);
-    auto expected = IndexTransition{ 1, 3, lToR };
-    compareIndexTransition(result[0], expected);
-    expected = IndexTransition{ 1, 3, rToL };
-    compareIndexTransition(result[1], expected);
-    expected = IndexTransition{ 1, 3, upToDw };
-    compareIndexTransition(result[2], expected);
-    expected = IndexTransition{ 1, 3, dwToUp };
-    compareIndexTransition(result[3], expected);
+    std::vector<IndexTransition> expected{ { 1, 1, lToR }, { 1, 1, rToL }, { 1, 1, upToDw }, { 1, 1, dwToUp } };
+    ASSERT_EQ( expected, result );
   }
 };
 TEST(ComparatorLibSuite, IterateHV)
@@ -76,11 +67,8 @@ TEST(ComparatorLibSuite, IterateHV)
 
       std::vector<IndexTransition> result = iterateProcess.iterate_H();
 
-      ASSERT_EQ(result.size(), 2);
-      auto expected = IndexTransition{ 1, 3, lToR };
-      compareIndexTransition(expected, result[0]);
-      expected = IndexTransition{ 1, 3, rToL };
-      compareIndexTransition(expected, result[1]);
+      std::vector<IndexTransition> expected{ { 1, 1, lToR }, { 1, 1, rToL } };
+      ASSERT_EQ( expected, result );
     }
   };
   TEST(ComparatorPrivateLibSuite, IterateH)
@@ -111,11 +99,9 @@ TEST(ComparatorLibSuite, IterateHV)
 
       std::vector<IndexTransition> result = iterateProcess.iterate_V();
 
-      ASSERT_EQ(result.size(), 2);
-      auto expected = IndexTransition{ 1, 3, upToDw };
-      compareIndexTransition(expected, result[0]);
-      expected = IndexTransition{ 1, 3, dwToUp };
-      compareIndexTransition(expected, result[1]);
+      std::vector<IndexTransition> expected{ { 1, 1, upToDw }, { 1, 1, dwToUp } };
+      ASSERT_EQ( expected, result );
+
     }
   };
   TEST(ComparatorPrivateLibSuite, IterateV)

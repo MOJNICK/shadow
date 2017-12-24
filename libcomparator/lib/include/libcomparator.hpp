@@ -52,8 +52,8 @@
 		class IndexTransition
 		{
 		public:
-			unsigned int row;
-			unsigned int col;
+			int row;
+			int col;
 			Transition transition;
 
 			//IndexTransition(IndexTransition const & indexTransition): row{indexTransition.row}, col{indexTransition.col}, transition{indexTransition.transition}{}
@@ -75,7 +75,7 @@
 
 			unsigned int index(cv::Mat& img)
 			{
-				return row * img.step + col;
+				return row * img.step + col * 3;
 			}
 		};
 		

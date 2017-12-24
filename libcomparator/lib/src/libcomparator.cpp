@@ -20,10 +20,10 @@ double const prealocate = 0.01;//vector reserve
 		std::vector<IndexTransition> result;
 		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
-		for(uint row = 0; row < img.rows; row++)		
+		for( int row = 0; row < img.rows; row++)		
 		{
-			uint rowIndex = row * img.step;
-			for(uint col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))
+			int rowIndex = row * img.step;
+			for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))
 			{
 				classifier.copy_pix(img.data + rowIndex + col, img.data + rowIndex + col + channels);
 				switch (classifier.f_classifier())
@@ -34,6 +34,9 @@ double const prealocate = 0.01;//vector reserve
 				}
 			}
 		}
+		std::for_each( result.begin(), result.end(), [](auto& it){
+			it.col /= 3;
+		});
 		return result;
 	}
 
@@ -42,9 +45,9 @@ double const prealocate = 0.01;//vector reserve
 		std::vector<IndexTransition> result;
 		result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
 
-		for(uint col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))		
+		for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))		
 		{
-			for(uint row = 0; row < img.rows - 1; row++)
+			for(int row = 0; row < img.rows - 1; row++)
 			{
 				classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
 				switch (classifier.f_classifier())
@@ -55,6 +58,9 @@ double const prealocate = 0.01;//vector reserve
 				}
 			}
 		}
+		std::for_each( result.begin(), result.end(), [](auto& it){
+			it.col /= 3;
+		});
 		return result;
 	}
 
@@ -89,18 +95,22 @@ double const prealocate = 0.01;//vector reserve
 	template <class TYPE> Transition Classifier<TYPE>::f_classifier()
 	{
 		Transition result = back;
-		if(brighter())
+		if(brighter())// pix0 > pix1
 		{
 			std::swap(pix0, pix1);//pix0 is now the dimmer
 			result = fwd;
 		}
+		if(pix1[0] < acceptanceLevel | pix1[1] < acceptanceLevel | pix1[2] < acceptanceLevel )
+		{
+			return (Transition::no);
+		}
 
-		correct_pix0();
+		correct_pix0();//correct ballance
 		if(light_distance() > lightThreshold)
 			if(color_distance() < colorThreshold)
 				return result;
 
-		return (result = no);
+		return (Transition::no);
 	}
 	
 	#ifdef WITH_TESTS
@@ -121,7 +131,7 @@ double const prealocate = 0.01;//vector reserve
 
 	template <class TYPE> double Classifier<TYPE>::light_distance()//pix0 have to < pix1 and be corrected
 	{
-		std::for_each(pix0, pix0 + channels, [](TYPE& el){if(el == 0){el = 1;}});
+		std::for_each(pix0, pix0 + channels, [](TYPE& el){if(el == 0){el = 1;}});// 0 -> 1 division
 		lightDistance = static_cast<double>(pix1[0] + pix1[1] + pix1[2]) / static_cast<double>(pix0[0] + pix0[1] + pix0[2]);
 		return lightDistance;
 	}
