@@ -107,13 +107,13 @@ void Clustering::check_point_zone_linear( int indexX )
 
     linkedTransform.resize(std::max(linkedClusters.back() + 1, (uint)(linkedTransform.size())), UINT32_MAX);//UINT32_MAX is one to one map (ex. if linkedTransform[2]==UINT32_MAX then cluster 2 maped to cluster2)
 
-    uint minLinkedTransformByLinkedClusters = UINT32_MAX;
+    uint minLinkedTransformByLinkedClusters = linkedClusters.front();
 
-    std::for_each(linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
-        minLinkedTransformByLinkedClusters = std::min(minLinkedTransformByLinkedClusters, linkedTransform[cl] );
+    std::for_each( linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
+        minLinkedTransformByLinkedClusters = std::min( minLinkedTransformByLinkedClusters, linkedTransform[cl] );
     });
     
-    std::for_each(linkedClusters.begin(), linkedClusters.end(), [ this, minLinkedTransformByLinkedClusters ]( uint cl){
+    std::for_each( linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
         linkedTransform[cl] = minLinkedTransformByLinkedClusters;
     });
     return;
