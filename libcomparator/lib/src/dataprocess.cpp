@@ -244,8 +244,7 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	{
 		if( data[ validIdx ].same_position( data[ idx ] ) )
 		{
-			data[ validIdx ].transition |= data[ idx ].transition;
-			
+			data[ validIdx ].transition |= data[ idx ].transition;			
 		}
 		else
 		{
@@ -273,6 +272,21 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
 		hue_base_level( colorBalance );
 		--counter;
 	}
+}
+
+void DataProcess::remove_noise_matches( std::vector<IndexTransition>&  data )
+{
+	data.erase(std::remove_if(data.begin(), data.end(), [](auto idxt){
+		Transition const tr = idxt.transition;
+		Transition tmpTr;
+		tmpTr =	tr & biUpDw;
+		tmpTr ^= biUpDw;
+
+		tmpTr |= tr & biLR;
+		tmpTr ^= biLR;
+
+		return tmpTr;
+	}), data.end());
 }
 
 template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >
