@@ -90,7 +90,7 @@ void Clustering::check_point_zone_linear( int indexX )
     std::sort(linkedClusters.begin(),linkedClusters.end());
     linkedClusters.erase(std::unique(linkedClusters.begin(), linkedClusters.end()), linkedClusters.end());
     
-//transform linked
+//transform linked// to delete
 /*    std::for_each(linkedClusters.begin(), linkedClusters.end(), [this](auto& cl){
         if( cl < linkedTransform.size())
         {
@@ -114,7 +114,11 @@ void Clustering::check_point_zone_linear( int indexX )
     });
     
     std::for_each( linkedClusters.begin(), linkedClusters.end(), [ this, &minLinkedTransformByLinkedClusters ]( uint cl){
-        linkedTransform[cl] = minLinkedTransformByLinkedClusters;
+        
+        //find all linkedTransform == linkedTransform[cl]
+        std::replace( linkedTransform.begin(), linkedTransform.end(), linkedTransform[ cl ], minLinkedTransformByLinkedClusters);
+        //linkedTransform[cl] = minLinkedTransformByLinkedClusters;
+
     });
     return;
 }
@@ -128,7 +132,7 @@ void Clustering::concatenate_clusters()
             linkedTransform[i] = i;
         }
     }
-/*
+/*//raw cluster numbers
     std::vector<uint> distinctClusters(linkedTransform);
     std::sort(distinctClusters.begin(), distinctClusters.end());
     distinctClusters.erase(std::unique(distinctClusters.begin(), distinctClusters.end()), distinctClusters.end());
