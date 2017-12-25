@@ -1,7 +1,9 @@
 #ifndef DATAPOCESS_HPP
 	#define DATAPOCESS_HPP
 	#include "libcomparator.hpp"
-
+	#ifdef WITH_TESTS
+		#include <iostream>
+	#endif
 
 	enum SideToClear
 	{

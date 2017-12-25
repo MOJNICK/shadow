@@ -73,14 +73,29 @@
 				}
 			}
 
-			bool same_position( IndexTransition& b )
+			bool same_position( IndexTransition& b ) const
 			{
 				return ( ( row == b.row ) && ( col == b.col ) ) ? true : false;
 			}
 
-			unsigned int index(cv::Mat& img)
+			uint index(cv::Mat& img)
 			{
-				return row * img.step + col * 3;
+				return row * img.step + col * channels;
+			}
+
+			uint conv_pix_to_subPix_col()
+			{
+				return col /= channels;
+			}
+
+			uint get_pix_to_subPix_col() const
+			{
+				return col / channels;
+			}
+
+			uint conv_subPix_to_pix_col()
+			{
+				return col *= channels;
 			}
 		};
 		

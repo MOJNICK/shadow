@@ -167,14 +167,15 @@ ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positi
 	return inputPositionsBalance;
 }
 
-void ColorBalance::push_element_balance( IndexTransition const & shadow )
+void ColorBalance::push_element_balance( IndexTransition const & inputShadow )
 {
+	IndexTransition shadow(inputShadow);
 	Transition const & shtransition = shadow.transition;
 	if( !is_valid( shadow.transition ) )
 		return;
 
 	uint brightRow = shadow.row;
-	uint brightCol = shadow.col;
+	uint brightCol = shadow.conv_subPix_to_pix_col();//fast compatibility... should be get_subPix_to_pix_col()
 	
 	if( shtransition & ( Transition::upToDw ) )		{ brightRow -= distance; }
 	if( shtransition & ( Transition::lToR ) )		{ brightCol -= distance * channels; }
@@ -199,6 +200,15 @@ void ColorBalance::push_element_balance( IndexTransition const & shadow )
 			}
 			colorBalances.push_back( _colorBalance );
 		}
+		#ifdef WITH_TESTS
+		else
+		{
+			if( distance <= 1)//distance within shadow detection zone
+			{
+				std::cout << "\nColorBalance::push_element_balance() : should never be here\n";
+			}
+		}
+		#endif
 }
 
 double ColorBalance::set_colorBalances_baseLevel()
