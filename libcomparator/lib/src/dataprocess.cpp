@@ -2,17 +2,17 @@
 
 double const d0upLim = 0.00001;//hue 0 limit
 
-ColorStruct::ColorStruct()
+ColorStruct::ColorStruct(): baseLevel{0}
 {
 	std::fill( color, color + channels, 0);
 }
 
-ColorStruct::ColorStruct( double value )
+ColorStruct::ColorStruct( double value ): baseLevel{0}
 {
 	std::fill( color, color + channels, value);
 }
 
-ColorStruct::ColorStruct( std::initializer_list< double > l )
+ColorStruct::ColorStruct( std::initializer_list< double > l ): baseLevel{0}
 {
 	std::transform( l.begin(), l.end(), color, []( double ld ){ return ld; } );
 }
@@ -98,14 +98,14 @@ double ColorStruct::saturation_cast( ColorStruct const & cs )
 		return 1.0 - min / max ;
 }
 
-double ColorStruct::HUE()
+double ColorStruct::HUE()//0 for test only, ColorBalance::baseLevel
 {
 	return HUE_cast( *this );
 }
 
 double ColorStruct::HUE_cast( ColorStruct const & cs )
 {
-	double const * color = cs.color;
+	double const * const color = cs.color;
 	double max = *std::max_element( color, color + channels);
 	double max_min = max - *std::min_element( color, color + channels);
     
@@ -227,7 +227,7 @@ bool ColorBalance::is_valid( Transition const & transition )
 	}
 #endif
 
-double ColorStruct::baseLevel = 0.0;
+//double ColorStruct::baseLevel = 0.0;
 
 DataProcess::DataProcess(){};
 
@@ -255,7 +255,7 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	data.resize(++validIdx);
 }
 
-double DataProcess::hue_base_level( std::vector< ColorStruct > const & colorBalance )
+double ColorBalance::hue_base_level()
 {
 	static double _baseLevel = 0.0;
 	static int counter = 2;//two iterations enough
@@ -267,10 +267,9 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > const & colorBala
 		for_each( colorBalance.begin(), colorBalance.end(), [&avg]( ColorStruct const & cs ){ avg += cs;});
 		avg /= colorBalance.size();
 		_baseLevel = avg.HUE( );
-		ColorStruct::baseLevel = _baseLevel;
-
-		hue_base_level( colorBalance );
+		//should change base level inside colorBalance vector.. ?
 		--counter;
+		hue_base_level();
 	}
 }
 

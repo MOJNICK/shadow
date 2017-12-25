@@ -32,11 +32,13 @@
 		static bool less_HUE( ColorStruct & first, ColorStruct & second );
 		static bool higher_HUE( ColorStruct & first, ColorStruct & second );
 	private:
-		static double baseLevel; //temporary workaround ..?
+		double baseLevel;
+
 		double saturation();
 		static double saturation_cast( ColorStruct const & cs );
-		double HUE();
-		static double HUE_cast( ColorStruct const & cs );
+		double HUE();//0 for test only, ColorBalance::baseLevel
+		double HUE_cast( ColorStruct const & cs );
+
 	};
 
 
@@ -55,9 +57,12 @@
 		cv::Mat const & img;
 		uint distance;
 		TYPE acceptanceLevel;
+
 		std::vector< ColorStruct > colorBalance;
+		
 
 		void push_element_balance( IndexTransition const & );
+		double hue_base_level();
 		static bool is_valid( Transition const & );
 	};
 
@@ -67,7 +72,6 @@
 	public:
 		DataProcess();
 		static void concatenate_HV( std::vector< IndexTransition >& );
-		static double hue_base_level( std::vector< ColorStruct > const & colorBalance );
 		static void remove_noise_matches( std::vector<IndexTransition>&  );
 		/*template< class TYPE, class Compare >
 			static void 
