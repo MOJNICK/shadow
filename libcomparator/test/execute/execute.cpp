@@ -62,7 +62,7 @@ void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & resu
             image.data[el.index( image ) + 1] = 0; 
             image.data[el.index( image ) + 2] = 255;
         });
-        draw_clusterNumber(image, result);
+        //draw_clusterNumber(image, result);
         cv::imshow( "Display window", image );
     }
     else
@@ -93,19 +93,19 @@ int test_on_image(char const path[], double eps, uint minPts)
         std::cout<<"\nwrong path\n";
         return -1;
     }
+
+    double factor = 0.25;
+    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     cv::Mat imageCpy = image.clone();
 
-
-    double factor = 1;
-    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
-
-    TYPE acceptanceLevel = 0;
+    TYPE acceptanceLevel = 50;
     double balance[] = {1.0, 1.0, 1.0};
-    double lightThreshold = 0.2;
-    double colorThreshold = 100000;
+    double lightThreshold = 0.4;
+    double colorThreshold = 0.9;
     IterateProcess<TYPE> iterateProcess(image, acceptanceLevel, lightThreshold, colorThreshold, balance);
     auto result = iterateProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
+    DataProcess::remove_noise_matches(result);
     
     show_result(image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
     
@@ -119,7 +119,7 @@ int test_on_image(char const path[], double eps, uint minPts)
 
 int main( int argc, char** argv )
 {
-    test_on_image("/home/szozda/Downloads/refImg/girSharp.png", 2.0, 40);
+    test_on_image("/home/szozda/Downloads/refImg/girSharp.png", 6.0, 5);
 //    test_on_image("/home/szozda/Downloads/refImg/linThin.png", 3.0, 0);
 //    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 3.0, 100);
 //    test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 3.0, 100);

@@ -132,9 +132,9 @@ img( img ), distance{ distance } //, colorBalance{ ColorStruct{ 0, 0 , 0 } }
 	acceptanceLevel = std::max( acceptanceLevel_, static_cast< TYPE >( 1 ) );
 }
 
-void ColorBalance::balance( std::vector< IndexTransition >& positions )
+void ColorBalance::balance( std::vector< IndexTransition > const & positions )
 {
-	std::for_each( positions.begin(), positions.end(), [ this ]( IndexTransition & el )
+	std::for_each( positions.begin(), positions.end(), [ this ]( IndexTransition const & el )
 	{
 		push_element_balance( el );
 	});
@@ -244,8 +244,7 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	{
 		if( data[ validIdx ].same_position( data[ idx ] ) )
 		{
-			data[ validIdx ].transition |= data[ idx ].transition;
-			
+			data[ validIdx ].transition |= data[ idx ].transition;			
 		}
 		else
 		{
@@ -256,10 +255,10 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	data.resize(++validIdx);
 }
 
-double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
+double DataProcess::hue_base_level( std::vector< ColorStruct > const & colorBalance )
 {
 	static double _baseLevel = 0.0;
-	static int counter = 2;
+	static int counter = 2;//two iterations enough
 	if ( counter == 0)
 		return _baseLevel;
 	else
@@ -273,6 +272,26 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
 		hue_base_level( colorBalance );
 		--counter;
 	}
+}
+
+void DataProcess::remove_noise_matches( std::vector<IndexTransition>&  data )
+{
+	//detect if double side transition aka noise transition
+	data.erase(std::remove_if(data.begin(), data.end(), [](auto idxt){
+		
+		bool result;
+		Transition const tr = idxt.transition;
+		Transition tmpTr;
+		
+		tmpTr =	(Transition)( tr & biUpDw );
+		result = ( tmpTr == ( tmpTr | biUpDw ) );
+
+		tmpTr =(Transition)( tr & biLR );
+		result |= ( tmpTr == ( tmpTr | biLR ) );
+		
+		return result;
+
+	}), data.end() );
 }
 
 template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >

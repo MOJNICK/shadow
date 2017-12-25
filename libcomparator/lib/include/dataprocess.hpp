@@ -45,7 +45,7 @@
 	public:
 		friend DataProcess;
 		ColorBalance( cv::Mat const &, TYPE, uint );
-		void balance( std::vector< IndexTransition >& );
+		void balance( std::vector< IndexTransition > const & );
 		~ColorBalance(){};
 		#ifdef WITH_TESTS
 			ColorStruct getColorBalance( uint idx = 0 );
@@ -67,7 +67,8 @@
 	public:
 		DataProcess();
 		static void concatenate_HV( std::vector< IndexTransition >& );
-		static double hue_base_level( std::vector< ColorStruct > colorBalance );
+		static double hue_base_level( std::vector< ColorStruct > const & colorBalance );
+		static void remove_noise_matches( std::vector<IndexTransition>&  );
 		/*template< class TYPE, class Compare >
 			static void 
 			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });*/
