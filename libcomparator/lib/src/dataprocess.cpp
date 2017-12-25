@@ -276,17 +276,22 @@ double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
 
 void DataProcess::remove_noise_matches( std::vector<IndexTransition>&  data )
 {
+	//detect if double side transition aka noise transition
 	data.erase(std::remove_if(data.begin(), data.end(), [](auto idxt){
+		
+		bool result;
 		Transition const tr = idxt.transition;
 		Transition tmpTr;
-		tmpTr =	tr & biUpDw;
-		tmpTr ^= biUpDw;
+		
+		tmpTr =	(Transition)( tr & biUpDw );
+		result = ( tmpTr == ( tmpTr | biUpDw ) );
 
-		tmpTr |= tr & biLR;
-		tmpTr ^= biLR;
+		tmpTr =(Transition)( tr & biLR );
+		result |= ( tmpTr == ( tmpTr | biLR ) );
+		
+		return result;
 
-		return tmpTr;
-	}), data.end());
+	}), data.end() );
 }
 
 template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >

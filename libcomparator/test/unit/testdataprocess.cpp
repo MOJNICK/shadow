@@ -6,6 +6,7 @@ uint const shuffleNumber = 100;
 class DataProcessTestMethods : public cvtest::BaseTest
 {
 public:
+  DataProcessTestMethods(): shuffleNumber{::shuffleNumber}{}
   DataProcessTestMethods( int shuffleNumber ): shuffleNumber{shuffleNumber}{}
 protected:
   int shuffleNumber;
@@ -28,6 +29,15 @@ protected:
       DataProcess::concatenate_HV( inputVec );
       compareVecIndexTransition(expectedVec, inputVec);
     }
+  }
+
+  std::vector<IndexTransition> transitionVec_to_indexTransitionVec( std::vector<Transition> trans)
+  {
+    std::vector<IndexTransition> result; 
+    for_each(trans.begin(), trans.end(), [&result](auto tr){
+      result.push_back(IndexTransition{0, 0, tr});
+    });
+    return result;
   }
 };
 
@@ -74,6 +84,43 @@ TEST(ComparatorLibDataProcessSuite, ConcatenateHV)
 {
   ConcatenateHV ConcatenateHV;
   ConcatenateHV.safe_run();
+}
+
+class RemoveNoise : public DataProcessTestMethods
+{
+public:
+    RemoveNoise(){}
+protected:
+  void run(int)
+  { 
+    DataProcess dp;
+    std::vector<uint> expectedSize{1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0};
+    for(uint i = 0; i < 0x10; ++i )
+    {
+      Transition tr = (Transition)( i << 3 );
+
+      std::vector<IndexTransition> testValue{ { 0, 0, tr } };
+      DataProcess::remove_noise_matches( testValue );
+      EXPECT_EQ( expectedSize[ i ], testValue.size() );
+    }
+
+    std::vector<Transition> transVector{ (Transition)(0), upToDw, lToR, biLUp, dwToUp, biLDw, rToL, biRUp, biRDw};
+    std::vector<IndexTransition> expectedVector = transitionVec_to_indexTransitionVec( transVector );
+    std::vector<IndexTransition> testVector;
+    for(uint i = 0; i < 0x10; ++i )
+    {
+      Transition tr = (Transition)( i << 3 );
+      testVector.push_back( IndexTransition{ 0, 0, tr } );
+    }
+    DataProcess::remove_noise_matches( testVector );
+    EXPECT_EQ( expectedVector, testVector );
+
+  }
+};
+TEST(ComparatorLibDataProcessSuite, RemoveNoise)
+{
+  RemoveNoise RemoveNoise;
+  RemoveNoise.safe_run();
 }
 
 class ColorStructsaturation : public cvtest::BaseTest

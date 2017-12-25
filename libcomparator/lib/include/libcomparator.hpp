@@ -38,6 +38,11 @@
 			
 			biUpDw = upToDw | dwToUp,
 			biLR = biUpDw << 1,
+
+			triUp = rToL | upToDw | lToR,
+			triL = triUp << 1,
+			triDw = triUp << 2,
+			triR = triUp << 3,
 						
 			all = biLR | biUpDw
 		};
