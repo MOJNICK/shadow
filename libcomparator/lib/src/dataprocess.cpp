@@ -132,7 +132,7 @@ img( img ), distance{ distance } //, colorBalance{ ColorStruct{ 0, 0 , 0 } }
 	acceptanceLevel = std::max( acceptanceLevel_, static_cast< TYPE >( 1 ) );
 }
 
-void ColorBalance::balance( std::vector< IndexTransition > const & positions )
+ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positions )
 {
 	std::for_each( positions.begin(), positions.end(), [ this ]( IndexTransition const & el )
 	{
@@ -164,6 +164,7 @@ void ColorBalance::balance( std::vector< IndexTransition > const & positions )
 	sumBalance /= colorBalances.size() * normalizer;
 
 	inputPositionsBalance = sumBalance;
+	return inputPositionsBalance;
 }
 
 void ColorBalance::push_element_balance( IndexTransition const & shadow )

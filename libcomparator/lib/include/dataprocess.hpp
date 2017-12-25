@@ -47,7 +47,7 @@
 	public:
 		friend DataProcess;
 		ColorBalance( cv::Mat const &, TYPE, uint );
-		void balance( std::vector< IndexTransition > const & inputPositions );
+		ColorStruct balance( std::vector< IndexTransition > const & inputPositions );
 		~ColorBalance(){};
 		#ifdef WITH_TESTS
 			ColorStruct getColorBalance( uint idx = 0 );
@@ -60,8 +60,7 @@
 		TYPE acceptanceLevel;
 		double baseLevel;//should be pushed to thi->colorBalances[].baseLevel
 
-		std::vector< ColorStruct > colorBalances;//temporary output balances of inputPositions
-		
+		std::vector< ColorStruct > colorBalances;//temporary output balances of inputPositions	
 
 		void push_element_balance( IndexTransition const & );
 		double set_colorBalances_baseLevel();
