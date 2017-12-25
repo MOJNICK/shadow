@@ -132,9 +132,9 @@ img( img ), distance{ distance } //, colorBalance{ ColorStruct{ 0, 0 , 0 } }
 	acceptanceLevel = std::max( acceptanceLevel_, static_cast< TYPE >( 1 ) );
 }
 
-void ColorBalance::balance( std::vector< IndexTransition >& positions )
+void ColorBalance::balance( std::vector< IndexTransition > const & positions )
 {
-	std::for_each( positions.begin(), positions.end(), [ this ]( IndexTransition & el )
+	std::for_each( positions.begin(), positions.end(), [ this ]( IndexTransition const & el )
 	{
 		push_element_balance( el );
 	});
@@ -255,10 +255,10 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	data.resize(++validIdx);
 }
 
-double DataProcess::hue_base_level( std::vector< ColorStruct > colorBalance )
+double DataProcess::hue_base_level( std::vector< ColorStruct > const & colorBalance )
 {
 	static double _baseLevel = 0.0;
-	static int counter = 2;
+	static int counter = 2;//two iterations enough
 	if ( counter == 0)
 		return _baseLevel;
 	else

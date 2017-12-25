@@ -93,16 +93,15 @@ int test_on_image(char const path[], double eps, uint minPts)
         std::cout<<"\nwrong path\n";
         return -1;
     }
-    cv::Mat imageCpy = image.clone();
 
-
-    double factor = 1;
+    double factor = 0.25;
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
+    cv::Mat imageCpy = image.clone();
 
     TYPE acceptanceLevel = 50;
     double balance[] = {1.0, 1.0, 1.0};
     double lightThreshold = 0.4;
-    double colorThreshold = 100000;
+    double colorThreshold = 0.9;
     IterateProcess<TYPE> iterateProcess(image, acceptanceLevel, lightThreshold, colorThreshold, balance);
     auto result = iterateProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
@@ -120,7 +119,7 @@ int test_on_image(char const path[], double eps, uint minPts)
 
 int main( int argc, char** argv )
 {
-    test_on_image("/home/szozda/Downloads/refImg/girSharp.png", 6.0, 0);
+    test_on_image("/home/szozda/Downloads/refImg/girSharp.png", 6.0, 5);
 //    test_on_image("/home/szozda/Downloads/refImg/linThin.png", 3.0, 0);
 //    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 3.0, 100);
 //    test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 3.0, 100);
