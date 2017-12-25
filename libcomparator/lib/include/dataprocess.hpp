@@ -23,6 +23,7 @@
 		ColorStruct( double value );
 		ColorStruct( std::initializer_list< double > l );
 		ColorStruct& operator+=( ColorStruct const & src );
+		ColorStruct& operator*=( double const divisor );
 		ColorStruct& operator/=( double const divisor );
 		ColorStruct& operator=( std::initializer_list< double > l );
 		static double add_saturation( ColorStruct & first, ColorStruct & second );
@@ -33,6 +34,7 @@
 		static double subtract_HUE( ColorStruct & first, ColorStruct & second );
 		static bool less_HUE( ColorStruct & first, ColorStruct & second );
 		static bool higher_HUE( ColorStruct & first, ColorStruct & second );
+		void set_baseLevel( double baseLevel_ ){ baseLevel = baseLevel_;}
 	private:
 		double baseLevel;
 

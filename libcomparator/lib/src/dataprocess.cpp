@@ -26,6 +26,15 @@ ColorStruct& ColorStruct::operator+=( ColorStruct const & src )
 	return *this;
 }
 
+ColorStruct& ColorStruct::operator*=( double const divisor )
+{
+	for( int i = 0; i < channels; ++i )
+	{
+		color[ i ] *= divisor;
+	}
+	return *this;
+}
+
 ColorStruct& ColorStruct::operator/=( double const divisor )
 {
 	for( int i = 0; i < channels; ++i )
@@ -145,7 +154,7 @@ ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positi
 							ColorStruct::subtract_saturation,
 							ColorStruct::saturation_cast );
 
-	set_colorBalances_baseLevel();
+	double _baseLevel = set_colorBalances_baseLevel();
 	DataProcess::outliner<double>( colorBalances, 1, both,
 							ColorStruct::less_HUE,
 							ColorStruct::add_HUE,
@@ -153,6 +162,7 @@ ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positi
 							ColorStruct::HUE_cast );
 	
 	ColorStruct sumBalance;
+	sumBalance.set_baseLevel( _baseLevel );
 
 	std::for_each( colorBalances.begin(), colorBalances.end(), [ &sumBalance ]( ColorStruct const & el )
 	{
@@ -161,7 +171,7 @@ ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positi
 
 	double normalizer = ( sumBalance.color[0] + sumBalance.color[1] + sumBalance.color[2] ) / channels;
 
-	sumBalance /= colorBalances.size() * normalizer;
+	sumBalance /= normalizer;
 
 	inputPositionsBalance = sumBalance;
 	return inputPositionsBalance;
