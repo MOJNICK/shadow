@@ -54,6 +54,7 @@
 			void clear_balance();
 		#endif
 	private:
+		ColorStruct inputPositionsBalance;
 		cv::Mat const & img;
 		uint distance;
 		TYPE acceptanceLevel;

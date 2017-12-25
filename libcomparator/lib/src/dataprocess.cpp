@@ -162,6 +162,8 @@ void ColorBalance::balance( std::vector< IndexTransition > const & positions )
 	double normalizer = ( sumBalance.color[0] + sumBalance.color[1] + sumBalance.color[2] ) / channels;
 
 	sumBalance /= colorBalances.size() * normalizer;
+
+	inputPositionsBalance = sumBalance;
 }
 
 void ColorBalance::push_element_balance( IndexTransition const & shadow )
