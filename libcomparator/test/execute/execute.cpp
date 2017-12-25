@@ -97,19 +97,28 @@ int test_on_image(char const path[], double eps, uint minPts)
     double factor = 0.25;
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     cv::Mat imageCpy = image.clone();
+    cv::Mat imageCpy2 = image.clone();
 
     TYPE acceptanceLevel = 50;
-    double balance[] = {1.0, 1.0, 1.0};
+    ColorStruct entryBalance{1.0, 1.0, 1.0};
     double lightThreshold = 0.4;
     double colorThreshold = 0.9;
-    IterateProcess<TYPE> iterateProcess(image, acceptanceLevel, lightThreshold, colorThreshold, balance);
-    auto result = iterateProcess.iterate_HV();
+    IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance);
+    auto result = entryProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
     DataProcess::remove_noise_matches(result);
     ColorBalance cba( image, 5u, 4 );
-    ColorStruct cs = cba.balance( result );
+    ColorStruct secondBalance = cba.balance( result );
+    result.resize( 0 );
 
     show_result(image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
+
+    IterateProcess<TYPE> secondProcess(image, acceptanceLevel, lightThreshold, colorThreshold, secondBalance);
+    result = secondProcess.iterate_HV();
+    DataProcess::concatenate_HV(result);
+    DataProcess::remove_noise_matches(result);
+
+    show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
     
     Clustering clustering( result, Distance::distance_fast, eps, minPts);
     clustering.points_clustering(&Clustering::check_point_zone_linear);
