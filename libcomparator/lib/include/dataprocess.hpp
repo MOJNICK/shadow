@@ -37,7 +37,7 @@
 		double saturation();
 		static double saturation_cast( ColorStruct const & cs );
 		double HUE();//0 for test only, ColorBalance::baseLevel
-		double HUE_cast( ColorStruct const & cs );
+		static double HUE_cast( ColorStruct const & cs );
 
 	};
 
@@ -47,7 +47,7 @@
 	public:
 		friend DataProcess;
 		ColorBalance( cv::Mat const &, TYPE, uint );
-		void balance( std::vector< IndexTransition > const & );
+		void balance( std::vector< IndexTransition > const & inputPositions );
 		~ColorBalance(){};
 		#ifdef WITH_TESTS
 			ColorStruct getColorBalance( uint idx = 0 );
@@ -57,12 +57,13 @@
 		cv::Mat const & img;
 		uint distance;
 		TYPE acceptanceLevel;
+		double baseLevel;//should be pushed to thi->colorBalances[].baseLevel
 
-		std::vector< ColorStruct > colorBalance;
+		std::vector< ColorStruct > colorBalances;//temporary output balances of inputPositions
 		
 
 		void push_element_balance( IndexTransition const & );
-		double hue_base_level();
+		double set_colorBalances_baseLevel();
 		static bool is_valid( Transition const & );
 	};
 

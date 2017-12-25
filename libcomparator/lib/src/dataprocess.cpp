@@ -120,7 +120,7 @@ double ColorStruct::HUE_cast( ColorStruct const & cs )
 	if( color[ 2 ] == max )
       	hue = 000 + ( ( color[ 1 ] - color[ 0 ] ) *60 /( max_min ) );
 	
-	if( hue < -180 + baseLevel )
+	if( hue < -180 + cs.baseLevel )
 		hue += 360;
 
 	return hue;
@@ -139,22 +139,29 @@ void ColorBalance::balance( std::vector< IndexTransition > const & positions )
 		push_element_balance( el );
 	});
 	
-	DataProcess::outliner<double>( colorBalance, 1, both,
+	DataProcess::outliner<double>( colorBalances, 1, both,
 							ColorStruct::less_saturation,
 							ColorStruct::add_saturation,
 							ColorStruct::subtract_saturation,
 							ColorStruct::saturation_cast );
+
+	set_colorBalances_baseLevel();
+	DataProcess::outliner<double>( colorBalances, 1, both,
+							ColorStruct::less_HUE,
+							ColorStruct::add_HUE,
+							ColorStruct::subtract_HUE,
+							ColorStruct::HUE_cast );
 	
 	ColorStruct sumBalance;
 
-	std::for_each( colorBalance.begin(), colorBalance.end(), [ &sumBalance ]( ColorStruct const & el )
+	std::for_each( colorBalances.begin(), colorBalances.end(), [ &sumBalance ]( ColorStruct const & el )
 	{
 		sumBalance += el;
 	} );
 
 	double normalizer = ( sumBalance.color[0] + sumBalance.color[1] + sumBalance.color[2] ) / channels;
 
-	sumBalance /= colorBalance.size() * normalizer;
+	sumBalance /= colorBalances.size() * normalizer;
 }
 
 void ColorBalance::push_element_balance( IndexTransition const & shadow )
@@ -187,8 +194,29 @@ void ColorBalance::push_element_balance( IndexTransition const & shadow )
 			{
 				_colorBalance.color[i] = static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
 			}
-			colorBalance.push_back( _colorBalance );
+			colorBalances.push_back( _colorBalance );
 		}
+}
+
+double ColorBalance::set_colorBalances_baseLevel()
+{
+	static int counter = 2;//two iterations enough
+	if ( counter == 0)
+	{
+		std::for_each( colorBalances.begin(), colorBalances.end(), [ this ](auto& el){
+			el.baseLevel = baseLevel;
+		});
+		return baseLevel;
+	}
+	else
+	{
+		ColorStruct avg;
+		std::for_each( colorBalances.begin(), colorBalances.end(), [&avg]( ColorStruct const & cs ){ avg += cs; });
+		avg /= colorBalances.size();
+		baseLevel = avg.HUE( );
+		--counter;
+		set_colorBalances_baseLevel();
+	}
 }
 
 bool ColorBalance::is_valid( Transition const & transition )
@@ -211,9 +239,9 @@ bool ColorBalance::is_valid( Transition const & transition )
 #ifdef WITH_TESTS
 	ColorStruct ColorBalance::getColorBalance( uint idx )
 	{
-		if( colorBalance.size() )
+		if( colorBalances.size() )
 		{
-			return colorBalance[ idx ];
+			return colorBalances[ idx ];
 		}
 		else
 		{
@@ -223,7 +251,7 @@ bool ColorBalance::is_valid( Transition const & transition )
 
 	void ColorBalance::clear_balance()
 	{
-		colorBalance.resize(0);
+		colorBalances.resize(0);
 	}
 #endif
 
@@ -253,24 +281,6 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 
 	}
 	data.resize(++validIdx);
-}
-
-double ColorBalance::hue_base_level()
-{
-	static double _baseLevel = 0.0;
-	static int counter = 2;//two iterations enough
-	if ( counter == 0)
-		return _baseLevel;
-	else
-	{
-		ColorStruct avg;
-		for_each( colorBalance.begin(), colorBalance.end(), [&avg]( ColorStruct const & cs ){ avg += cs;});
-		avg /= colorBalance.size();
-		_baseLevel = avg.HUE( );
-		//should change base level inside colorBalance vector.. ?
-		--counter;
-		hue_base_level();
-	}
 }
 
 void DataProcess::remove_noise_matches( std::vector<IndexTransition>&  data )
