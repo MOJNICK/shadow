@@ -99,21 +99,24 @@ int test_on_image(char const path[], double eps, uint minPts)
     cv::Mat imageCpy = image.clone();
     cv::Mat imageCpy2 = image.clone();
 
-    TYPE acceptanceLevel = 50;
-    ColorStruct entryBalance{1.0, 1.0, 1.0};
-    double lightThreshold = 0.4;
-    double colorThreshold = 0.9;
+    TYPE acceptanceLevel = 90;
+    ColorStruct entryBalance{ 0.82, 1.05, 1.14 };
+    double lightThreshold = 0.5;
+    double colorThreshold = 0.2;
     IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance);
     auto result = entryProcess.iterate_HV();
+    std::cout << result.size() << '\n';
     DataProcess::concatenate_HV(result);
     DataProcess::remove_noise_matches(result);
-    ColorBalance cba( image, 5u, 4 );
+    ColorBalance cba( image, 5u, 6 );
     ColorStruct secondBalance = cba.balance( result );
+
+    show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
     result.resize( 0 );
 
-    show_result(image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
-
-    IterateProcess<TYPE> secondProcess(image, acceptanceLevel, lightThreshold, colorThreshold, secondBalance);
+    lightThreshold = 0.2;
+    colorThreshold = 0.1;
+    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, secondBalance);
     result = secondProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
     DataProcess::remove_noise_matches(result);
@@ -130,7 +133,7 @@ int test_on_image(char const path[], double eps, uint minPts)
 
 int main( int argc, char** argv )
 {
-    test_on_image("/home/szozda/Downloads/refImg/girSharp.png", 6.0, 5);
+    test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 6.0, 20);
 //    test_on_image("/home/szozda/Downloads/refImg/linThin.png", 3.0, 0);
 //    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 3.0, 100);
 //    test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 3.0, 100);

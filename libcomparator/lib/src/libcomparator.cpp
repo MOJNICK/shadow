@@ -105,7 +105,7 @@ double const prealocate = 0.01;//vector reserve
 			return (Transition::no);
 		}
 
-		correct_pix0();//correct ballance
+		correct_pix0();//correct balance
 		if(light_distance() > lightThreshold)
 			if(color_distance() < colorThreshold)
 				return result;
