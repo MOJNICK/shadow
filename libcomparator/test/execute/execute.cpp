@@ -106,7 +106,9 @@ int test_on_image(char const path[], double eps, uint minPts)
     auto result = iterateProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
     DataProcess::remove_noise_matches(result);
-    
+    ColorBalance cba( image, 5u, 4 );
+    ColorStruct cs = cba.balance( result );
+
     show_result(image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
     
     Clustering clustering( result, Distance::distance_fast, eps, minPts);

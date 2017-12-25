@@ -32,11 +32,13 @@
 		static bool less_HUE( ColorStruct & first, ColorStruct & second );
 		static bool higher_HUE( ColorStruct & first, ColorStruct & second );
 	private:
-		static double baseLevel; //temporary workaround ..?
+		double baseLevel;
+
 		double saturation();
 		static double saturation_cast( ColorStruct const & cs );
-		double HUE();
+		double HUE();//0 for test only, ColorBalance::baseLevel
 		static double HUE_cast( ColorStruct const & cs );
+
 	};
 
 
@@ -45,19 +47,23 @@
 	public:
 		friend DataProcess;
 		ColorBalance( cv::Mat const &, TYPE, uint );
-		void balance( std::vector< IndexTransition > const & );
+		ColorStruct balance( std::vector< IndexTransition > const & inputPositions );
 		~ColorBalance(){};
 		#ifdef WITH_TESTS
 			ColorStruct getColorBalance( uint idx = 0 );
 			void clear_balance();
 		#endif
 	private:
+		ColorStruct inputPositionsBalance;
 		cv::Mat const & img;
 		uint distance;
 		TYPE acceptanceLevel;
-		std::vector< ColorStruct > colorBalance;
+		double baseLevel;//should be pushed to thi->colorBalances[].baseLevel
+
+		std::vector< ColorStruct > colorBalances;//temporary output balances of inputPositions	
 
 		void push_element_balance( IndexTransition const & );
+		double set_colorBalances_baseLevel();
 		static bool is_valid( Transition const & );
 	};
 
@@ -67,7 +73,6 @@
 	public:
 		DataProcess();
 		static void concatenate_HV( std::vector< IndexTransition >& );
-		static double hue_base_level( std::vector< ColorStruct > const & colorBalance );
 		static void remove_noise_matches( std::vector<IndexTransition>&  );
 		/*template< class TYPE, class Compare >
 			static void 

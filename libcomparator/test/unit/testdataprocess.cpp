@@ -129,7 +129,7 @@ public:
 protected:
   void run(int)
   {
-    ColorStruct::baseLevel = 0;
+    //ColorStruct::baseLevel = 0;
     ColorStruct cs{ 0, 0, 0};
     ASSERT_DOUBLE_EQ( 0.0, cs.saturation() );
 
@@ -164,7 +164,7 @@ public:
 protected:
   void run(int)
   {
-    ColorStruct::baseLevel = 0;
+//    ColorStruct::baseLevel = 0;
     ColorStruct cs{ 0, 0, 0};
     ASSERT_DOUBLE_EQ( 0.0, cs.HUE() );
 
