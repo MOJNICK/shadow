@@ -1,7 +1,9 @@
 #ifndef DATAPOCESS_HPP
 	#define DATAPOCESS_HPP
 	#include "libcomparator.hpp"
-
+	#ifdef WITH_TESTS
+		#include <iostream>
+	#endif
 
 	enum SideToClear
 	{
@@ -15,14 +17,18 @@
 	{
 		friend DataProcess;
 
-		double color[ channels ];
-
 		ColorStruct();
 		ColorStruct( double value );
 		ColorStruct( std::initializer_list< double > l );
+
+		operator double*(){ return color; }//
+		double& operator[]( uint idx ){ return color[idx];}
+
 		ColorStruct& operator+=( ColorStruct const & src );
+		ColorStruct& operator*=( double const divisor );
 		ColorStruct& operator/=( double const divisor );
 		ColorStruct& operator=( std::initializer_list< double > l );
+
 		static double add_saturation( ColorStruct & first, ColorStruct & second );
 		static double subtract_saturation( ColorStruct & first, ColorStruct & second );
 		static bool less_saturation( ColorStruct & first, ColorStruct & second );
@@ -31,7 +37,11 @@
 		static double subtract_HUE( ColorStruct & first, ColorStruct & second );
 		static bool less_HUE( ColorStruct & first, ColorStruct & second );
 		static bool higher_HUE( ColorStruct & first, ColorStruct & second );
+
+		void set_baseLevel( double baseLevel_ ){ baseLevel = baseLevel_;}
+	
 	private:
+		double color[ channels ];
 		double baseLevel;
 
 		double saturation();
@@ -54,7 +64,7 @@
 			void clear_balance();
 		#endif
 	private:
-		ColorStruct inputPositionsBalance;
+		ColorStruct inputPositionsBalance;//result
 		cv::Mat const & img;
 		uint distance;
 		TYPE acceptanceLevel;
