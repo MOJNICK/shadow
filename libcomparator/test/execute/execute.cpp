@@ -131,12 +131,72 @@ int test_on_image(char const path[], double eps, uint minPts)
     return 0;
 }
 
+void save_result(char* source_path, char const postFix[], char const outputFormat[], cv::Mat& image)
+{
+    char* destination_path = (char*)calloc( strlen(source_path) + strlen(postFix) + strlen(outputFormat), sizeof(char) );
+
+    char* lastSlash = strrchr ( source_path, '.' );
+    int lastSlashPos = lastSlash - source_path;
+    
+    strncpy( destination_path, source_path, lastSlashPos );
+    
+    int len = strlen( destination_path );
+    strcpy( destination_path + len, postFix );
+    
+    len += strlen( postFix );
+    strcpy( destination_path + len, source_path + lastSlashPos );
+    
+    len = strlen( destination_path );
+    strcpy( destination_path + len, outputFormat );
+
+    cv::imwrite( destination_path, image);
+}
+
+int broad_HUE(char* path)
+{
+    cv::Mat image;
+    image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    if(! image.data )
+    {
+        std::cout<<"\nwrong path\n";
+        return -1;
+    }
+    
+    cvtColor(image, image, CV_BGR2HSV);
+    for(int i =2; i < image.rows * image.cols * 3; i+=3)
+    {
+        image.data[i] = 255;
+    }
+    cvtColor(image, image, CV_HSV2BGR);
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Display window", image );
+    save_result(path, "_OUT1", ".png", image);
+
+    cvtColor(image, image, CV_BGR2HSV);
+    for(int i =2; i < image.rows * image.cols * 3; i+=3)
+    {
+        image.data[i] = 255;
+    }
+    for(int i = 1; i < image.rows * image.cols * 3; i+=3)
+    {
+        image.data[i] = 255;
+    }
+    cvtColor(image, image, CV_HSV2BGR);
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Display window", image );
+    save_result(path, "_OUT2", ".png", image);
+
+    return 0;
+}
+
+
 int main( int argc, char** argv )
 {
-    test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 6.0, 20);
+//    test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 6.0, 20);
 //    test_on_image("/home/szozda/Downloads/refImg/linThin.png", 3.0, 0);
 //    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 3.0, 100);
 //    test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 3.0, 100);
+    broad_HUE("/home/szozda/Downloads/refImg/table.jpg");
 
     return 0;
 }
