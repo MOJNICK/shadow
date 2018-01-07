@@ -161,6 +161,11 @@ ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positi
 							ColorStruct::subtract_HUE,
 							ColorStruct::HUE_cast );
 	
+	if( colorBalances.size() == 0 )
+	{
+		return ColorStruct{1.0,1.0,1.0};
+	}
+
 	ColorStruct sumBalance;
 	sumBalance.set_baseLevel( _baseLevel );
 

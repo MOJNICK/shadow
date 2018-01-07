@@ -83,8 +83,8 @@ cv::Mat show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & r
             image.data[el.index( image ) + 1] = 0; 
             image.data[el.index( image ) + 2] = 255;
         });
-        //draw_clusterNumber(image, result);
-        cv::imshow( "Display window image", image );
+        draw_clusterNumber(image, result);
+        cv::imshow( "Display window", image );
     }
     else
     {
@@ -99,8 +99,8 @@ cv::Mat show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & r
         blackImage.data[el.index( blackImage ) + 1] = 0; 
         blackImage.data[el.index( blackImage ) + 2] = 255;
     });
-    //draw_clusterNumber(blackImage, result);
-    cv::imshow( "Display window blackImage", blackImage );
+    draw_clusterNumber(blackImage, result);
+    cv::imshow( "Display window", blackImage );
     cv::waitKey(0);
     return blackImage;
 }
@@ -122,7 +122,7 @@ int test_on_image(char path[], double factor, double eps, uint minPts)
 
     TYPE acceptanceLevel = 90;
     ColorStruct entryBalance{ 0.82, 1.05, 1.14 };
-    double lightThreshold = 0.5;
+    double lightThreshold = 0.3;
     double colorThreshold = 0.2;
     IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance);
     auto result = entryProcess.iterate_HV();
@@ -209,10 +209,17 @@ int broad_HUE(char* path)
 
 int main( int argc, char** argv )
 {
-//    test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 4.0, 20);
+//    test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 4.0, 20);
 //    test_on_image("/home/szozda/Downloads/refImg/linThin.png", 1, 6.0, 2);
-    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 1, 6.0, 2);
+//    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 1, 6.0, 2);
 //    test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 1, 6.0, 2);
+//    test_on_image("/home/szozda/Downloads/refImg/roof.png", 1, 6.0, 2); 
+//    test_on_image("/home/szozda/Downloads/refImg/cirRef.png", 1, 6.0, 2);
+//    test_on_image("/home/szozda/Downloads/refImg/cirRef2.png", 1, 6.0, 2);
+//    test_on_image("/home/szozda/Downloads/refImg/cirRef3.png", 1, 6.0, 2);
+    test_on_image("/home/szozda/Downloads/refImg/cirRef4.png", 1, 1.0, 2);
+//   test_on_image("/home/szozda/Downloads/refImg/cirRef5.png", 1, 6.0, 2);
+
 
 //    broad_HUE("/home/szozda/Downloads/refImg/palma.jpg");
 //    broad_HUE("/home/szozda/Downloads/refImg/table.jpg");
