@@ -70,8 +70,9 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
     std::cout<< textPoint.size()<< "\n";
 }
 
-cv::Mat show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & result )
+cv::Mat show_result(cv::Mat img, std::vector<IndexTransitionCluster> const & result )
 {
+    cv::Mat image = img.clone();
     cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Display window", image );                   
     cv::waitKey(0);
@@ -91,7 +92,7 @@ cv::Mat show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & r
         std::cout<<"notcontionuous\n";
         return image;
     }
-    cv::waitKey(0);
+//    cv::waitKey(0);
 
     cv::Mat blackImage(image.rows, image.cols, CV_8UC3, cv::Scalar(0,0,0));
     for_each(result.begin(), result.end(), [&blackImage](auto el){
@@ -121,36 +122,38 @@ int test_on_image(char path[], double factor, double eps, uint minPts)
     cv::Mat blackImage;
 
     TYPE acceptanceLevel = 90;
-    ColorStruct entryBalance{ 0.82, 1.05, 1.14 };
+    ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
     double lightThreshold = 0.3;
     double colorThreshold = 0.2;
     IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance);
     auto result = entryProcess.iterate_HV();
     std::cout << result.size() << '\n';
     DataProcess::concatenate_HV(result);
+    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
+    save_result(path, "_noisy", ".png", blackImage);
     DataProcess::remove_noise_matches(result);
     ColorBalance cba( image, 5u, 6 );
     ColorStruct secondBalance = cba.balance( result );
 
     blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
-    result.resize( 0 );
     save_result(path, "_detect1", ".png", blackImage);
+    result.resize( 0 );
 
-    lightThreshold = 0.5;
+    lightThreshold = 0.3;
     colorThreshold = 0.2;
-    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, secondBalance);
+    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 });//secondBalance);
     result = secondProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
     DataProcess::remove_noise_matches(result);
 
     blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
-    save_result(path, "_detect3", ".png", blackImage);
+    save_result(path, "_detect_balanced", ".png", blackImage);
     
     Clustering clustering( result, Distance::distance_fast, eps, minPts);
     clustering.points_clustering(&Clustering::check_point_zone_linear);
     auto clusters = clustering.getRefVIndexTransitionCluster();
     blackImage = show_result(imageCpy, clusters);
-    save_result(path, "_detect2", ".png", blackImage);
+    save_result(path, "_detect_cluster", ".png", blackImage);
     
     return 0;
 }
@@ -209,18 +212,19 @@ int broad_HUE(char* path)
 
 int main( int argc, char** argv )
 {
-//    test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 4.0, 20);
-//    test_on_image("/home/szozda/Downloads/refImg/linThin.png", 1, 6.0, 2);
-//    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 1, 6.0, 2);
-//    test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 1, 6.0, 2);
-//    test_on_image("/home/szozda/Downloads/refImg/roof.png", 1, 6.0, 2); 
-//    test_on_image("/home/szozda/Downloads/refImg/cirRef.png", 1, 6.0, 2);
-//    test_on_image("/home/szozda/Downloads/refImg/cirRef2.png", 1, 6.0, 2);
-//    test_on_image("/home/szozda/Downloads/refImg/cirRef3.png", 1, 6.0, 2);
-    test_on_image("/home/szozda/Downloads/refImg/cirRef4.png", 1, 1.0, 2);
-//   test_on_image("/home/szozda/Downloads/refImg/cirRef5.png", 1, 6.0, 2);
+    test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 3.0, 10);
+    // test_on_image("/home/szozda/Downloads/refImg/linThin.png", 1, 6.0, 2);
+    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 1, 6.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 1, 6.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/roof.png", 0.25, 6.0, 2); 
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef.png", 1, 2.0, 100);
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef2.png", 1, 6.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef3.png", 1, 6.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef4.png", 1, 2.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef5.png", 1, 6.0, 2);
 
 
+   broad_HUE("/home/szozda/Downloads/refImg/girRef.jpg");
 //    broad_HUE("/home/szozda/Downloads/refImg/palma.jpg");
 //    broad_HUE("/home/szozda/Downloads/refImg/table.jpg");
 //    broad_HUE("/home/szozda/Downloads/refImg/palma_linear.png");
