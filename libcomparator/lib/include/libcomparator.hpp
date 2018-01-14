@@ -83,6 +83,11 @@
 				return row * img.step + col * channels;
 			}
 
+			uint bw_index(cv::Mat& img)
+			{
+				return row * img.step + col;
+			}
+
 			uint conv_pix_to_subPix_col()
 			{
 				return col /= channels;
