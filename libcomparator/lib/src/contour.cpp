@@ -41,9 +41,10 @@ cv::Mat Preprocess::get_thick_kernel( cv::Mat& image, int dilationSize )
     cv::Mat gray, edge, draw;
     cvtColor(image, gray, CV_BGR2GRAY);
  
-    blur( gray, gray, cv::Size(10,10) );
+    blur( gray, gray, cv::Size(7, 7) );
 
-    Canny( gray, edge, 10, 40, 3);
+    int apertureSize = 5;
+    Canny( gray, edge, 80, 500, apertureSize, true);//
  
     edge.convertTo(thickKernel, CV_8U);
 
@@ -56,3 +57,16 @@ cv::Mat Preprocess::get_thick_kernel( cv::Mat& image, int dilationSize )
 
 	return thickKernel;
 }
+
+cv::Mat_<DataTransition> Preprocess::get_correction_edge( cv::Mat const & thickKernel, std::vector<IndexTransition> const & indexTransition, cv::Mat filterKernel )
+{
+	if(filterKernel.rows % 2 != 0 | filterKernel.cols % 2 != 0 )
+		std::cout << "\nnot even filterKernel Preprocess::get_correction_edge\n";
+
+	cv::Mat thickKernelBorder;
+	cv::copyMakeBorder( thickKernel, thickKernelBorder, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
+	cv::Rect rct( filterKernel.cols, filterKernel.rows, thickKernel.cols + filterKernel.cols, thickKernel.rows + filterKernel.rows);//TBD
+	cv::Mat roi = thickKernelBorder(rct);
+
+}
+

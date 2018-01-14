@@ -1,11 +1,10 @@
 #include "show_result.hpp"
-#include <iostream>
 
 
 int main( int argc, char** argv )
 {
 
-    test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 1.0, 5 );
+    test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 1.0, 0 );
     // test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 3.0, 10);
     // test_on_image("/home/szozda/Downloads/refImg/linThin.png", 1, 6.0, 2);
     // test_on_image("/home/szozda/Downloads/refImg/linThick.png", 1, 6.0, 2);
