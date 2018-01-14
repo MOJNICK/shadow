@@ -4,6 +4,7 @@
 #include "libcomparator.hpp"
 #include "dataprocess.hpp"
 #include "clustering.hpp"
+#include "contour.hpp"
 
 void save_result(char* source_path, char const postFix[], char const outputFormat[], cv::Mat& image);
 
@@ -16,3 +17,5 @@ cv::Mat show_result(cv::Mat img, std::vector<IndexTransitionCluster> const & res
 int test_on_image(char path[], double factor, double eps, uint minPts);
 
 int broad_HUE(char* path);
+
+cv::Mat test_canny( char* path, double factor, int dilationSize );

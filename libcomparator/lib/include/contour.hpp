@@ -1,4 +1,5 @@
 #include <opencv2/core/core.hpp>
+#include "opencv2/imgproc/imgproc.hpp"
 #include "libcomparator.hpp"
 
 class DataTransition
@@ -24,5 +25,5 @@ private:
 class Preprocess
 {
 public:
-	cv::Mat get_thick_kernel( cv::Mat& image );
+	static cv::Mat get_thick_kernel( cv::Mat& image, int dilationSize );
 };

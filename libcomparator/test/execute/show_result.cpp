@@ -202,3 +202,20 @@ int broad_HUE(char* path)
 
     return 0;
 }
+
+cv::Mat test_canny( char* path, double factor, int dilationSize )
+{
+    cv::Mat image;
+    image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    if(! image.data )
+    {
+        std::cout<<"\nwrong path\n";
+        return image;
+    }
+    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
+
+    cv::Mat edges = Preprocess::get_thick_kernel( image, dilationSize );
+    cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Canny", edges );
+    cv::waitKey(0);
+}

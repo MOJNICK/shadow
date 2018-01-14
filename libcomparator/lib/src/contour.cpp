@@ -34,8 +34,25 @@ void ContourTransition::set_transition_to_no()
 
 
 
-cv::Mat Preprocess::get_thick_kernel( cv::Mat& image )
+cv::Mat Preprocess::get_thick_kernel( cv::Mat& image, int dilationSize )
 {
 	cv::Mat thickKernel = image.clone();
+ 
+    cv::Mat gray, edge, draw;
+    cvtColor(image, gray, CV_BGR2GRAY);
+ 
+    blur( gray, gray, cv::Size(10,10) );
+
+    Canny( gray, edge, 10, 40, 3);
+ 
+    edge.convertTo(thickKernel, CV_8U);
+
+    //dilate here
+    cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE,
+                                       cv::Size( 2*dilationSize + 1, 2*dilationSize+1 ),
+                                       cv::Point( dilationSize, dilationSize ) );
+  /// Apply the dilation operation
+  	dilate( thickKernel, thickKernel, element );
+
 	return thickKernel;
 }
