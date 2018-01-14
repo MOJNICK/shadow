@@ -2,6 +2,7 @@ file(GLOB execute_source_files *.cpp)
 use_cxx_std()
 
 include_directories(/usr/include/python2.7)
+include_directories(./)
 
 add_executable(execute ${execute_source_files})
 
