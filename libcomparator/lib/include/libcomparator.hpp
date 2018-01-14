@@ -44,7 +44,9 @@
 			triDw = triUp << 2,
 			triR = triUp << 3,
 						
-			all = biLR | biUpDw
+			all = biLR | biUpDw,
+
+			unknown = rToL << 1
 		};
 
 		inline Transition operator|( Transition const & a, Transition const & b )

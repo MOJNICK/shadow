@@ -214,7 +214,8 @@ cv::Mat test_canny( char* path, double factor, int dilationSize )
     }
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
 
-    cv::Mat edges = Preprocess::get_thick_kernel( image, dilationSize );
+    Preprocess preprocess( MakeFilter::get_square_filter(10), image);
+    cv::Mat edges = preprocess.get_thick_kernel( image, dilationSize );
     cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Canny", edges );
     cv::waitKey(0);
