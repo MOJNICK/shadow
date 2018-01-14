@@ -161,6 +161,11 @@ ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positi
 							ColorStruct::subtract_HUE,
 							ColorStruct::HUE_cast );
 	
+	if( colorBalances.size() == 0 )
+	{
+		return ColorStruct{1.0,1.0,1.0};
+	}
+
 	ColorStruct sumBalance;
 	sumBalance.set_baseLevel( _baseLevel );
 
@@ -330,6 +335,9 @@ template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast 
 void
 DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, BaseArithm add, BaseArithm subtract, Cast cast_arithm_arg )
 {
+	if( dataset.size() == 0 )
+		return;
+	
     TypeIn median( 0 );
     TypeIn Q1( 0 );
     TypeIn Q3( 0 );

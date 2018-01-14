@@ -37,6 +37,8 @@ void Clustering::points_clustering( void (Clustering::*check_point_zone_function
     {
         (this->*check_point_zone_function)(indexX);
     }
+    if( linkedTransform.size() == 0 )
+        return;
 
     concatenate_clusters();
 
@@ -115,7 +117,7 @@ void Clustering::concatenate_clusters()
         }
     }
 
-//raw cluster numbers or not
+//raw cluster numbers or not code below
     std::vector<uint> distinctClusters(linkedTransform);
     std::sort(distinctClusters.begin(), distinctClusters.end());
     distinctClusters.erase(std::unique(distinctClusters.begin(), distinctClusters.end()), distinctClusters.end());

@@ -6,6 +6,27 @@
 #include "clustering.hpp"
 #include <iostream>
 
+void save_result(char* source_path, char const postFix[], char const outputFormat[], cv::Mat& image)
+{
+    char* destination_path = (char*)calloc( strlen(source_path) + strlen(postFix) + strlen(outputFormat), sizeof(char) );
+
+    char* lastSlash = strrchr ( source_path, '.' );
+    int lastSlashPos = lastSlash - source_path;
+    
+    strncpy( destination_path, source_path, lastSlashPos );
+    
+    int len = strlen( destination_path );
+    strcpy( destination_path + len, postFix );
+    
+    len += strlen( postFix );
+    strcpy( destination_path + len, source_path + lastSlashPos );
+    
+    len = strlen( destination_path );
+    strcpy( destination_path + len, outputFormat );
+
+    cv::imwrite( destination_path, image);
+}
+
 void p_around(unsigned char* data, int before, int after)
 {
     for(int i = -before; i < after; ++i )
@@ -49,8 +70,9 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
     std::cout<< textPoint.size()<< "\n";
 }
 
-void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & result )
+cv::Mat show_result(cv::Mat img, std::vector<IndexTransitionCluster> const & result )
 {
+    cv::Mat image = img.clone();
     cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Display window", image );                   
     cv::waitKey(0);
@@ -62,15 +84,15 @@ void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & resu
             image.data[el.index( image ) + 1] = 0; 
             image.data[el.index( image ) + 2] = 255;
         });
-        //draw_clusterNumber(image, result);
+        draw_clusterNumber(image, result);
         cv::imshow( "Display window", image );
     }
     else
     {
         std::cout<<"notcontionuous\n";
-        return;
+        return image;
     }
-    cv::waitKey(0);
+//    cv::waitKey(0);
 
     cv::Mat blackImage(image.rows, image.cols, CV_8UC3, cv::Scalar(0,0,0));
     for_each(result.begin(), result.end(), [&blackImage](auto el){
@@ -78,13 +100,13 @@ void show_result(cv::Mat image, std::vector<IndexTransitionCluster> const & resu
         blackImage.data[el.index( blackImage ) + 1] = 0; 
         blackImage.data[el.index( blackImage ) + 2] = 255;
     });
-    //draw_clusterNumber(blackImage, result);
+    draw_clusterNumber(blackImage, result);
     cv::imshow( "Display window", blackImage );
-    cv::imwrite("/mnt/hgfs/dsk/refImg/result_cirRef2.png", blackImage);
     cv::waitKey(0);
+    return blackImage;
 }
 
-int test_on_image(char const path[], double eps, uint minPts)
+int test_on_image(char path[], double factor, double eps, uint minPts)
 {
     cv::Mat image;
     image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
@@ -94,49 +116,121 @@ int test_on_image(char const path[], double eps, uint minPts)
         return -1;
     }
 
-    double factor = 0.25;
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     cv::Mat imageCpy = image.clone();
     cv::Mat imageCpy2 = image.clone();
+    cv::Mat blackImage;
 
     TYPE acceptanceLevel = 90;
-    ColorStruct entryBalance{ 0.82, 1.05, 1.14 };
-    double lightThreshold = 0.5;
+    ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
+    double lightThreshold = 0.3;
     double colorThreshold = 0.2;
     IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance);
     auto result = entryProcess.iterate_HV();
     std::cout << result.size() << '\n';
     DataProcess::concatenate_HV(result);
+    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
+    save_result(path, "_noisy", ".png", blackImage);
     DataProcess::remove_noise_matches(result);
     ColorBalance cba( image, 5u, 6 );
     ColorStruct secondBalance = cba.balance( result );
 
-    show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
+    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
+    save_result(path, "_detect1", ".png", blackImage);
     result.resize( 0 );
 
-    lightThreshold = 0.2;
-    colorThreshold = 0.1;
-    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, secondBalance);
+    lightThreshold = 0.3;
+    colorThreshold = 0.2;
+    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 });//secondBalance);
     result = secondProcess.iterate_HV();
     DataProcess::concatenate_HV(result);
     DataProcess::remove_noise_matches(result);
 
-    show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
+    blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
+    save_result(path, "_detect_balanced", ".png", blackImage);
     
     Clustering clustering( result, Distance::distance_fast, eps, minPts);
     clustering.points_clustering(&Clustering::check_point_zone_linear);
     auto clusters = clustering.getRefVIndexTransitionCluster();
-    show_result(imageCpy, clusters);
+    blackImage = show_result(imageCpy, clusters);
+    save_result(path, "_detect_cluster", ".png", blackImage);
     
     return 0;
 }
 
+
+int broad_HUE(char* path)
+{
+    cv::Mat image;
+    image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    if(! image.data )
+    {
+        std::cout<<"\nwrong path\n";
+        return -1;
+    }
+    
+    cvtColor(image, image, CV_BGR2HSV);
+    for(int i =2; i < image.rows * image.cols * 3; i+=3)
+    {
+        image.data[i] = 255;
+    }
+    cvtColor(image, image, CV_HSV2BGR);
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Display window", image );
+    save_result(path, "_OUT1", ".png", image);
+
+
+    cv::Mat cpyImage = image.clone();
+    cvtColor(cpyImage, cpyImage, CV_BGR2HSV);
+    for(int i =2; i < cpyImage.rows * cpyImage.cols * 3; i+=3)
+    {
+        cpyImage.data[i] = cpyImage.data[i-1];
+    }
+    cvtColor(cpyImage, cpyImage, CV_HSV2BGR);
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Display window", cpyImage );
+    save_result(path, "_OUT3", ".png", cpyImage);
+
+
+    cvtColor(image, image, CV_BGR2HSV);
+    for(int i =2; i < image.rows * image.cols * 3; i+=3)
+    {
+        image.data[i] = 255;
+    }
+    for(int i = 1; i < image.rows * image.cols * 3; i+=3)
+    {
+        image.data[i] = 255;
+    }
+    cvtColor(image, image, CV_HSV2BGR);
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Display window", image );
+    save_result(path, "_OUT2", ".png", image);
+
+    return 0;
+}
+
+
 int main( int argc, char** argv )
 {
-    test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 6.0, 20);
-//    test_on_image("/home/szozda/Downloads/refImg/linThin.png", 3.0, 0);
-//    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 3.0, 100);
-//    test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 3.0, 100);
+    test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 3.0, 10);
+    // test_on_image("/home/szozda/Downloads/refImg/linThin.png", 1, 6.0, 2);
+    test_on_image("/home/szozda/Downloads/refImg/linThick.png", 1, 6.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 1, 6.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/roof.png", 0.25, 6.0, 2); 
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef.png", 1, 2.0, 100);
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef2.png", 1, 6.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef3.png", 1, 6.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef4.png", 1, 2.0, 2);
+    // test_on_image("/home/szozda/Downloads/refImg/cirRef5.png", 1, 6.0, 2);
+
+
+   broad_HUE("/home/szozda/Downloads/refImg/girRef.jpg");
+//    broad_HUE("/home/szozda/Downloads/refImg/palma.jpg");
+//    broad_HUE("/home/szozda/Downloads/refImg/table.jpg");
+//    broad_HUE("/home/szozda/Downloads/refImg/palma_linear.png");
+//    broad_HUE("/home/szozda/Downloads/refImg/roof_black.png");
+//    broad_HUE("/home/szozda/Downloads/refImg/roof_invariant.png");
+//    broad_HUE("/home/szozda/Downloads/refImg/roof_finlay_invariant.png");
 
     return 0;
 }
