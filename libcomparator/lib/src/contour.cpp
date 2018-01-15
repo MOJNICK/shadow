@@ -67,19 +67,24 @@ ContourTransition Preprocess::get_correction_edge( cv::Mat const & thickKernel, 
 	if(filterKernel.rows % 2 != 0 | filterKernel.cols % 2 != 0 )
 		std::cout << "\nnot even filterKernel Preprocess::get_correction_edge\n";
 
-	cv::Mat thickKernelBorder;
-	cv::copyMakeBorder( thickKernel, thickKernelBorder, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
+	cv::Mat thickKernelSilentBorder;
+	cv::copyMakeBorder( thickKernel, thickKernelSilentBorder, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
 	cv::Rect rct( filterKernel.cols, filterKernel.rows, thickKernel.cols + filterKernel.cols, thickKernel.rows + filterKernel.rows);//TBD
-	cv::Mat kernelSilentBorder = thickKernelBorder(rct);
-	cv::Mat_<Transition> matTrans = this->cvt_it_to_matT( indexTransition );
+	cv::Mat kernelSilentBorder = thickKernelSilentBorder(rct);
+	cv::Mat_<Transition> matTransSilentBorder = this->cvt_it_to_matT( indexTransition );
+
+	for( int i = 0; i < kernelSilentBorder.total(); ++i )
+	{
+		;
+	}
 
 }
 
 Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Transition> matTransSilentBorder )
 {
 	Transition result{ empty };
-	std::pair<double, uint> histo[ transDirCombo ];
-	for( int i = 0; i < transDirCombo; i++ )
+	std::pair<double, uint> histo[ transDirCombi ];
+	for( int i = 0; i < transDirCombi; i++ )
 	{
 		histo[i] = std::pair<double, uint>( 0.0, i );
 	}
@@ -91,11 +96,11 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 		}
 
 
-	std::pair<double, uint> orgHisto[ transDirCombo ];
-	std::copy( histo, histo + transDirCombo, orgHisto );
-	for( int i = 0; i < transDirCombo; i++ )//concatenate similar transition probability
+	std::pair<double, uint> orgHisto[ transDirCombi ];
+	std::copy( histo, histo + transDirCombi, orgHisto );
+	for( int i = 0; i < transDirCombi; ++i )//concatenate similar transition probability
 	{
-		for( int j = 0; j < transDirCombo; j++ )
+		for( int j = 0; j < transDirCombi; ++j )
 		{
 			if( i & j == i )
 			{
@@ -104,7 +109,7 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 		}
 	}
 
-	std::sort(histo, histo + transDirCombo, std::greater<std::pair<double, uint>>());
+	std::sort(histo, histo + transDirCombi, std::greater<std::pair<double, uint>>());
 	
 	if( histo[0].first / histo[1].first > 2 )
 	{
@@ -144,7 +149,7 @@ cv::Mat_<Transition> Preprocess::cvt_it_to_matT( std::vector<IndexTransition> co
 	});
 	cv::copyMakeBorder( tmpResult, result, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
 
-	return result;
+	return result;//return with silent border
 }
 
 cv::Mat_<double> MakeFilter::get_square_filter( int filterSize )
