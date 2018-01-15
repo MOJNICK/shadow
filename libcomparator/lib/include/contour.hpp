@@ -1,6 +1,7 @@
 #include <opencv2/core/core.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
 #include "libcomparator.hpp"
+#include "dataprocess.hpp"
 #include <iostream>
 
 class DataTransition
@@ -34,7 +35,7 @@ private:
 	cv::Mat_<double> filterKernel;
 	cv::Size2i srcImgSize;
 
-	DataTransition get_direction( int row, int col, cv::Mat_<Transition> matTrans );
+	Transition get_direction( int const row, int const col, cv::Mat_<Transition> matTrans );
 	// DataTransition set_direction( cv::Mat thickKernelROI, cv::Mat_<Transition> matTrans );
 	cv::Mat_<Transition> cvt_it_to_matT( std::vector<IndexTransition> const & indexTransition );
 };

@@ -311,22 +311,27 @@ void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 	data.resize(++validIdx);
 }
 
+bool DataProcess::is_noise_detection( Transition const tr )
+{
+	bool result;
+	Transition tmpTr;
+	
+	tmpTr =	(Transition)( tr & biUpDw );
+	result = ( tmpTr == ( tmpTr | biUpDw ) );
+
+	tmpTr =(Transition)( tr & biLR );
+	result |= ( tmpTr == ( tmpTr | biLR ) );
+	
+	return result;
+}
+
 void DataProcess::remove_noise_matches( std::vector<IndexTransition>&  data )
 {
 	//detect if double side transition aka noise transition
 	data.erase(std::remove_if(data.begin(), data.end(), [](auto idxt){
 		
-		bool result;
 		Transition const tr = idxt.transition;
-		Transition tmpTr;
-		
-		tmpTr =	(Transition)( tr & biUpDw );
-		result = ( tmpTr == ( tmpTr | biUpDw ) );
-
-		tmpTr =(Transition)( tr & biLR );
-		result |= ( tmpTr == ( tmpTr | biLR ) );
-		
-		return result;
+		return is_noise_detection( tr );
 
 	}), data.end() );
 }

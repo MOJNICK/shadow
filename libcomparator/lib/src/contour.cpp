@@ -75,17 +75,37 @@ ContourTransition Preprocess::get_correction_edge( cv::Mat const & thickKernel, 
 
 }
 
-DataTransition Process::get_direction( int const row, int const col, cv::Mat_<Transition> matTransSilentBorder )
+Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Transition> matTransSilentBorder )
 {
-	DataTransition result;
-	std::vector<double> histo( 17, 0 );//TBD
+	Transition result;
+	std::pair<double, uint> histo[ transDirCombo ];
+	for( int i = 0; i < transDirCombo; i++ )
+	{
+		histo[i] = std::pair<double, uint>( 0.0, i );
+	}
 
 	for(int _row = row - filterKernel.rows / 2; _row < row + filterKernel.rows; _row++ )
-		for(int _col = col - filterKernel.cols/2; _col < col + filterKernel.cols; col++ )
+		for(int _col = col - filterKernel.cols/2; _col < col + filterKernel.cols; _col++ )
 		{
-			histo[ '"matTrans(_row, _col)"'] += filterKernel(_row - row + filterKernel.rows, _col - col + filterKernel.cols );
+			histo[ matTransSilentBorder(_row, _col) >> distinctDir ].second += filterKernel(_row - row + filterKernel.rows, _col - col + filterKernel.cols );
 		}
-		//return histo max aka median filter
+		
+	uint currentMax = 0;
+	uint secondMax = 0;
+	for( int i = 0; i< transDirCombo; i++)//find two max
+	{
+	    if (histo[i] > histo[currentMax])
+	    {
+	        secondMax = currentMax;
+	        currentMax = i;
+	    }
+	}
+
+	result <<= distinctDir;
+	if( DataProcess::is_noise_detection( result ))
+		return Transition::unknown;
+
+	return result;
 }
 
 
