@@ -8,27 +8,27 @@ ContourTransition::ContourTransition( cv::Mat& image )
 void ContourTransition::bw_push_transition(std::vector<IndexTransition> const & indexTransition)
 {
 	std::for_each(indexTransition.begin(), indexTransition.end(), [ this ](auto& el){
-		matTransition( el.row, el.col ).transition = el.transition;
+		matDataTrans( el.row, el.col ).transition = el.transition;
     });
 }
 
 void ContourTransition::copy_data( cv::Mat& image )
 {
 	set_transition_to_no();
-	matTransition.create( image.rows, image.cols );
-	for(int row = 0; row < matTransition.rows; row++ )
-		for(int col = 0; col < matTransition.cols; col++ )
+	matDataTrans.create( image.rows, image.cols );
+	for(int row = 0; row < matDataTrans.rows; row++ )
+		for(int col = 0; col < matDataTrans.cols; col++ )
 		{
-			matTransition(row, col).pixel = *image.ptr(row, col);
+			matDataTrans(row, col).pixel = *image.ptr(row, col);
 		}
 }
 
 void ContourTransition::set_transition_to_no()
 {
-	for(int row = 0; row < matTransition.rows; row++ )
-		for(int col = 0; col < matTransition.cols; col++ )
+	for(int row = 0; row < matDataTrans.rows; row++ )
+		for(int col = 0; col < matDataTrans.cols; col++ )
 		{
-			matTransition(row, col).transition = Transition::no;
+			matDataTrans(row, col).transition = Transition::no;
 		}
 }
 
@@ -70,14 +70,30 @@ ContourTransition Preprocess::get_correction_edge( cv::Mat const & thickKernel, 
 	cv::Mat thickKernelBorder;
 	cv::copyMakeBorder( thickKernel, thickKernelBorder, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
 	cv::Rect rct( filterKernel.cols, filterKernel.rows, thickKernel.cols + filterKernel.cols, thickKernel.rows + filterKernel.rows);//TBD
-	cv::Mat roi = thickKernelBorder(rct);
+	cv::Mat kernelSilentBorder = thickKernelBorder(rct);
+	cv::Mat_<Transition> matTrans = this->cvt_it_to_matT( indexTransition );
 
 }
+
+DataTransition Process::get_direction( int const row, int const col, cv::Mat_<Transition> matTransSilentBorder )
+{
+	DataTransition result;
+	std::vector<double> histo( 17, 0 );//TBD
+
+	for(int _row = row - filterKernel.rows / 2; _row < row + filterKernel.rows; _row++ )
+		for(int _col = col - filterKernel.cols/2; _col < col + filterKernel.cols; col++ )
+		{
+			histo[ '"matTrans(_row, _col)"'] += filterKernel(_row - row + filterKernel.rows, _col - col + filterKernel.cols );
+		}
+		//return histo max aka median filter
+}
+
 
 cv::Mat_<Transition> Preprocess::cvt_it_to_matT( std::vector<IndexTransition> const & indexTransition )
 {
 	cv::Mat_<Transition> result;
-	cv::Mat_<Transition> tmpResult;
+	cv::Mat_<Transition> tmpResult( srcImgSize, Transition::no );
+
 	std::for_each( indexTransition.begin(), indexTransition.end(), [&tmpResult]( auto& el){
 		tmpResult( el.row, el.col) = el.transition;
 	});
@@ -86,11 +102,11 @@ cv::Mat_<Transition> Preprocess::cvt_it_to_matT( std::vector<IndexTransition> co
 	return result;
 }
 
-cv::Mat_<double> MakeFilter::get_square_filter(int size)
+cv::Mat_<double> MakeFilter::get_square_filter( int filterSize )
 {
-	if( size % 2 == 0)
-		size -= 1;
+	if( filterSize % 2 == 0)
+		filterSize -= 1;
 
-	cv::Mat_<double> result( cv::Size(size, size), 1/( size * size ));
+	cv::Mat_<double> result( cv::Size2i( filterSize, filterSize ), 1/( filterSize * filterSize ) );
 	return result;
 }
