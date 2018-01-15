@@ -23,6 +23,7 @@
 
 	enum Transition
 	{
+		empty = 0,
 		no = 1 << 0,
 		unknown = no << 1,
 
@@ -48,7 +49,7 @@
 		triDw = triUp << 2,
 		triR = triUp << 3,
 					
-		all = biLR | biUpDw,
+		all = biLR | biUpDw
 
 	};
 

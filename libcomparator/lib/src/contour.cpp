@@ -77,7 +77,7 @@ ContourTransition Preprocess::get_correction_edge( cv::Mat const & thickKernel, 
 
 Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Transition> matTransSilentBorder )
 {
-	Transition result;
+	Transition result{ empty };
 	std::pair<double, uint> histo[ transDirCombo ];
 	for( int i = 0; i < transDirCombo; i++ )
 	{
@@ -89,7 +89,7 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 		{
 			histo[ matTransSilentBorder(_row, _col) >> distinctDir ].second += filterKernel(_row - row + filterKernel.rows, _col - col + filterKernel.cols );
 		}
-		
+	/*	
 	uint currentMax = 0;
 	uint secondMax = 0;
 	for( int i = 0; i< transDirCombo; i++)//find two max
@@ -99,6 +99,30 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 	        secondMax = currentMax;
 	        currentMax = i;
 	    }
+	}
+	*/
+	double normalizer = 0;
+	for( int i = 0; i < transDirCombo; i++ )
+	{
+		normalizer += histo[i].first;
+	}
+
+	std::pair<double, uint> orgHisto[ transDirCombo ];
+	std::copy( histo, histo + transDirCombo, orgHisto );
+	for( int i = 0; i < transDirCombo; i++ )
+	{
+		for( int j = 0; j < transDirCombo; j++ )
+		{
+			if( i & j == i )
+			{
+				histo[i].first += orgHisto[j].first;
+			}
+		}
+	}
+
+	for( int i = 0; i < transDirCombo; i++ )
+	{
+		if( histo[i].first / normalizer > 0.25 );
 	}
 
 	result <<= distinctDir;
