@@ -84,32 +84,16 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 		histo[i] = std::pair<double, uint>( 0.0, i );
 	}
 
-	for(int _row = row - filterKernel.rows / 2; _row < row + filterKernel.rows; _row++ )
-		for(int _col = col - filterKernel.cols/2; _col < col + filterKernel.cols; _col++ )
+	for(int _row = row - filterKernel.rows / 2; _row <= row + filterKernel.rows / 2; _row++ )
+		for(int _col = col - filterKernel.cols/2; _col <= col + filterKernel.cols / 2; _col++ )
 		{
-			histo[ matTransSilentBorder(_row, _col) >> distinctDir ].second += filterKernel(_row - row + filterKernel.rows, _col - col + filterKernel.cols );
+			histo[ matTransSilentBorder(_row, _col) >> distinctDir ].second += filterKernel(_row - row + filterKernel.rows / 2, _col - col + filterKernel.cols / 2 );
 		}
-	/*	
-	uint currentMax = 0;
-	uint secondMax = 0;
-	for( int i = 0; i< transDirCombo; i++)//find two max
-	{
-	    if (histo[i] > histo[currentMax])
-	    {
-	        secondMax = currentMax;
-	        currentMax = i;
-	    }
-	}
-	*/
-	double normalizer = 0;
-	for( int i = 0; i < transDirCombo; i++ )
-	{
-		normalizer += histo[i].first;
-	}
+
 
 	std::pair<double, uint> orgHisto[ transDirCombo ];
 	std::copy( histo, histo + transDirCombo, orgHisto );
-	for( int i = 0; i < transDirCombo; i++ )
+	for( int i = 0; i < transDirCombo; i++ )//concatenate similar transition probability
 	{
 		for( int j = 0; j < transDirCombo; j++ )
 		{
@@ -120,16 +104,33 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 		}
 	}
 
-	for( int i = 0; i < transDirCombo; i++ )
+	std::sort(histo, histo + transDirCombo, std::greater<std::pair<double, uint>>());
+	
+	if( histo[0].first / histo[1].first > 2 )
 	{
-		if( histo[i].first / normalizer > 0.25 );
+
+		result = static_cast<Transition>( histo[0].second << distinctDir );
+		if( DataProcess::is_noise_detection( result ))
+		{
+			return Transition::unknown;
+		}
+		else
+		{
+			return result;
+		}
 	}
-
-	result <<= distinctDir;
-	if( DataProcess::is_noise_detection( result ))
-		return Transition::unknown;
-
-	return result;
+	else
+	{
+		result = static_cast<Transition>( ( histo[0].second | histo[1].second )<< distinctDir );
+		if( DataProcess::is_noise_detection( result ))
+		{
+			return Transition::unknown;
+		}
+		else
+		{
+			return result;
+		}
+	}
 }
 
 
