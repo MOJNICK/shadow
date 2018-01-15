@@ -29,8 +29,8 @@ class Preprocess
 public:
 	Preprocess( cv::Mat_<double> filterKernel_, cv::Mat srcImg_ );
 
-	cv::Mat get_thick_kernel( cv::Mat& image, int dilationSize );
-	ContourTransition get_correction_edge( cv::Mat const & thickKernel, std::vector<IndexTransition> const & indexTransition );
+	cv::Mat get_thick_kernel( cv::Mat const & image, uint dilationSize );
+	ContourTransition get_correction_edge( cv::Mat const & thickKernel, std::vector<IndexTransition> const & indexTransition, uint dilationSize );
 private:
 	cv::Mat_<double> filterKernel;
 	cv::Size2i srcImgSize;

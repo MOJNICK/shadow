@@ -3,6 +3,7 @@
 ContourTransition::ContourTransition( cv::Mat& image )
 {
 	copy_data( image );
+	set_transition_to_no();
 }
 
 void ContourTransition::bw_push_transition(std::vector<IndexTransition> const & indexTransition)
@@ -38,7 +39,7 @@ Preprocess::Preprocess( cv::Mat_<double> filterKernel_, cv::Mat srcImg_ ) : srcI
 	filterKernel = filterKernel_.clone();
 }
 
-cv::Mat Preprocess::get_thick_kernel( cv::Mat& image, int dilationSize )
+cv::Mat Preprocess::get_thick_kernel( cv::Mat const & image, uint dilationSize )
 {
 	cv::Mat thickKernel = image.clone();
  
@@ -62,20 +63,29 @@ cv::Mat Preprocess::get_thick_kernel( cv::Mat& image, int dilationSize )
 	return thickKernel;
 }
 
-ContourTransition Preprocess::get_correction_edge( cv::Mat const & thickKernel, std::vector<IndexTransition> const & indexTransition )
+ContourTransition Preprocess::get_correction_edge( cv::Mat const & thinKernel, std::vector<IndexTransition> const & indexTransition, uint dilationSize )
 {
-	if(filterKernel.rows % 2 != 0 | filterKernel.cols % 2 != 0 )
+	if(filterKernel.rows & 1 == 0 | filterKernel.cols & 1 == 0 )
 		std::cout << "\nnot even filterKernel Preprocess::get_correction_edge\n";
 
-	cv::Mat thickKernelSilentBorder;
-	cv::copyMakeBorder( thickKernel, thickKernelSilentBorder, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
+	cv::Mat thickKernel = get_thick_kernel( thinKernel, dilationSize );
+
+	cv::Mat kernelSilentBorder;
+	cv::copyMakeBorder( thickKernel, kernelSilentBorder, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
 	cv::Rect rct( filterKernel.cols, filterKernel.rows, thickKernel.cols + filterKernel.cols, thickKernel.rows + filterKernel.rows);//TBD
-	cv::Mat kernelSilentBorder = thickKernelSilentBorder(rct);
+	cv::Mat kernelSilentBorderROI = kernelSilentBorder(rct);
 	cv::Mat_<Transition> matTransSilentBorder = this->cvt_it_to_matT( indexTransition );
 
-	for( int i = 0; i < kernelSilentBorder.total(); ++i )
+	ContourTransition contourTransition( kernelSilentBorderROI );//full , not roi, 
+	for( int i = 0; i < kernelSilentBorderROI.rows; ++i )
 	{
-		;
+		for( int j = 0; j < kernelSilentBorderROI.cols; ++j )
+		{
+			if( *kernelSilentBorderROI.ptr( i, j ) == 255 )
+			{
+// save to coontour transition, 
+			}
+		}
 	}
 
 }
@@ -154,7 +164,7 @@ cv::Mat_<Transition> Preprocess::cvt_it_to_matT( std::vector<IndexTransition> co
 
 cv::Mat_<double> MakeFilter::get_square_filter( int filterSize )
 {
-	if( filterSize % 2 == 0)
+	if( filterSize & 1 == 0)
 		filterSize -= 1;
 
 	cv::Mat_<double> result( cv::Size2i( filterSize, filterSize ), 1/( filterSize * filterSize ) );

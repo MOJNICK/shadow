@@ -5,6 +5,26 @@ int main( int argc, char** argv )
 {
 
     test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 1.0, 0 );
+
+    cv::Mat image;
+    image = cv::imread("/home/szozda/Downloads/refImg/girRef.jpg", CV_LOAD_IMAGE_COLOR);
+    if(! image.data )
+    {
+        std::cout<<"\nwrong path\n";
+        return -1;
+    }
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Display window", image );
+    std::cout<<image.total()<<"\n";
+    cv::waitKey(0);
+
+    cv::Rect rct(10, 100, 30, 800);
+    cv::Mat roi = image(rct);
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Display window", roi );
+    std::cout<<roi.total()<<"\n";
+    cv::waitKey(0);
+
     // test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 3.0, 10);
     // test_on_image("/home/szozda/Downloads/refImg/linThin.png", 1, 6.0, 2);
     // test_on_image("/home/szozda/Downloads/refImg/linThick.png", 1, 6.0, 2);
