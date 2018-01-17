@@ -19,6 +19,7 @@
 	typedef unsigned char TYPE;
 	typedef int DTYPE;
 	uint const distinctDir = 4;
+	uint const shiftToDistinct = 4;
 	uint const transDirCombi = 16;//4 distinct directions
 
 	enum Transition

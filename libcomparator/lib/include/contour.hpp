@@ -18,6 +18,8 @@ public:
 	
 	ContourTransition( cv::Mat& image );
 
+	cv::Mat show_matDataTrans();
+
 private:
 	void copy_data( cv::Mat& image );
 	void set_transition_to_no();
@@ -27,10 +29,10 @@ private:
 class Preprocess
 {
 public:
-	Preprocess( cv::Mat_<double> filterKernel_, cv::Mat srcImg_ );
+	Preprocess( cv::Mat_<double> filterKernel_, cv::Mat const & image );
 
 	cv::Mat get_thick_kernel( cv::Mat const & image, uint dilationSize );
-	ContourTransition get_correction_edge( cv::Mat const & thickKernel, std::vector<IndexTransition> const & indexTransition, uint dilationSize );
+	ContourTransition get_correction_edge( cv::Mat const & image, std::vector<IndexTransition> const & indexTransition, uint dilationSize );
 private:
 	cv::Mat_<double> filterKernel;
 	cv::Size2i srcImgSize;

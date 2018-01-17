@@ -100,14 +100,14 @@ cv::Mat show_result(cv::Mat img, std::vector<IndexTransitionCluster> const & res
     return blackImage;
 }
 
-int test_on_image(char path[], double factor, double eps, uint minPts)
+std::vector<IndexTransitionCluster> test_on_image(char path[], double factor, double eps, uint minPts)
 {
     cv::Mat image;
     image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
     if(! image.data )
     {
         std::cout<<"\nwrong path\n";
-        return -1;
+        return std::vector<IndexTransitionCluster>()    ;
     }
 
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
@@ -149,7 +149,7 @@ int test_on_image(char path[], double factor, double eps, uint minPts)
     blackImage = show_result(imageCpy, clusters);
     save_result(path, "_detect_cluster", ".png", blackImage);
     
-    return 0;
+    return clusters;
 }
 
 
@@ -219,4 +219,31 @@ cv::Mat test_canny( char* path, double factor, int dilationSize )
     cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Canny", edges );
     cv::waitKey(0);
+
+    return edges;
+}
+
+cv::Mat test_directed_canny( char* path, double factor, int dilationSize )
+{
+    cv::Mat image;
+    image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    if(! image.data )
+    {
+        std::cout<<"\nwrong path\n";
+        return image;
+    }
+    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
+
+    auto idTrCluster = test_on_image( path, factor, 3.0, 10 );
+    std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
+
+    Preprocess preprocess( MakeFilter::get_square_filter(11), image);
+    auto contourTransition = preprocess.get_correction_edge( image, idTr, 3);
+
+    auto matContourTransition = contourTransition.show_matDataTrans();
+    cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Canny", matContourTransition );
+    cv::waitKey(0);
+
+    return matContourTransition;
 }

@@ -6,6 +6,24 @@ ContourTransition::ContourTransition( cv::Mat& image )
 	set_transition_to_no();
 }
 
+cv::Mat ContourTransition::show_matDataTrans()
+{
+	cv::Mat blackImage(matDataTrans.rows, matDataTrans.cols * channels, CV_8UC3, cv::Scalar(0,0,0));
+	
+	for(int row = 0; row < matDataTrans.rows; row++ )
+		for(int col = 0; col < matDataTrans.cols; col+=3 )
+		{
+			switch (matDataTrans(row, col).transition )
+			{
+				case lToR : *blackImage.ptr(row, col + 1) = 255; break;
+				case upToDw : *blackImage.ptr(row, col + 2) = 255; break;
+				default : *blackImage.ptr(row, col + 1) = 64;
+			}
+		}
+
+	return blackImage;
+}
+
 void ContourTransition::bw_push_transition(std::vector<IndexTransition> const & indexTransition)
 {
 	std::for_each(indexTransition.begin(), indexTransition.end(), [ this ](auto& el){
@@ -34,12 +52,15 @@ void ContourTransition::set_transition_to_no()
 }
 
 
-Preprocess::Preprocess( cv::Mat_<double> filterKernel_, cv::Mat srcImg_ ) : srcImgSize(srcImg_.rows, srcImg_.cols)
+Preprocess::Preprocess( cv::Mat_<double> filterKernel_, cv::Mat const & image ) : srcImgSize(image.rows, image.cols)
 {
+	if(filterKernel_.rows & 1 == 0 | filterKernel_.cols & 1 == 0 )
+		std::cout << "\nnot symmetric filterKernel_ Preprocess::get_correction_edge\n";
+	
 	filterKernel = filterKernel_.clone();
 }
 
-cv::Mat Preprocess::get_thick_kernel( cv::Mat const & image, uint dilationSize )
+cv::Mat Preprocess::get_thick_kernel( cv::Mat const & image, uint dilationSize )//tested visually
 {
 	cv::Mat thickKernel = image.clone();
  
@@ -60,37 +81,37 @@ cv::Mat Preprocess::get_thick_kernel( cv::Mat const & image, uint dilationSize )
   /// Apply the dilation operation
   	dilate( thickKernel, thickKernel, element );
 
-	return thickKernel;
+  	cv::Mat kernelSilentBorder;
+	cv::copyMakeBorder( thickKernel, kernelSilentBorder, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
+	
+
+	return kernelSilentBorder;
 }
 
-ContourTransition Preprocess::get_correction_edge( cv::Mat const & thinKernel, std::vector<IndexTransition> const & indexTransition, uint dilationSize )
+ContourTransition Preprocess::get_correction_edge( cv::Mat const & image, std::vector<IndexTransition> const & indexTransition, uint dilationSize )
 {
-	if(filterKernel.rows & 1 == 0 | filterKernel.cols & 1 == 0 )
-		std::cout << "\nnot even filterKernel Preprocess::get_correction_edge\n";
+	cv::Mat kernelSilentBorder = get_thick_kernel( image, dilationSize );//thick canny
 
-	cv::Mat thickKernel = get_thick_kernel( thinKernel, dilationSize );
+	// cv::Mat kernelSilentBorderROI = kernelSilentBorder(rct);
+	cv::Mat_<Transition> matTransSilentBorder = this->cvt_it_to_matT( indexTransition );//silent border inside
 
-	cv::Mat kernelSilentBorder;
-	cv::copyMakeBorder( thickKernel, kernelSilentBorder, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
-	cv::Rect rct( filterKernel.cols, filterKernel.rows, thickKernel.cols + filterKernel.cols, thickKernel.rows + filterKernel.rows);//TBD
-	cv::Mat kernelSilentBorderROI = kernelSilentBorder(rct);
-	cv::Mat_<Transition> matTransSilentBorder = this->cvt_it_to_matT( indexTransition );
-
-	ContourTransition contourTransition( kernelSilentBorderROI );//full , not roi, 
-	for( int i = 0; i < kernelSilentBorderROI.rows; ++i )
+	cv::Rect rct( filterKernel.cols / 2 + 1, filterKernel.rows / 2 + 1, image.cols - filterKernel.cols / 2 + 1, image.rows - filterKernel.rows / 2 + 1 );
+	ContourTransition contourTransition( kernelSilentBorder );//full , not roi //::no //v<0;255>
+	contourTransition.matDataTrans( rct );//silent border
+	for( int row = 0; row < contourTransition.matDataTrans.rows; ++row )
 	{
-		for( int j = 0; j < kernelSilentBorderROI.cols; ++j )
+		for( int col = 0; col < contourTransition.matDataTrans.cols; ++col )
 		{
-			if( *kernelSilentBorderROI.ptr( i, j ) == 255 )
+			if( contourTransition.matDataTrans( row, col ).pixel == (unsigned char)(255) )
 			{
-// save to coontour transition, 
+				contourTransition.matDataTrans( row, col ).transition = get_direction( row, col, matTransSilentBorder);
 			}
 		}
 	}
-
+	return contourTransition;
 }
 
-Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Transition> matTransSilentBorder )
+Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Transition> matTransSilentBorder )//core method
 {
 	Transition result{ empty };
 	std::pair<double, uint> histo[ transDirCombi ];
@@ -102,7 +123,11 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 	for(int _row = row - filterKernel.rows / 2; _row <= row + filterKernel.rows / 2; _row++ )
 		for(int _col = col - filterKernel.cols/2; _col <= col + filterKernel.cols / 2; _col++ )
 		{
-			histo[ matTransSilentBorder(_row, _col) >> distinctDir ].second += filterKernel(_row - row + filterKernel.rows / 2, _col - col + filterKernel.cols / 2 );
+			auto debugValue = (matTransSilentBorder(_row, _col) & all) >> shiftToDistinct;
+			if( (debugValue) >= transDirCombi )
+				std::cout << "\n\n\nERRR\n\n\n";
+
+			histo[ (matTransSilentBorder(_row, _col) & all) >> shiftToDistinct ].second += filterKernel(_row - row + filterKernel.rows / 2, _col - col + filterKernel.cols / 2 );
 		}
 
 
@@ -124,7 +149,7 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 	if( histo[0].first / histo[1].first > 2 )
 	{
 
-		result = static_cast<Transition>( histo[0].second << distinctDir );
+		result = static_cast<Transition>( histo[0].second << shiftToDistinct );
 		if( DataProcess::is_noise_detection( result ))
 		{
 			return Transition::unknown;
@@ -136,7 +161,7 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 	}
 	else
 	{
-		result = static_cast<Transition>( ( histo[0].second | histo[1].second )<< distinctDir );
+		result = static_cast<Transition>( ( histo[0].second | histo[1].second )<< shiftToDistinct );
 		if( DataProcess::is_noise_detection( result ))
 		{
 			return Transition::unknown;
@@ -152,7 +177,14 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 cv::Mat_<Transition> Preprocess::cvt_it_to_matT( std::vector<IndexTransition> const & indexTransition )
 {
 	cv::Mat_<Transition> result;
-	cv::Mat_<Transition> tmpResult( srcImgSize, Transition::no );
+	cv::Mat_<Transition> tmpResult( srcImgSize);//, Transition::no );
+	for( int i = 0; i < tmpResult.total(); ++i){ ((Transition*)(tmpResult.data))[i] = Transition::no; }
+	// for( int i = 0; i < tmpResult.total(); ++i)//debug
+	// {
+	// 	//((double*)(tmpResult.data))[i] = 1.0/( filterSize * filterSize );
+	// 	std::cout << tmpResult(0 , i);
+	// }
+	// std::cout<<std::endl;
 
 	std::for_each( indexTransition.begin(), indexTransition.end(), [&tmpResult]( auto& el){
 		tmpResult( el.row, el.col) = el.transition;
@@ -167,6 +199,7 @@ cv::Mat_<double> MakeFilter::get_square_filter( int filterSize )
 	if( filterSize & 1 == 0)
 		filterSize -= 1;
 
-	cv::Mat_<double> result( cv::Size2i( filterSize, filterSize ), 1/( filterSize * filterSize ) );
+	cv::Mat_<double> result( cv::Size2i( filterSize, filterSize ), 1.0/( filterSize * filterSize ) );
+
 	return result;
 }
