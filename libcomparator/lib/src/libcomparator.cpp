@@ -76,9 +76,6 @@ double const prealocate = 0.01;//vector reserve
 
 
 
-
-
-
 	template <class TYPE> Classifier<TYPE>::Classifier(TYPE acceptanceLevel_, double lightThreshold_, double colorThreshold_, double colorBalance_[]) : lightThreshold{lightThreshold_ + 1}, colorThreshold{colorThreshold_}
 	{
 		if(acceptanceLevel_ != 0){ acceptanceLevel = acceptanceLevel_; }
