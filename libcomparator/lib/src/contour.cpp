@@ -8,16 +8,23 @@ ContourTransition::ContourTransition( cv::Mat& image )
 
 cv::Mat ContourTransition::show_matDataTrans()
 {
-	cv::Mat blackImage(matDataTrans.rows, matDataTrans.cols * channels, CV_8UC3, cv::Scalar(0,0,0));
+	cv::Mat blackImage(matDataTrans.rows, matDataTrans.cols, CV_8UC3, cv::Scalar(0,0,0));
 	
 	for(int row = 0; row < matDataTrans.rows; row++ )
 		for(int col = 0; col < matDataTrans.cols; col+=3 )
 		{
-			switch (matDataTrans(row, col).transition )
+			Transition trans = matDataTrans(row, col).transition;
+			if(trans & lToR)
 			{
-				case lToR : *blackImage.ptr(row, col + 1) = 255; break;
-				case upToDw : *blackImage.ptr(row, col + 2) = 255; break;
-				default : *blackImage.ptr(row, col + 1) = 64;
+				blackImage.data[ row * blackImage.cols * channels + col * channels + 0 ] = 255;
+			}
+			if(trans & rToL)
+			{
+				blackImage.data[ row * blackImage.cols * channels + col * channels + 2 ] = 255;
+			}
+			if(trans & all)
+			{
+				blackImage.data[ row * blackImage.cols * channels + col * channels + 1 ] = 255;
 			}
 		}
 
@@ -127,9 +134,9 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 			if( (debugValue) >= transDirCombi )
 				std::cout << "\n\n\nERRR\n\n\n";
 
-			histo[ (matTransSilentBorder(_row, _col) & all) >> shiftToDistinct ].second += filterKernel(_row - row + filterKernel.rows / 2, _col - col + filterKernel.cols / 2 );
+			histo[ (matTransSilentBorder(_row, _col) & all) >> shiftToDistinct ].first += filterKernel(_row - row + filterKernel.rows / 2, _col - col + filterKernel.cols / 2 );
 		}
-
+	histo[0].first = 0;
 
 	std::pair<double, uint> orgHisto[ transDirCombi ];
 	std::copy( histo, histo + transDirCombi, orgHisto );
@@ -137,7 +144,7 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 	{
 		for( int j = 0; j < transDirCombi; ++j )
 		{
-			if( i & j == i )
+			if( i & j == i )// shouldd i!=j 
 			{
 				histo[i].first += orgHisto[j].first;
 			}
