@@ -32,10 +32,11 @@ class Preprocess
 public:
 	Preprocess( cv::Mat_<double> filterKernel_, cv::Mat const & image );
 
-	cv::Mat get_thick_kernel( cv::Mat const & image, uint dilationSize );
+	cv::Mat make_thick_kernel( cv::Mat const & image, uint dilationSize );
 	ContourTransition get_correction_edge( cv::Mat const & image, std::vector<IndexTransition> const & indexTransition, uint dilationSize );
 private:
 	cv::Mat_<double> filterKernel;
+	cv::Mat thickKernel;
 	cv::Size2i srcImgSize;
 
 	Transition get_direction( int const row, int const col, cv::Mat_<Transition> matTrans );
@@ -55,9 +56,14 @@ private:
 class Filter
 {
 public:
-	Filter( cv::Mat const & image ): srcImgSize( image.cols, image.rows ) {}
+	Filter( cv::Mat & image ): srcImgSize( image.cols, image.rows ), _image(image) {}
 	cv::Mat get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
+	// cv::normalize(sum, sum, 0.0, 1.0, cv::NORM_MINMAX);
+	cv::Mat filter_image();
+
 private:
+	cv::Mat & _image;
+	cv::Mat reverseZeroBasedFilter;
 	cv::Size2i srcImgSize;
 	cv::Mat cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition );
 };

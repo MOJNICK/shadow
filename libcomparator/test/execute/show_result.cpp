@@ -214,8 +214,8 @@ cv::Mat test_canny( char* path, double factor, int dilationSize )
     }
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
 
-    Preprocess preprocess( MakeFilter::get_square_filter(10), image);
-    cv::Mat edges = preprocess.get_thick_kernel( image, dilationSize );
+    Preprocess preprocess( MakeFilter::get_square_filter(11), image);
+    cv::Mat edges = preprocess.make_thick_kernel( image, dilationSize );
     cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Canny", edges );
     cv::waitKey(0);
@@ -264,6 +264,7 @@ cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
 
     Filter filter(image);
     cv::Mat result = filter.get_shadow_weight( idTr );
+    result = filter.filter_image();
 
     cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Canny", result );
