@@ -22,3 +22,5 @@ int broad_HUE(char* path);
 cv::Mat test_canny( char* path, double factor, int dilationSize );
 
 cv::Mat test_directed_canny( char* path, double factor, int dilationSize );
+
+cv::Mat test_gauss_directed( char* path, double factor, int dilationSize );

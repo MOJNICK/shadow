@@ -247,3 +247,27 @@ cv::Mat test_directed_canny( char* path, double factor, int dilationSize )
 
     return matContourTransition;
 }
+
+cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
+{
+    cv::Mat image;
+    image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    if(! image.data )
+    {
+        std::cout<<"\nwrong path\n";
+        return image;
+    }
+    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
+
+    auto idTrCluster = test_on_image( path, factor, 3.0, 10 );
+    std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
+
+    Filter filter(image);
+    auto result = filter.get_shadow_weight( idTr );
+
+    cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Canny", result );
+    cv::waitKey(0);
+
+    return result;
+}

@@ -275,7 +275,14 @@ cv::Mat Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTra
 	cv::Mat DWkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, dwToUp, 0);
 	cv::Mat Rkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, rToL, 0);
 
-	
+	cv::filter2D( splited[0], splited[0], -1, UPkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
+	cv::filter2D( splited[1], splited[1], -1, Lkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
+	cv::filter2D( splited[2], splited[2], -1, DWkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
+	cv::filter2D( splited[3], splited[3], -1, Rkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
+
+	cv::Mat sum = splited[0] + splited[1] + splited[2] + splited[3];
+	sum /= 8;
+	sum += 0.5;
 }
 
 cv::Mat Filter::cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition )
