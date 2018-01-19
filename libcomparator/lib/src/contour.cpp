@@ -210,3 +210,85 @@ cv::Mat_<double> MakeFilter::get_square_filter( int filterSize )
 
 	return result;
 }
+
+cv::Mat MakeFilter::get_gauss_antisimmetric_filter( double sizeFactor, double sigma, Transition direction, double hvFactor )//add direction factor
+{
+	if(!(direction && !(direction & (direction - 1))))
+		return cv::Mat( 1, 1, CV_64F, 1.0 );
+
+	if( hvFactor == 0 )
+	{
+		if( direction & biUpDw )
+			hvFactor = 1 / 2;
+
+		if( direction & biLR)
+			hvFactor = 2;
+	}
+	else
+	{
+		if( direction & biUpDw )
+			hvFactor = 1 / hvFactor;		
+	}
+
+	int sigmaH = sigma * sizeFactor * hvFactor;
+	int sigmaV = sigma * sizeFactor / hvFactor;
+
+	
+	cv::Mat kernel( cv::Size( sigmaH * sizeFactor, sigmaV * sizeFactor ), CV_64F, .0 );
+    cv::GaussianBlur( kernel, kernel, cv::Size( sigmaH * sizeFactor , sigmaV * sizeFactor), sigmaH , sigmaV );
+	
+	int anchorH = kernel.rows / 2;
+	int anchorV = kernel.cols / 2; //not exactly
+
+	for(int i = 0; i < kernel.rows; i++)
+	{
+	    for(int j = 0; j < kernel.cols; j++)
+	    {
+	    	if( direction == upToDw)
+	    		if( i < anchorV )
+	        		kernel.at<double>(i, j) = -kernel.at<double>(i, j);
+
+	    	if( direction == lToR)
+	    		if( j < anchorH )
+	        		kernel.at<double>(i, j) = -kernel.at<double>(i, j);
+
+	    	if( direction == dwToUp)
+	    		if( i > anchorV )
+	        		kernel.at<double>(i, j) = -kernel.at<double>(i, j);
+
+	    	if( direction == rToL)
+	    		if( j > anchorH )
+	        		kernel.at<double>(i, j) = -kernel.at<double>(i, j);
+	    }
+	}
+	return kernel;
+}
+
+cv::Mat Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransition )
+{
+	cv::Mat directed = cvt_it_to_matFloat( indexTransition );
+	std::vector<cv::Mat> splited;
+	cv::split(directed, splited);
+
+	cv::Mat UPkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, upToDw, 0);
+	cv::Mat Lkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, lToR, 0);
+	cv::Mat DWkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, dwToUp, 0);
+	cv::Mat Rkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, rToL, 0);
+
+	
+}
+
+cv::Mat Filter::cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition )
+{
+	cv::Mat result( srcImgSize, CV_64FC4, .0 );//, Transition::no );
+
+	std::for_each( indexTransition.begin(), indexTransition.end(), [&result]( auto& el){
+		cv::Vec4d vec4d = result.at<cv::Vec4d>( el.row, el.col);//reference
+		vec4d[ 0 ] = el.transition & upToDw && 1;
+		vec4d[ 1 ] = el.transition & lToR && 1;
+		vec4d[ 2 ] = el.transition & dwToUp && 1;
+		vec4d[ 3 ] = el.transition & rToL && 1;
+	});
+
+	return result;//return with silent border
+}

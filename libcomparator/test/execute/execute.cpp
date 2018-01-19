@@ -13,7 +13,8 @@ int main( int argc, char** argv )
     //     std::cout<<"\nwrong path\n";
     //     return -1;
     // }
-    // cv::copyMakeBorder( image, image, 100, 100, 300, 300, cv::BORDER_REFLECT);//to be safe
+    // cv::GaussianBlur( image, image, cv::Size(51,51), 30 , 1 );
+    // // cv::copyMakeBorder( image, image, 100, 100, 300, 300, cv::BORDER_REFLECT);//to be safe
     // cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
     // cv::imshow( "Display window", image );
     // std::cout<<image.total()<<"\n";

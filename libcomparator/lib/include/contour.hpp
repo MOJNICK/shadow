@@ -1,5 +1,6 @@
 #include <opencv2/core/core.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
+// #include <opencv2/core/matx.hpp>
 #include "libcomparator.hpp"
 #include "dataprocess.hpp"
 #include <iostream>
@@ -46,6 +47,17 @@ class MakeFilter
 {
 public:
 	static cv::Mat_<double> get_square_filter( int size );
+	static cv::Mat get_gauss_antisimmetric_filter( double sizeFactor, double sigma, Transition direction, double hvFactor );
 private:
 	// cv::Mat_<double> cvt_mat_matDoble(cv::Mat filterKernel);
+};
+
+class Filter
+{
+public:
+	Filter( cv::Mat const & image ): srcImgSize( image.rows, image.cols ) {}
+	cv::Mat get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
+private:
+	cv::Size2i srcImgSize;
+	cv::Mat cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition );
 };
