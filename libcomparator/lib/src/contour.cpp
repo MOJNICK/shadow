@@ -216,10 +216,10 @@ cv::Mat MakeFilter::get_gauss_antisimmetric_filter( double sizeFactor, double si
 	if(!(direction && !(direction & (direction - 1))))
 		return cv::Mat( 1, 1, CV_64F, 1.0 );
 
-	if( hvFactor == 0 )
+	if( std::abs(hvFactor) < 0.01 )
 	{
 		if( direction & biUpDw )
-			hvFactor = 1 / 2;
+			hvFactor = 1.0 / 2;
 
 		if( direction & biLR)
 			hvFactor = 2;
@@ -230,16 +230,20 @@ cv::Mat MakeFilter::get_gauss_antisimmetric_filter( double sizeFactor, double si
 			hvFactor = 1 / hvFactor;		
 	}
 
-	int sigmaH = sigma * sizeFactor * hvFactor;
-	int sigmaV = sigma * sizeFactor / hvFactor;
+	int sigmaH = (int)(sigma * hvFactor) | 1;
+	int sigmaV = (int)(sigma / hvFactor) | 1;
+	int sigmaHf = (int)(sigmaV * sizeFactor) | 1;
+	int sigmaVf = (int)(sigmaV * sizeFactor) | 1;
+
 
 	
-	cv::Mat kernel( cv::Size( sigmaH * sizeFactor, sigmaV * sizeFactor ), CV_64F, .0 );
-    cv::GaussianBlur( kernel, kernel, cv::Size( sigmaH * sizeFactor , sigmaV * sizeFactor), sigmaH , sigmaV );
-	
+	cv::Mat kernel( cv::Size( sigmaHf, sigmaVf ), CV_64F, .0 );
 	int anchorH = kernel.rows / 2;
-	int anchorV = kernel.cols / 2; //not exactly
+	int anchorV = kernel.cols / 2; //not exactly	
+	kernel.at<double>(anchorH, anchorV) = 1.0;
 
+    cv::GaussianBlur( kernel, kernel, cv::Size( sigmaHf, sigmaVf ), sigmaH , sigmaV );
+	
 	for(int i = 0; i < kernel.rows; i++)
 	{
 	    for(int j = 0; j < kernel.cols; j++)
@@ -270,7 +274,7 @@ cv::Mat Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTra
 	std::vector<cv::Mat> splited;
 	cv::split(directed, splited);
 
-	cv::Mat UPkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, upToDw, 0);
+	cv::Mat UPkernel = MakeFilter::get_gauss_antisimmetric_filter(1, 10, upToDw, 0);
 	cv::Mat Lkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, lToR, 0);
 	cv::Mat DWkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, dwToUp, 0);
 	cv::Mat Rkernel = MakeFilter::get_gauss_antisimmetric_filter(4, 40, rToL, 0);

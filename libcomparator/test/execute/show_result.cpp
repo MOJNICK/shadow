@@ -263,7 +263,7 @@ cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
 
     Filter filter(image);
-    auto result = filter.get_shadow_weight( idTr );
+    cv::Mat result = filter.get_shadow_weight( idTr );
 
     cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Canny", result );

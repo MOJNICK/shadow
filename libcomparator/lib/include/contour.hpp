@@ -55,7 +55,7 @@ private:
 class Filter
 {
 public:
-	Filter( cv::Mat const & image ): srcImgSize( image.rows, image.cols ) {}
+	Filter( cv::Mat const & image ): srcImgSize( image.cols, image.rows ) {}
 	cv::Mat get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
 private:
 	cv::Size2i srcImgSize;
