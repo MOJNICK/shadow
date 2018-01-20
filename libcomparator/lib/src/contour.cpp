@@ -26,6 +26,10 @@ cv::Mat ContourTransition::show_matDataTrans()
 			{
 				blackImage.at<cv::Vec3b>(row, col)[1] = 255;
 			}
+			if(trans & unknown)
+			{
+				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 0, 255);
+			}
 		}
 
 	return blackImage;
@@ -67,6 +71,18 @@ Preprocess::Preprocess( cv::Mat_<double> filterKernel_, cv::Mat const & image ) 
 	filterKernel = filterKernel_.clone();
 }
 
+void Preprocess::rm_out_edge_detected( std::vector<IndexTransition> & indexTransition )
+{
+	indexTransition.erase( std::remove_if(indexTransition.begin(), indexTransition.end(), [ this ]( auto& idxTr){
+		if( thickKernel.at<unsigned char>( idxTr.row, idxTr.col) == 0 )
+			return true;
+		else
+			return false;
+
+	}), indexTransition.end());
+}
+
+
 cv::Mat Preprocess::make_thick_kernel( cv::Mat const & image, uint dilationSize )//tested visually
 {
 	thickKernel = image.clone();
@@ -85,22 +101,20 @@ cv::Mat Preprocess::make_thick_kernel( cv::Mat const & image, uint dilationSize 
     cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE,
                                        cv::Size( 2*dilationSize + 1, 2*dilationSize+1 ),
                                        cv::Point( dilationSize, dilationSize ) );
-  /// Apply the dilation operation
-  	// dilate( thickKernel, thickKernel, element );
-  	morphologyEx( thickKernel, thickKernel, cv::MORPH_CLOSE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
 
-	cv::copyMakeBorder( thickKernel, thickKernel, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);//to be safe
+  	// morphologyEx( thickKernel, thickKernel, cv::MORPH_CLOSE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
+  	morphologyEx( thickKernel, thickKernel, cv::MORPH_DILATE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
 	
-
 	return thickKernel;
 }
 
 ContourTransition Preprocess::get_correction_edge( cv::Mat const & image, std::vector<IndexTransition> const & indexTransition, uint dilationSize )
 {
-	cv::Mat kernelSilentBorder = make_thick_kernel( image, dilationSize );//thick canny
+	cv::Mat kernelSilentBorder;
+	cv::copyMakeBorder( make_thick_kernel( image, dilationSize ), kernelSilentBorder, filterKernel.rows / 2, filterKernel.rows / 2, filterKernel.cols / 2, filterKernel.cols / 2, cv::BORDER_REFLECT);
 
 	// cv::Mat kernelSilentBorderROI = kernelSilentBorder(rct);
-	cv::Mat_<Transition> matTransSilentBorder = this->cvt_it_to_matT( indexTransition );//silent border inside
+	cv::Mat_<Transition> matTransSilentBorder = cvt_it_to_matTSilent( indexTransition );//silent border inside
 
 	cv::Rect rct( filterKernel.cols / 2 + 1, filterKernel.rows / 2 + 1, image.cols - filterKernel.cols / 2 + 1, image.rows - filterKernel.rows / 2 + 1 );
 	ContourTransition contourTransition( kernelSilentBorder );//full , not roi //::no //v<0;255>
@@ -109,9 +123,9 @@ ContourTransition Preprocess::get_correction_edge( cv::Mat const & image, std::v
 	{
 		for( int col = 0; col < contourTransition.matDataTrans.cols; ++col )
 		{
-			if( contourTransition.matDataTrans( row, col ).pixel == (unsigned char)(255) )
+			if( contourTransition.matDataTrans.at<DataTransition>( row, col ).pixel == (unsigned char)(255) )
 			{
-				contourTransition.matDataTrans( row, col ).transition = get_direction( row, col, matTransSilentBorder);
+				contourTransition.matDataTrans.at<DataTransition>( row, col ).transition = get_direction( row, col, matTransSilentBorder);
 			}
 		}
 	}
@@ -181,7 +195,7 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 }
 
 
-cv::Mat_<Transition> Preprocess::cvt_it_to_matT( std::vector<IndexTransition> const & indexTransition )
+cv::Mat_<Transition> Preprocess::cvt_it_to_matTSilent( std::vector<IndexTransition> const & indexTransition )
 {
 	cv::Mat_<Transition> result( srcImgSize);//, Transition::no );
 	for( int i = 0; i < result.total(); ++i){ ((Transition*)(result.data))[i] = Transition::no; }
@@ -211,11 +225,7 @@ cv::Mat MakeFilter::get_gauss_antisimmetric_filter( double sizeFactor, double si
 
 	if( std::abs(hvFactor) < 0.01 )
 	{
-		if( direction & biUpDw )
-			hvFactor = 1.0 / 2;
-
-		if( direction & biLR)
-			hvFactor = 2;
+		hvFactor = 1;
 	}
 	else
 	{
@@ -267,10 +277,11 @@ cv::Mat Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTra
 	std::vector<cv::Mat> splited;
 	cv::split(directed, splited);
 
-	cv::Mat UPkernel = MakeFilter::get_gauss_antisimmetric_filter(10, 10, upToDw, 0);
-	cv::Mat Lkernel = MakeFilter::get_gauss_antisimmetric_filter(10, 10, lToR, 0);
-	cv::Mat DWkernel = MakeFilter::get_gauss_antisimmetric_filter(10, 10, dwToUp, 0);
-	cv::Mat Rkernel = MakeFilter::get_gauss_antisimmetric_filter(10, 10, rToL, 0);
+	double hvFactor = 2.0;
+	cv::Mat UPkernel = MakeFilter::get_gauss_antisimmetric_filter(10, 5, upToDw, hvFactor);
+	cv::Mat Lkernel = MakeFilter::get_gauss_antisimmetric_filter(10, 5, lToR, hvFactor);
+	cv::Mat DWkernel = MakeFilter::get_gauss_antisimmetric_filter(10, 5, dwToUp, hvFactor);
+	cv::Mat Rkernel = MakeFilter::get_gauss_antisimmetric_filter(10, 5, rToL, hvFactor);
 
 	cv::filter2D( splited[0], splited[0], -1, UPkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 	cv::filter2D( splited[1], splited[1], -1, Lkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );

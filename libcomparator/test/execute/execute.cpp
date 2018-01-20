@@ -4,7 +4,7 @@
 int main( int argc, char** argv )
 {
 
-    // test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 1.0, 0 );
+    test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0 );
 
     // cv::Mat image;
     // image = cv::imread("/home/szozda/Downloads/refImg/girRef.jpg", CV_LOAD_IMAGE_COLOR);
@@ -68,7 +68,7 @@ int main( int argc, char** argv )
     // std::cout<<std::endl;
     // std::cout<<std::endl;
 
-    test_directed_canny("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 3);
+    // test_directed_canny("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 3);
 
     // std::cout<<std::endl;
     // std::cout<<std::endl;
@@ -78,7 +78,7 @@ int main( int argc, char** argv )
     
 
 
-    // test_gauss_directed( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0);
+    test_gauss_directed( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0);
 
     // test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 3.0, 10);
     // test_on_image("/home/szozda/Downloads/refImg/linThin.png", 1, 6.0, 2);

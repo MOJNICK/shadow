@@ -257,17 +257,24 @@ cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
         std::cout<<"\nwrong path\n";
         return image;
     }
-    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
 
-    auto idTrCluster = test_on_image( path, factor, 3.0, 10 );
+    cv::Mat cImage = image.clone();
+    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
+    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
+    
+
+    auto idTrCluster = test_on_image( path, factor, 3.0, 1 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
 
     Filter filter(image);
+    Preprocess preprocess( MakeFilter::get_square_filter(3), image);
+    preprocess.make_thick_kernel(image, dilationSize);
+    preprocess.rm_out_edge_detected( idTr );
     cv::Mat result = filter.get_shadow_weight( idTr );
     result = filter.filter_image();
 
-    cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "Canny", result );
+    cv::namedWindow( "GaussFiltered", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "GaussFiltered", result );
     cv::waitKey(0);
 
     return result;

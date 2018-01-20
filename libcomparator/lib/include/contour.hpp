@@ -32,6 +32,8 @@ class Preprocess
 public:
 	Preprocess( cv::Mat_<double> filterKernel_, cv::Mat const & image );
 
+	void rm_out_edge_detected( std::vector<IndexTransition> & indexTransition );
+
 	cv::Mat make_thick_kernel( cv::Mat const & image, uint dilationSize );
 	ContourTransition get_correction_edge( cv::Mat const & image, std::vector<IndexTransition> const & indexTransition, uint dilationSize );
 private:
@@ -41,7 +43,7 @@ private:
 
 	Transition get_direction( int const row, int const col, cv::Mat_<Transition> matTrans );
 	// DataTransition set_direction( cv::Mat thickKernelROI, cv::Mat_<Transition> matTrans );
-	cv::Mat_<Transition> cvt_it_to_matT( std::vector<IndexTransition> const & indexTransition );
+	cv::Mat_<Transition> cvt_it_to_matTSilent( std::vector<IndexTransition> const & indexTransition );
 };
 
 class MakeFilter
