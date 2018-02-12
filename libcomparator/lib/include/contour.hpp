@@ -32,6 +32,8 @@ class Preprocess
 public:
 	Preprocess( cv::Mat_<double> filterKernel_, cv::Mat const & image );
 
+	cv::Mat& get_thickKernel(){ return thickKernel; };
+
 	void rm_out_edge_detected( std::vector<IndexTransition> & indexTransition );
 
 	cv::Mat make_thick_kernel( cv::Mat const & image, uint dilationSize );
@@ -52,13 +54,14 @@ public:
 	static cv::Mat_<double> get_square_filter( int size );
 	static cv::Mat get_gauss_antisimmetric_filter( double sizeFactor, double sigma, Transition direction, double hvFactor );
 private:
+	static void cvt_to_antisimmetric( cv::Mat& kernel, Transition direction, int anchorH, int anchorV );
 	// cv::Mat_<double> cvt_mat_matDoble(cv::Mat filterKernel);
 };
 
 class Filter
 {
 public:
-	Filter( cv::Mat & image ): srcImgSize( image.cols, image.rows ), _image(image) {}
+	Filter( cv::Mat & image, double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1);
 	cv::Mat get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
 	// cv::normalize(sum, sum, 0.0, 1.0, cv::NORM_MINMAX);
 	cv::Mat filter_image();
@@ -67,5 +70,10 @@ private:
 	cv::Mat & _image;
 	cv::Mat reverseZeroBasedFilter;
 	cv::Size2i srcImgSize;
+
+	double sizeFactor;
+	double antiSigma;
+	double hvFactor;
+
 	cv::Mat cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition );
 };

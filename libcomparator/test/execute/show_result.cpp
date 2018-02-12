@@ -67,8 +67,8 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
 cv::Mat show_result(cv::Mat img, std::vector<IndexTransitionCluster> const & result )
 {
     cv::Mat image = img.clone();
-    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "Display window", image );                   
+    cv::namedWindow( "show_result", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "show_result", image );                   
     cv::waitKey(0);
 
     if(image.isContinuous())
@@ -79,7 +79,7 @@ cv::Mat show_result(cv::Mat img, std::vector<IndexTransitionCluster> const & res
             image.data[el.index( image ) + 2] = 255;
         });
         draw_clusterNumber(image, result);
-        cv::imshow( "Display window", image );
+        cv::imshow( "show_result", image );
     }
     else
     {
@@ -95,7 +95,7 @@ cv::Mat show_result(cv::Mat img, std::vector<IndexTransitionCluster> const & res
         blackImage.data[el.index( blackImage ) + 2] = 255;
     });
     draw_clusterNumber(blackImage, result);
-    cv::imshow( "Display window", blackImage );
+    cv::imshow( "show_result", blackImage );
     cv::waitKey(0);
     return blackImage;
 }
@@ -107,7 +107,7 @@ std::vector<IndexTransitionCluster> test_on_image(char path[], double factor, do
     if(! image.data )
     {
         std::cout<<"\nwrong path\n";
-        return std::vector<IndexTransitionCluster>()    ;
+        return std::vector<IndexTransitionCluster>();
     }
 
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
@@ -266,12 +266,27 @@ cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
     auto idTrCluster = test_on_image( path, factor, 3.0, 1 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
 
-    Filter filter(image);
     Preprocess preprocess( MakeFilter::get_square_filter(3), image);
     preprocess.make_thick_kernel(image, dilationSize);
     preprocess.rm_out_edge_detected( idTr );
+
+    show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
+
+
+    Filter filter(image, 160, 3, 2);
     cv::Mat result = filter.get_shadow_weight( idTr );
     result = filter.filter_image();
+
+    ContourTransition contourTransition(image);
+    contourTransition.bw_push_transition( idTr );
+    cv::Mat matTrans = contourTransition.show_matDataTrans();
+
+    cv::namedWindow( "matTrans", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "matTrans", matTrans );
+
+
+    cv::namedWindow( "thickKernel", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "thickKernel", preprocess.get_thickKernel() );
 
     cv::namedWindow( "GaussFiltered", cv::WINDOW_AUTOSIZE );
     cv::imshow( "GaussFiltered", result );
