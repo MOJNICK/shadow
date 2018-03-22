@@ -40,6 +40,10 @@
 		static bool higher_HUE( ColorStruct & first, ColorStruct & second );
 
 		void set_baseLevel( double baseLevel_ ){ baseLevel = baseLevel_;}
+		double get_baseLevel() const {return baseLevel;}
+
+		void set_color(unsigned char index, double value){color[index] = value;}
+		double get_color(unsigned char index) const {return color[index];}
 
 		double saturation();
 		double HUE();//0 for test only, ColorBalance::baseLevel
@@ -47,7 +51,7 @@
 		static double HUE_cast( ColorStruct const & cs );
 
 		double accumulate_color();
-//	private:
+	private:
 		double color[ channels ];
 		double baseLevel;
 

@@ -216,7 +216,7 @@ void ColorBalance::push_element_balance( IndexTransition const & inputShadow )
 		ColorStruct _colorBalance { .0, .0, .0 };
 		for( uint i = 0; i < channels; ++i )
 		{
-			_colorBalance.color[i] = static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
+			_colorBalance.set_color(i, static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ]);
 		}
 		colorBalances.push_back( _colorBalance );
 	}
@@ -237,7 +237,7 @@ double ColorBalance::set_colorBalances_baseLevel()
 	if ( counter == 0)
 	{
 		std::for_each( colorBalances.begin(), colorBalances.end(), [ this ](auto& el){
-			el.baseLevel = baseLevel;
+			el.set_baseLevel(baseLevel);
 		});
 		return baseLevel;
 	}
