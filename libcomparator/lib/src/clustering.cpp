@@ -50,14 +50,14 @@ void Clustering::check_point_zone_linear( int indexX )
     std::vector<uint> linkedClusters;
     uint currentClusterNumber = 0;
     IndexTransitionCluster point = vIndexTransitionCluster[indexX];
-    if( point.clusterNumber == 0 )
+    if( point.get_cluster_number() == 0 )
     {
         currentClusterNumber = create_new_cluster();
-        point.clusterNumber = currentClusterNumber;
+        point.set_cluster_number( currentClusterNumber );
     }
     else
     {
-        currentClusterNumber = point.clusterNumber;
+        currentClusterNumber = point.get_cluster_number();
     }
     linkedClusters.push_back(currentClusterNumber);
 
@@ -77,13 +77,13 @@ void Clustering::check_point_zone_linear( int indexX )
             {
                 if (distance_function(point, vIndexTransitionCluster[i]) <= eps )
                 {
-                    if( vIndexTransitionCluster[i].clusterNumber == 0 )
+                    if( vIndexTransitionCluster[i].get_cluster_number() == 0 )
                     {
-                        vIndexTransitionCluster[i].clusterNumber = currentClusterNumber;
+                        vIndexTransitionCluster[i].set_cluster_number(currentClusterNumber);
                     }
                     else
                     {
-                        linkedClusters.push_back( vIndexTransitionCluster[i].clusterNumber );
+                        linkedClusters.push_back( vIndexTransitionCluster[i].get_cluster_number() );
                     }
                 }
             }
@@ -133,14 +133,14 @@ void Clustering::concatenate_clusters()
     
 
     std::for_each(vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), [this](auto& itc){
-        itc.clusterNumber = linkedTransform[ itc.clusterNumber ];
+        itc.set_cluster_number(linkedTransform[ itc.get_cluster_number() ]);
     });
 }
 
 void Clustering::remove_small_clusters_and_noise()
 {
     auto maxClusterNumberIterator = std::max_element( vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), []( IndexTransitionCluster const & itc1, IndexTransitionCluster const & itc2){
-        if( itc1.clusterNumber < itc2.clusterNumber )
+        if( itc1.get_cluster_number() < itc2.get_cluster_number() )
         {
             return true;
         }
@@ -149,18 +149,18 @@ void Clustering::remove_small_clusters_and_noise()
             return false;
         }
     });
-    uint maxClusterNumber = maxClusterNumberIterator->clusterNumber;
+    uint maxClusterNumber = maxClusterNumberIterator->get_cluster_number();
 
     std::vector<uint>clusterOccurences(maxClusterNumber + 1, 0);
     for_each( vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), [&clusterOccurences]( IndexTransitionCluster const & itc ){
-        if( itc.clusterNumber != 0 )// new itc without cluster occurrrence
+        if( itc.get_cluster_number() != 0 )// new itc without cluster occurrrence
         {
-            clusterOccurences[itc.clusterNumber] += 1;
+            clusterOccurences[itc.get_cluster_number()] += 1;
         }
     });
     
     vIndexTransitionCluster.erase(std::remove_if(vIndexTransitionCluster.begin(), vIndexTransitionCluster.end(), [this, &clusterOccurences](IndexTransitionCluster const & itc){//remove small clusters
-        if( clusterOccurences[itc.clusterNumber] < minPts )
+        if( clusterOccurences[itc.get_cluster_number()] < minPts )
         {
             return true;
         }

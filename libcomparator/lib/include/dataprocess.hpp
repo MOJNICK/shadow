@@ -15,6 +15,7 @@
 
 	struct ColorStruct
 	{
+	public:
 		friend DataProcess;
 
 		ColorStruct();
@@ -39,15 +40,18 @@
 		static bool higher_HUE( ColorStruct & first, ColorStruct & second );
 
 		void set_baseLevel( double baseLevel_ ){ baseLevel = baseLevel_;}
-	
-	private:
+
+		double saturation();
+		double HUE();//0 for test only, ColorBalance::baseLevel
+		static double saturation_cast( ColorStruct const & cs );
+		static double HUE_cast( ColorStruct const & cs );
+
+		double accumulate_color();
+//	private:
 		double color[ channels ];
 		double baseLevel;
 
-		double saturation();
-		static double saturation_cast( ColorStruct const & cs );
-		double HUE();//0 for test only, ColorBalance::baseLevel
-		static double HUE_cast( ColorStruct const & cs );
+
 
 	};
 

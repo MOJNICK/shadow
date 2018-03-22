@@ -9,7 +9,8 @@
         IndexTransitionCluster( IndexTransition indexTransition ): IndexTransition( indexTransition ), clusterNumber{0}{}
         IndexTransitionCluster( IndexTransition indexTransition, uint clusterNumber ): IndexTransition( indexTransition ), clusterNumber{clusterNumber}{}
         IndexTransitionCluster( int row, int col, Transition transition, uint clusterNumber ): IndexTransition{ row, col, transition}, clusterNumber{clusterNumber}{}
-        uint getClusterNumber(){ return clusterNumber; }
+        uint get_cluster_number() const { return clusterNumber; }
+        void set_cluster_number(uint _clusterNumber){ this->clusterNumber = _clusterNumber; }
         #ifdef WITH_TESTS
             #ifdef TEST_PRIVATE_PART
             bool operator ==(const IndexTransitionCluster &itc) const

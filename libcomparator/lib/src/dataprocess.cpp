@@ -135,6 +135,11 @@ double ColorStruct::HUE_cast( ColorStruct const & cs )
 	return hue;
 }
 
+double ColorStruct::accumulate_color()
+{
+	return std::accumulate(color, color + channels, 0.0);
+}
+
 ColorBalance::ColorBalance( cv::Mat const & img, TYPE acceptanceLevel_, uint distance = 1 ):
 img( img ), distance{ distance } //, colorBalance{ ColorStruct{ 0, 0 , 0 } }
 {
@@ -174,7 +179,7 @@ ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positi
 		sumBalance += el;
 	} );
 
-	double normalizer = ( sumBalance.color[0] + sumBalance.color[1] + sumBalance.color[2] ) / channels;
+	double normalizer = sumBalance.accumulate_color() / channels;
 
 	sumBalance /= normalizer;
 
@@ -198,32 +203,32 @@ void ColorBalance::push_element_balance( IndexTransition const & inputShadow )
 	if( shtransition & ( Transition::rToL ) )		{ brightCol += distance * channels; }
 
 	if( ( 0 <= brightRow && brightRow < img.rows ) && ( 0 <= brightCol && brightCol < img.cols ))
+	{
+		for( uint i = 0; i < channels; ++i )
 		{
-			for( uint i = 0; i < channels; ++i )
+			bool rejectShadow = img.data[ shadow.row * img.step + shadow.col + i ] < acceptanceLevel;
+			bool rejectBright = img.data[ brightRow * img.step + brightCol + i ] < acceptanceLevel;
+			if( rejectShadow || rejectBright )
 			{
-				bool rejectShadow = img.data[ shadow.row * img.step + shadow.col + i ] < acceptanceLevel;
-				bool rejectBright = img.data[ brightRow * img.step + brightCol + i ] < acceptanceLevel;
-				if( rejectShadow || rejectBright )
-				{
-					return;
-				}
-			}
-			ColorStruct _colorBalance { .0, .0, .0 };
-			for( uint i = 0; i < channels; ++i )
-			{
-				_colorBalance.color[i] = static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
-			}
-			colorBalances.push_back( _colorBalance );
-		}
-		#ifdef WITH_TESTS
-		else
-		{
-			if( distance <= 1)//distance within shadow detection zone
-			{
-				std::cout << "\nColorBalance::push_element_balance() : should never be here\n";
+				return;
 			}
 		}
-		#endif
+		ColorStruct _colorBalance { .0, .0, .0 };
+		for( uint i = 0; i < channels; ++i )
+		{
+			_colorBalance.color[i] = static_cast< double >( img.data[ brightRow * img.step + brightCol + i ] ) / img.data[ shadow.row * img.step + shadow.col + i ];
+		}
+		colorBalances.push_back( _colorBalance );
+	}
+	#ifdef WITH_TESTS
+	else
+	{
+		if( distance <= 1)//distance within shadow detection zone
+		{
+			std::cout << "\nColorBalance::push_element_balance() : should never be here\n";
+		}
+	}
+	#endif
 }
 
 double ColorBalance::set_colorBalances_baseLevel()
