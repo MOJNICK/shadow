@@ -1,5 +1,6 @@
 file(GLOB execute_source_files *.cpp)
 use_cxx_std()
+use_pedantic_errors()
 
 include_directories(/usr/include/python2.7)
 

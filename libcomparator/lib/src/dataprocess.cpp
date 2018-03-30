@@ -290,7 +290,7 @@ bool ColorBalance::is_valid( Transition const & transition )
 
 //double ColorStruct::baseLevel = 0.0;
 
-DataProcess::DataProcess(){};
+DataProcess::DataProcess(){}
 
 void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
 {

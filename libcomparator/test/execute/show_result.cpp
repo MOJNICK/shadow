@@ -37,7 +37,7 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
 {
     std::vector<IndexTransitionCluster> textPoint(result);
     std::stable_sort( textPoint.begin(), textPoint.end(), [](auto el1, auto el2){
-        if(el1.getClusterNumber() < el2.getClusterNumber())
+        if(el1.get_cluster_number() < el2.get_cluster_number())
         {
             return true;
         }
@@ -47,7 +47,7 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
         }
     } );
     textPoint.erase( unique( textPoint.begin(), textPoint.end(), [](auto el1, auto el2){
-        if(el1.getClusterNumber() == el2.getClusterNumber())
+        if(el1.get_cluster_number() == el2.get_cluster_number())
         {
             return true;
         }
@@ -57,8 +57,8 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
         }
     } ), textPoint.end() );
     std::for_each(textPoint.begin(), textPoint.end(), [&image](auto el){
-        cv::putText(image, std::to_string(el.getClusterNumber()), cv::Point(el.col, el.row ), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.4, cv::Scalar(200,20,250));//, 1, 8, false);
-        std::cout<<el.getClusterNumber()<<" "<<el.row<<" "<<el.col<<"\n";
+        cv::putText(image, std::to_string(el.get_cluster_number()), cv::Point(el.col, el.row ), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.4, cv::Scalar(200,20,250));//, 1, 8, false);
+        std::cout<<el.get_cluster_number()<<" "<<el.row<<" "<<el.col<<"\n";
     });
     std::cout<< result.size()<< "\n";
     std::cout<< textPoint.size()<< "\n";
