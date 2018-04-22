@@ -9,7 +9,8 @@
         IndexTransitionCluster( IndexTransition indexTransition ): IndexTransition( indexTransition ), clusterNumber{0}{}
         IndexTransitionCluster( IndexTransition indexTransition, uint clusterNumber ): IndexTransition( indexTransition ), clusterNumber{clusterNumber}{}
         IndexTransitionCluster( int row, int col, Transition transition, uint clusterNumber ): IndexTransition{ row, col, transition}, clusterNumber{clusterNumber}{}
-        uint getClusterNumber(){ return clusterNumber; }
+        uint get_clusterNumber() const { return clusterNumber; }
+        void set_clusterNumber(unsigned int _clusterNumber){ this->clusterNumber = _clusterNumber; }
         #ifdef WITH_TESTS
             #ifdef TEST_PRIVATE_PART
             bool operator ==(const IndexTransitionCluster &itc) const
@@ -33,8 +34,9 @@
     {
     public:
         Clustering( std::vector<IndexTransition> const & vIndexTransition, double (*distance_function)( IndexTransitionCluster const &, IndexTransitionCluster const & pixelA ), double eps, uint minPts);
-        std::vector<IndexTransitionCluster> const & getRefVIndexTransitionCluster(){ return vIndexTransitionCluster; }
-        void points_clustering( void (Clustering::*check_point_zone_function)(int) );
+        std::vector<IndexTransitionCluster> & getRefVIndexTransitionCluster(){ return vIndexTransitionCluster; }
+        void points_clustering( void (Clustering::*check_point_zone_function)(int) );    
+        void check_point_zone_linear( int indexX );
     private:
         uint nowClusterNumber;
         double eps;//radious
@@ -46,7 +48,6 @@
         double (*distance_function)( IndexTransitionCluster const & , IndexTransitionCluster const & );
         uint create_new_cluster();//not api
         uint get_cluster_number();//not api
-        void check_point_zone_linear( int indexX );
         void concatenate_clusters();
         void remove_small_clusters_and_noise();
     };

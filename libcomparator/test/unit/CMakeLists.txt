@@ -1,5 +1,6 @@
 file(GLOB testcomparator_source_files *.cpp)
 use_cxx_std()
+use_pedantic_errors()
 
 
 if (WITH_TESTS)

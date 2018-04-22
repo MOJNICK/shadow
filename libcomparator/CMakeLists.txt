@@ -1,10 +1,17 @@
 cmake_minimum_required(VERSION 3.0)
 project(comparator)
+
 macro(use_cxx_std)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14") 
 endmacro(use_cxx_std)
 
+macro(use_pedantic_errors)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
+endmacro(use_pedantic_errors)
+
 use_cxx_std()
+use_pedantic_errors()
+
 option(CMAKE_BUILD_TYPE "" Release) 
 
 include_directories(lib/include)

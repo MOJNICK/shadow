@@ -34,7 +34,7 @@ protected:
     void run(int)
     {
         SetUp();
-        std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
+        std::vector<IndexTransitionCluster> const & actual = objectClustering.getRefVIndexTransitionCluster();
         std::vector<IndexTransitionCluster> expected{   {1, 2, lToR, 0}, {2, 3, rToL, 0}, {3, 4, rToL, 0},
                                                         {4, 2, lToR, 0}, {5, 7, rToL, 0}, {6, 8, rToL, 0},
                                                         {8, 8, rToL, 0}, {9, 2, lToR, 0}, {11, 2, lToR, 0}, {12, 2, lToR, 0}  };
@@ -47,6 +47,8 @@ TEST(ClusteringSuite, ClusteringConstructor)
   clusteringConstructor.safe_run();
 }
 
+#ifdef TEST_PRIVATE_PART
+
 class ClusteringSmallAndNoise : public TestClustering
 {
 public:
@@ -54,14 +56,14 @@ protected:
     void run(int)
     {
         SetUp();
-        std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
+        std::vector<IndexTransitionCluster> & actual = objectClustering.getRefVIndexTransitionCluster();
         for(int i = 1; i < 4; ++ i)
         {
-            actual[i].clusterNumber = 1;
+            actual[i].set_clusterNumber(1u);
         }
         for(int i = 6; i < 9; ++ i)
         {
-            actual[i].clusterNumber = 6;
+            actual[i].set_clusterNumber(6u);
         }
         objectClustering.remove_small_clusters_and_noise();
 
@@ -120,7 +122,7 @@ protected:
     void run(int)
     {
         SetUp();
-        std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
+        std::vector<IndexTransitionCluster>& actual = objectClustering.getRefVIndexTransitionCluster();
         objectClustering.check_point_zone_linear(2);
 
         std::vector<IndexTransitionCluster> expected{   {1, 2, lToR, 0}, {2, 3, rToL, 1}, {3, 4, rToL, 1},
@@ -143,6 +145,8 @@ TEST(ClusteringSuite, ClusteringPointZoneLinear)
   clusteringPointZoneLinear.safe_run();
 }
 
+#endif
+
 class ClusteringDistanceFast: public TestClustering
 {
 public:
@@ -161,7 +165,7 @@ protected:
         ASSERT_DOUBLE_EQ(8.0, Distance::distance_fast(pixelA, pixelB));
 
         pixelA = { 3, 4, lToR, 1 };
-        pixelB = objectClustering.vIndexTransitionCluster[3];
+        pixelB = objectClustering.getRefVIndexTransitionCluster()[3];
         ASSERT_DOUBLE_EQ(3.0, Distance::distance_fast(pixelA, pixelB));
     }
 };
@@ -171,6 +175,8 @@ TEST(ClusteringSuite, ClusteringDistanceFast)
   clusteringDistanceFast.safe_run();
 }
 
+#ifdef TEST_PRIVATE_PART
+
 class ClusteringPointsClustering: public TestClustering
 {
 public:
@@ -178,7 +184,7 @@ protected:
     void run(int)
     {
         SetUp();
-        std::vector<IndexTransitionCluster>& actual = objectClustering.vIndexTransitionCluster;
+        std::vector<IndexTransitionCluster>& actual = objectClustering.getRefVIndexTransitionCluster();
         objectClustering.eps = 3.0;
         objectClustering.points_clustering(&Clustering::check_point_zone_linear);
         std::vector<IndexTransitionCluster> expected{   {1, 2, lToR, 1}, {2, 3, rToL, 1}, {3, 4, rToL, 1},
@@ -199,3 +205,5 @@ TEST(ClusteringSuite, ClusteringPointsClustering)
   ClusteringPointsClustering clusteringPointsClustering;
   clusteringPointsClustering.safe_run();
 }
+
+#endif

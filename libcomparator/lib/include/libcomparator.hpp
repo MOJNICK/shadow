@@ -15,7 +15,7 @@
 	#endif
 
 	typedef unsigned int uint;
-	int const channels = 3;//not a parameter, only for convinience
+	unsigned char const channels = 3;//not a parameter, only for convinience
 	typedef unsigned char TYPE;
 	typedef int DTYPE;
 	uint const distinctDir = 4;
