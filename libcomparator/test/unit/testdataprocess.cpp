@@ -201,7 +201,7 @@ protected:
   {
     for( int i = 0; i < channels; ++i )
     {
-      ASSERT_DOUBLE_EQ( expected.color[i], actual.color[i] );
+      ASSERT_DOUBLE_EQ( expected.get_color(i), actual.get_color(i) );
     }
   }
 };

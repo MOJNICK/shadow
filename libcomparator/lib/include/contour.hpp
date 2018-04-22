@@ -16,15 +16,13 @@ class ContourTransition
 {
 public:
 	cv::Mat_<DataTransition> matDataTrans;
-	
+
 	ContourTransition( cv::Mat& image );
-
+	void bw_push_transition(std::vector<IndexTransition> const & indexTransition);
 	cv::Mat show_matDataTrans();
-
 private:
 	void copy_data( cv::Mat& image );
 	void set_transition_to_no();
-	void bw_push_transition(std::vector<IndexTransition> const & indexTransition);
 };
 
 class Preprocess

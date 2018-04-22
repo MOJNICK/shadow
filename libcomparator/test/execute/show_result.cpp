@@ -37,7 +37,7 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
 {
     std::vector<IndexTransitionCluster> textPoint(result);
     std::stable_sort( textPoint.begin(), textPoint.end(), [](auto el1, auto el2){
-        if(el1.get_cluster_number() < el2.get_cluster_number())
+        if(el1.get_clusterNumber() < el2.get_clusterNumber())
         {
             return true;
         }
@@ -47,7 +47,7 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
         }
     } );
     textPoint.erase( unique( textPoint.begin(), textPoint.end(), [](auto el1, auto el2){
-        if(el1.get_cluster_number() == el2.get_cluster_number())
+        if(el1.get_clusterNumber() == el2.get_clusterNumber())
         {
             return true;
         }
@@ -57,8 +57,8 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
         }
     } ), textPoint.end() );
     std::for_each(textPoint.begin(), textPoint.end(), [&image](auto el){
-        cv::putText(image, std::to_string(el.get_cluster_number()), cv::Point(el.col, el.row ), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.4, cv::Scalar(200,20,250));//, 1, 8, false);
-        std::cout<<el.get_cluster_number()<<" "<<el.row<<" "<<el.col<<"\n";
+        cv::putText(image, std::to_string(el.get_clusterNumber()), cv::Point(el.col, el.row ), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.4, cv::Scalar(200,20,250));//, 1, 8, false);
+        std::cout<<el.get_clusterNumber()<<" "<<el.row<<" "<<el.col<<"\n";
     });
     std::cout<< result.size()<< "\n";
     std::cout<< textPoint.size()<< "\n";
@@ -221,31 +221,6 @@ cv::Mat test_canny( char* path, double factor, int dilationSize )
     cv::waitKey(0);
 
     return edges;
-}
-
-cv::Mat test_directed_canny( char* path, double factor, int dilationSize )
-{
-    cv::Mat image;
-    image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
-    if(! image.data )
-    {
-        std::cout<<"\nwrong path\n";
-        return image;
-    }
-    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
-
-    auto idTrCluster = test_on_image( path, factor, 3.0, 10 );
-    std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
-
-    Preprocess preprocess( MakeFilter::get_square_filter(11), image);
-    auto contourTransition = preprocess.get_correction_edge( image, idTr, 3);
-
-    auto matContourTransition = contourTransition.show_matDataTrans();
-    cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "Canny", matContourTransition );
-    cv::waitKey(0);
-
-    return matContourTransition;
 }
 
 cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )

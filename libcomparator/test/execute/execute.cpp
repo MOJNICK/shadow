@@ -4,7 +4,7 @@
 int main( int argc, char** argv )
 {
 
-    // test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0 );
+    test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0 );
 
     // cv::Mat image;
     // image = cv::imread("/home/szozda/Downloads/refImg/girRef.jpg", CV_LOAD_IMAGE_COLOR);

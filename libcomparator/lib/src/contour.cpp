@@ -71,6 +71,7 @@ Preprocess::Preprocess( cv::Mat_<double> filterKernel_, cv::Mat const & image ) 
 	filterKernel = filterKernel_.clone();
 }
 
+/*remove shadow transitions when not under canny*/
 void Preprocess::rm_out_edge_detected( std::vector<IndexTransition> & indexTransition )
 {
 	indexTransition.erase( std::remove_if(indexTransition.begin(), indexTransition.end(), [ this ]( auto& idxTr){
@@ -82,7 +83,7 @@ void Preprocess::rm_out_edge_detected( std::vector<IndexTransition> & indexTrans
 	}), indexTransition.end());
 }
 
-
+/*canny and dilate*/
 cv::Mat Preprocess::make_thick_kernel( cv::Mat const & image, uint dilationSize )//tested visually
 {
 	thickKernel = image.clone();
