@@ -97,7 +97,7 @@ protected:
     std::vector<uint> expectedSize{1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0};
     for(uint i = 0; i < 0x10; ++i )
     {
-      Transition tr = (Transition)( i << 3 );
+      Transition tr = (Transition)( i << directionBit );
 
       std::vector<IndexTransition> testValue{ { 0, 0, tr } };
       DataProcess::remove_noise_matches( testValue );
@@ -109,7 +109,7 @@ protected:
     std::vector<IndexTransition> testVector;
     for(uint i = 0; i < 0x10; ++i )
     {
-      Transition tr = (Transition)( i << 3 );
+      Transition tr = (Transition)( i << directionBit );
       testVector.push_back( IndexTransition{ 0, 0, tr } );
     }
     DataProcess::remove_noise_matches( testVector );

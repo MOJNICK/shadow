@@ -21,6 +21,7 @@
 	uint const distinctDir = 4;
 	uint const shiftToDistinct = 4;
 	uint const transDirCombi = 16;//4 distinct directions
+	uint const directionBit = 4;
 
 	enum Transition
 	{
@@ -32,7 +33,7 @@
 		back = fwd << 1,
 		biFwdBack = fwd | back,
 
-		upToDw = no << 4,
+		upToDw = no << directionBit,
 		lToR = upToDw << 1,
 		dwToUp = upToDw << 2,
 		rToL = upToDw << 3,
