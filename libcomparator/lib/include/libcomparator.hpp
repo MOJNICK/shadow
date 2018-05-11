@@ -164,7 +164,6 @@
 		double light_distance();
 
 		bool brighter();
-		void swap();
 	};
 
 	extern "C"
