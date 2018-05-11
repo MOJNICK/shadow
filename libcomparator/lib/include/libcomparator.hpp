@@ -88,7 +88,7 @@
 
 		bool same_position( IndexTransition& b ) const
 		{
-			return ( ( row == b.row ) && ( col == b.col ) ) ? true : false;
+			return ( row == b.row ) && ( col == b.col );
 		}
 
 		uint index(cv::Mat& img)

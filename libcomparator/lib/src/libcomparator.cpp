@@ -35,7 +35,7 @@ double const prealocate = 0.01;//vector reserve
 			}
 		}
 		std::for_each( result.begin(), result.end(), [](auto& it){
-			it.col /= 3;
+			it.col /= channels;
 		});
 		return result;
 	}
@@ -59,7 +59,7 @@ double const prealocate = 0.01;//vector reserve
 			}
 		}
 		std::for_each( result.begin(), result.end(), [](auto& it){
-			it.col /= 3;
+			it.col /= channels;
 		});
 		return result;
 	}
@@ -141,12 +141,7 @@ double const prealocate = 0.01;//vector reserve
 
 	template<class TYPE> bool Classifier<TYPE>::brighter()
 	{
-		return ((pix0[0] + pix0[1] + pix0[2]) > (pix1[0] + pix1[1] + pix1[2]) ? (true) : (false));
-	}
-
-	template<class TYPE> void Classifier<TYPE>::swap()//unused
-	{
-
+		return (pix0[0] + pix0[1] + pix0[2]) > (pix1[0] + pix1[1] + pix1[2]);
 	}
 
 	void instantiate()
