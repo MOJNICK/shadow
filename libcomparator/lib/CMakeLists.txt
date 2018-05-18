@@ -1,8 +1,4 @@
-use_cxx_std()
-use_pedantic_errors()
+include_directories(include)
 
 file(GLOB_RECURSE comparator_source src/*)
 add_library(comparator SHARED ${comparator_source})
-
-find_package(OpenCV REQUIRED core)
-target_link_libraries(comparator ${OpenCV_LIBS})

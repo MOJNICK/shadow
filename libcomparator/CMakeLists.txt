@@ -1,32 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(comparator)
 
-macro(use_cxx_std)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14") 
-endmacro(use_cxx_std)
-
-macro(use_pedantic_errors)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
-endmacro(use_pedantic_errors)
-
-#set(CMAKE_CXX_FLAGS_RELEASE "-v -save-temps ${CMAKE_CXX_FLAGS_RELEASE} -O3")
-
-use_cxx_std()
-use_pedantic_errors()
-
-option(CMAKE_BUILD_TYPE "" Release) 
-
-include_directories(lib/include)
-
-option (WITH_TESTS "build tests" OFF)
-option(TEST_PRIVATE_PART "define private public, and include private test code" OFF)
-
-if (WITH_TESTS)
-	if(TEST_PRIVATE_PART)
-		add_definitions(-DTEST_PRIVATE_PART)
-	endif()
-  	add_definitions(-DWITH_TESTS)
-#  	add_subdirectory(test)
-endif()
+#string( REPLACE "-O3" "-O0" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+set(CMAKE_CXX_FLAGS_RELEASE "-v -save-temps ${CMAKE_CXX_FLAGS_RELEASE}")
 
 add_subdirectory(lib)
