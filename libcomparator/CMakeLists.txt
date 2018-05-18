@@ -9,6 +9,8 @@ macro(use_pedantic_errors)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
 endmacro(use_pedantic_errors)
 
+#set(CMAKE_CXX_FLAGS_RELEASE "-v -save-temps ${CMAKE_CXX_FLAGS_RELEASE} -O3")
+
 use_cxx_std()
 use_pedantic_errors()
 
@@ -24,7 +26,7 @@ if (WITH_TESTS)
 		add_definitions(-DTEST_PRIVATE_PART)
 	endif()
   	add_definitions(-DWITH_TESTS)
-  	add_subdirectory(test)
+#  	add_subdirectory(test)
 endif()
 
 add_subdirectory(lib)
