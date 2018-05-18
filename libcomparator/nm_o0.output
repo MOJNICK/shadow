@@ -1,0 +1,17 @@
+./lib/libcomparator.so:0000000000200f00 B __bss_start
+./lib/libcomparator.so:                 w __cxa_finalize
+./lib/libcomparator.so:0000000000200f00 D _edata
+./lib/libcomparator.so:0000000000200f08 B _end
+./lib/libcomparator.so:0000000000000b18 T _fini
+./lib/libcomparator.so:                 w __gmon_start__
+./lib/libcomparator.so:0000000000000738 T _init
+./lib/libcomparator.so:                 w _ITM_deregisterTMCloneTable
+./lib/libcomparator.so:                 w _ITM_registerTMCloneTable
+./lib/libcomparator.so:                 w _Jv_RegisterClasses
+./lib/libcomparator.so:                 U __powidf2
+./lib/libcomparator.so:00000000000008e0 T instantiate()
+./lib/libcomparator.so:000000000000098c W IterateProcess<unsigned char>::color_distance(unsigned char*, unsigned char*)
+./lib/libcomparator.so:0000000000000950 W IterateProcess<unsigned char>::iterate_H(unsigned char*, unsigned char*)
+./lib/libcomparator.so:0000000000000946 W IterateProcess<unsigned char>::IterateProcess()
+./lib/libcomparator.so:0000000000000946 W IterateProcess<unsigned char>::IterateProcess()
+./lib/libcomparator.so:0000000000000919 W std::pow(double, int)

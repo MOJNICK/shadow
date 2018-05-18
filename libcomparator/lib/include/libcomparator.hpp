@@ -13,5 +13,4 @@
 		double color_distance(TYPE* pix0, TYPE* pix1);
 	private:		
 	};
-
 #endif

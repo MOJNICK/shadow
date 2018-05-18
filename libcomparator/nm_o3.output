@@ -1,0 +1,11 @@
+./lib/libcomparator.so:00000000002009a0 B __bss_start
+./lib/libcomparator.so:                 w __cxa_finalize
+./lib/libcomparator.so:00000000002009a0 D _edata
+./lib/libcomparator.so:00000000002009a8 B _end
+./lib/libcomparator.so:00000000000006a4 T _fini
+./lib/libcomparator.so:                 w __gmon_start__
+./lib/libcomparator.so:0000000000000548 T _init
+./lib/libcomparator.so:                 w _ITM_deregisterTMCloneTable
+./lib/libcomparator.so:                 w _ITM_registerTMCloneTable
+./lib/libcomparator.so:                 w _Jv_RegisterClasses
+./lib/libcomparator.so:00000000000006a0 T instantiate()
