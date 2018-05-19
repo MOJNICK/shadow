@@ -128,15 +128,15 @@
 	class IterateProcess
 	{
 	public:
-		IterateProcess( cv::Mat&, TYPE, double, double, double[] );
+		IterateProcess( cv::Mat&, TYPE, double, double, double[], bool(*mask_ok)() = [](){return true;} );
 		std::vector<IndexTransition> iterate_HV();
 	private:		
 		cv::Mat_<TYPE> img;//reference by default?
 		Classifier<TYPE> classifier;
+		bool (*is_mask_ok)();
 
 		std::vector<IndexTransition> iterate_H();
 		std::vector<IndexTransition> iterate_V();
-		
 	};
 
 	
@@ -165,10 +165,10 @@
 
 		bool brighter();
 	};
-
-	extern "C"
-	{
-
-	}
+	
+	#ifdef WITH_TESTS
+	template class Classifier<TYPE>;
+	template class IterateProcess<TYPE>;
+	#endif
 
 #endif
