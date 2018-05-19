@@ -3,17 +3,19 @@
 
 double const prealocate = 0.01;//vector reserve
 
-
 	template <class TYPE>
 	IterateProcess<TYPE>::IterateProcess
 	(
-		cv::Mat& img, TYPE acceptanceLevel,
-		double lightThreshold, double colorThreshold,
-		double colorBalance[], bool(*mask_ok)()
+		cv::Mat& img,
+		TYPE     acceptanceLevel,
+		double   lightThreshold,
+		double   colorThreshold,
+		double   colorBalance[],
+		bool     is_mask_ok_stub,
+		cv::Mat  mask
 	)
 	:
-	classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance),
-	is_mask_ok(mask_ok)
+	classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
 	{
 		if(! img.isContinuous() )
 		{
@@ -35,6 +37,12 @@ double const prealocate = 0.01;//vector reserve
 			int rowIndex = row * img.step;
 			for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))
 			{
+				#ifdef MASK_PROCESS
+				if(!is_mask_ok(row, col))
+				{
+					continue;
+				}
+				#endif
 				classifier.copy_pix(img.data + rowIndex + col, img.data + rowIndex + col + channels);
 				switch (classifier.f_classifier())
 				{
@@ -60,6 +68,12 @@ double const prealocate = 0.01;//vector reserve
 		{
 			for(int row = 0; row < img.rows - 1; row++)
 			{
+				#ifdef MASK_PROCESS
+				if(!is_mask_ok(row, col))
+				{
+					continue;
+				}
+				#endif
 				classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
 				switch (classifier.f_classifier())
 				{

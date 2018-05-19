@@ -14,6 +14,8 @@
 		#endif
 	#endif
 
+	#define MASK_PROCESS
+
 	typedef unsigned int uint;
 	unsigned char const channels = 3;//not a parameter, only for convinience
 	typedef unsigned char TYPE;
@@ -128,12 +130,15 @@
 	class IterateProcess
 	{
 	public:
-		IterateProcess( cv::Mat&, TYPE, double, double, double[], bool(*mask_ok)() = [](){return true;} );
+		IterateProcess( cv::Mat&, TYPE, double, double, double[], bool mask_ok_stub = true, cv::Mat mask = cv::Mat());
 		std::vector<IndexTransition> iterate_HV();
 	private:		
 		cv::Mat_<TYPE> img;//reference by default?
 		Classifier<TYPE> classifier;
-		bool (*is_mask_ok)();
+	#ifdef MASK_PROCESS
+		cv::Mat mask;//8UC1
+		bool is_mask_ok(int row, int col){return mask.data[row*mask.cols + col/3] > 0;}
+	#endif 
 
 		std::vector<IndexTransition> iterate_H();
 		std::vector<IndexTransition> iterate_V();
