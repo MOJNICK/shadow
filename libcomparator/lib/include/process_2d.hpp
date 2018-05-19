@@ -3,9 +3,23 @@
 #define MASK_PROCESS
 #include "libcomparator.hpp"
 
-class MaskIterateProcess
+double balance[] = {1.0, 1.0, 1.0};
+
+class MaskIterateProcess: public IterateProcessMask<TYPE>
 {
 public:
+	MaskIterateProcess(cv::Mat img, cv::Mat mask)
+	:
+		IterateProcessMask<TYPE>
+		(
+			img,
+			std::numeric_limits<TYPE>::lowest(),
+			std::numeric_limits<double>::min(),
+			std::numeric_limits<double>::max(),
+			balance,
+			mask
+		)
+	{}
 	std::vector<IndexTransition> calc_transitions_with_mask(cv::Mat const & image_1d, cv::Mat const & mask);
 private:
 	unsigned char* pix0;

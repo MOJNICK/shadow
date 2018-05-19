@@ -64,6 +64,7 @@
 	{
 	public:
 		friend DataProcess;
+		
 		ColorBalance( cv::Mat const &, TYPE, uint );
 		ColorStruct balance( std::vector< IndexTransition > const & inputPositions );
 		~ColorBalance(){};
