@@ -11,6 +11,5 @@ private:
 	unsigned char* pix0;
 	unsigned char* pix1;
 	Transition calc_transition();
-	bool brighter();
 };
 #endif

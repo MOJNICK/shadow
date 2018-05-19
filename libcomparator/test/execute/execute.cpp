@@ -3,10 +3,6 @@
 
 int main( int argc, char** argv )
 {
-    Selectable<char> selImplicitTrue;
-    Selectable<char,true> selExplicitTrue;
-    Selectable<char,false> selExplicitFalse;
-
     test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0 );
 
     // cv::Mat image;

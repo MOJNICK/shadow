@@ -272,21 +272,4 @@
 			template class IterateProcessMask<TYPE>;
 		#endif
 	#endif
-
-	template <class type, bool selector=true>
-	class Selectable
-	{
-	public:
-		Selectable(){std::cout<<"\n TRUE here \n";};
-	};
-
-	
-	template<> 
-	class Selectable<char, false>
-	{
-	public:
-		Selectable(){std::cout<<"\n FALSE here \n";};	
-	};
-template class Selectable<char>;
-template class Selectable<char,false>;
 #endif
