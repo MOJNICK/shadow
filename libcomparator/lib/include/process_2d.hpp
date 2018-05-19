@@ -1,5 +1,6 @@
 #ifndef PROCESS_2D_HPP
 #define PROCESS_2D_HPP
+#define MASK_PROCESS
 #include "libcomparator.hpp"
 
 class MaskIterateProcess

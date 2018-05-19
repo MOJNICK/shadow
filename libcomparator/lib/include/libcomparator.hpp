@@ -15,7 +15,6 @@
 	#endif
 
 	#include <iostream>
-	#define MASK_PROCESS
 
 	typedef unsigned int uint;
 	unsigned char const channels = 3;//not a parameter, only for convinience
@@ -128,11 +127,19 @@
 
 
 	template <class TYPE>//, bool with_mask = false>
+	#ifndef MASK_PROCESS
 	class IterateProcess
+	#else
+	class IterateProcessMask
+	#endif
 	{
 		static constexpr double prealocate = 0.01;//vector reserve
 	public:
+		#ifndef MASK_PROCESS
 		IterateProcess
+		#else
+		IterateProcessMask
+		#endif
 		(
 			cv::Mat& img,
 			TYPE     acceptanceLevel,
@@ -258,8 +265,12 @@
 	};
 	
 	#ifdef WITH_TESTS
-	template class Classifier<TYPE>;
-	template class IterateProcess<TYPE>;
+		template class Classifier<TYPE>;
+		#ifndef MASK_PROCESS
+			template class IterateProcess<TYPE>;
+		#else
+			template class IterateProcessMask<TYPE>;
+		#endif
 	#endif
 
 	template <class type, bool selector=true>
