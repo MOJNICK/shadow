@@ -14,6 +14,7 @@
 		#endif
 	#endif
 
+	#include <iostream>
 	#define MASK_PROCESS
 
 	typedef unsigned int uint;
@@ -126,12 +127,40 @@
 	class Classifier;
 
 
-	template <class TYPE>
+	template <class TYPE>//, bool with_mask = false>
 	class IterateProcess
 	{
+		static constexpr double prealocate = 0.01;//vector reserve
 	public:
-		IterateProcess( cv::Mat&, TYPE, double, double, double[], bool mask_ok_stub = true, cv::Mat mask = cv::Mat());
-		std::vector<IndexTransition> iterate_HV();
+		IterateProcess
+		(
+			cv::Mat& img,
+			TYPE     acceptanceLevel,
+			double   lightThreshold,
+			double   colorThreshold,
+			double   colorBalance[],
+			cv::Mat  mask = cv::Mat()
+		)
+		:
+		classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
+		{
+			if(! img.isContinuous() )
+			{
+				img = cv::Mat( cv::Size(200,100), CV_8UC(channels), cv::Scalar(0));
+				cv::putText(img, "not coninuous", cv::Point(0,0), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200,200,250), 1, 8, false);
+				this->img = img;
+			}
+			else { this->img = img; }
+		}
+
+		std::vector<IndexTransition> iterate_HV()
+		{
+			std::vector<IndexTransition> detectedH = iterate_H();
+			std::vector<IndexTransition> detectedV = iterate_V();
+			detectedH.insert(detectedH.end(), detectedV.begin(), detectedV.end());
+			std::vector<IndexTransition> detectedHV = detectedH;
+			return detectedHV;
+		}
 	private:		
 		cv::Mat_<TYPE> img;//reference by default?
 		Classifier<TYPE> classifier;
@@ -140,8 +169,65 @@
 		bool is_mask_ok(int row, int col){return mask.data[row*mask.cols + col/3] > 0;}
 	#endif 
 
-		std::vector<IndexTransition> iterate_H();
-		std::vector<IndexTransition> iterate_V();
+		std::vector<IndexTransition> iterate_H()
+		{
+			std::vector<IndexTransition> result;
+			result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
+
+			for( int row = 0; row < img.rows; row++)		
+			{
+				int rowIndex = row * img.step;
+				for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))
+				{
+					#ifdef MASK_PROCESS
+					if(!is_mask_ok(row, col))
+					{
+						continue;
+					}
+					#endif
+					classifier.copy_pix(img.data + rowIndex + col, img.data + rowIndex + col + channels);
+					switch (classifier.f_classifier())
+					{
+						case no: continue; break;
+						case fwd: result.push_back( IndexTransition{ row, col + channels, lToR } ); break;
+						case back: result.push_back( IndexTransition{ row, col, rToL } ); break;
+					}
+				}
+			}
+			std::for_each( result.begin(), result.end(), [](auto& it){
+				it.col /= channels;
+			});
+			return result;
+		}
+		std::vector<IndexTransition> iterate_V()
+		{
+			std::vector<IndexTransition> result;
+			result.reserve(sizeof(IndexTransition) * img.total() * prealocate);
+
+			for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))		
+			{
+				for(int row = 0; row < img.rows - 1; row++)
+				{
+					#ifdef MASK_PROCESS
+					if(!is_mask_ok(row, col))
+					{
+						continue;
+					}
+					#endif
+					classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
+					switch (classifier.f_classifier())
+					{
+						case no: continue; break;
+						case fwd: result.push_back( IndexTransition{ row + 1, col, upToDw } ); break;
+						case back: result.push_back( IndexTransition{ row, col, dwToUp } ); break;
+					}
+				}
+			}
+			std::for_each( result.begin(), result.end(), [](auto& it){
+				it.col /= channels;
+			});
+			return result;
+		}
 	};
 
 	
@@ -176,4 +262,20 @@
 	template class IterateProcess<TYPE>;
 	#endif
 
+	template <class type, bool selector=true>
+	class Selectable
+	{
+	public:
+		Selectable(){std::cout<<"\n TRUE here \n";};
+	};
+
+	
+	template<> 
+	class Selectable<char, false>
+	{
+	public:
+		Selectable(){std::cout<<"\n FALSE here \n";};	
+	};
+template class Selectable<char>;
+template class Selectable<char,false>;
 #endif
