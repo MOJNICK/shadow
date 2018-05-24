@@ -14,8 +14,6 @@
 		#endif
 	#endif
 
-	#include <iostream>
-
 	typedef unsigned int uint;
 	unsigned char const channels = 3;//not a parameter, only for convinience
 	typedef unsigned char TYPE;

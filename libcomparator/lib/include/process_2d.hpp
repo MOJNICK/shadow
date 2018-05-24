@@ -5,14 +5,15 @@
 
 double balance[] = {1.0, 1.0, 1.0};
 
-class MaskIterateProcess: public IterateProcessMask<TYPE>
+class MaskIterateProcess
 {
 public:
-	MaskIterateProcess(cv::Mat img, cv::Mat mask)
+	IterateProcessMask<TYPE> iterateProcessMask;
+	MaskIterateProcess(cv::Mat image, cv::Mat mask)
 	:
-		IterateProcessMask<TYPE>
+		iterateProcessMask
 		(
-			img,
+			image,
 			std::numeric_limits<TYPE>::lowest(),
 			std::numeric_limits<double>::min(),
 			std::numeric_limits<double>::max(),
@@ -20,10 +21,15 @@ public:
 			mask
 		)
 	{}
-	std::vector<IndexTransition> calc_transitions_with_mask(cv::Mat const & image_1d, cv::Mat const & mask);
+	std::vector<IndexTransition> calc_transitions_with_mask()
+	{
+		return iterateProcessMask.iterate_HV();
+	}
 private:
-	unsigned char* pix0;
-	unsigned char* pix1;
-	Transition calc_transition();
+};
+
+class Process2D
+{
+	Process2D(cv::Mat image, cv::Mat image_1d){}
 };
 #endif

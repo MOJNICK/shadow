@@ -8,6 +8,7 @@
 #include "dataprocess.hpp"
 #include "clustering.hpp"
 #include "contour.hpp"
+#include "imageprocess.hpp"
 #include <iostream>
 
 void save_result(char* source_path, char const postFix[], char const outputFormat[], cv::Mat& image);
