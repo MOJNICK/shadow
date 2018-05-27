@@ -232,6 +232,7 @@ cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
         std::cout<<"\nwrong path\n";
         return image;
     }
+    linearize_2_2_gamma(image);
 
     cv::Mat cImage = image.clone();
     bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );

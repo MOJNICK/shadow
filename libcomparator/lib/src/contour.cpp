@@ -145,9 +145,11 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 	for(int _row = row - filterKernel.rows / 2; _row <= row + filterKernel.rows / 2; _row++ )
 		for(int _col = col - filterKernel.cols/2; _col <= col + filterKernel.cols / 2; _col++ )
 		{
+			#ifdef WITH_TESTS
 			auto debugValue = (matTransSilentBorder(_row, _col) & all) >> shiftToDistinct;
 			if( (debugValue) >= transDirCombi )
 				std::cout << "\n\n\nERRR\n\n\n";
+			#endif
 
 			histo[ (matTransSilentBorder(_row, _col) & all) >> shiftToDistinct ].first += filterKernel(_row - row + filterKernel.rows / 2, _col - col + filterKernel.cols / 2 );
 		}
@@ -155,11 +157,12 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 
 	std::pair<double, uint> orgHisto[ transDirCombi ];
 	std::copy( histo, histo + transDirCombi, orgHisto );
-	for( int i = 0; i < transDirCombi; ++i )//concatenate similar transition probability
+	for( int i = 0; i < transDirCombi; ++i )//concatenate similar transitions
 	{
+		histo[i].first = 0;
 		for( int j = 0; j < transDirCombi; ++j )
 		{
-			if( i & j == i )// shouldd i!=j 
+			if( (i & j) == i )
 			{
 				histo[i].first += orgHisto[j].first;
 			}
