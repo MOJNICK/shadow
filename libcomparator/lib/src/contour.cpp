@@ -86,11 +86,9 @@ void Preprocess::rm_out_edge_detected( std::vector<IndexTransition> & indexTrans
 /*canny and dilate*/
 cv::Mat Preprocess::make_thick_kernel( cv::Mat const & image, uint dilationSize )//tested visually
 {
-	thickKernel = image.clone();
- 
-    cv::Mat gray, edge, draw;
+	cv::Mat gray, edge;
+    
     cvtColor(image, gray, CV_BGR2GRAY);
- 
     blur( gray, gray, cv::Size(7, 7) );
 
     int apertureSize = 5;
