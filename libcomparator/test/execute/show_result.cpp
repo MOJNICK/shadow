@@ -249,9 +249,8 @@ cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
     show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
 
 
-    Filter filter(image, 160, 3, 2);
-    cv::Mat result = filter.get_shadow_weight( idTr );
-    result = filter.filter_image();
+    Filter filter(image, idTr, 160, 3, 2);
+    cv::Mat result = filter.filter_image();
 
     ContourTransition contourTransition(image);
     contourTransition.bw_push_transition( idTr );

@@ -280,10 +280,13 @@ void MakeFilter::cvt_to_antisimmetric(cv::Mat& kernel, Transition direction, int
 }
 
 
-Filter::Filter( cv::Mat & image, double sizeFactor, double antiSigma, double hvFactor ):
-	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor} {}
+Filter::Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor, double antiSigma, double hvFactor ):
+	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor} 
+{
+	get_shadow_weight( indexTransition );
+}
 
-cv::Mat Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransition )
+void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransition )
 {
 	cv::Mat directed = cvt_it_to_matFloat( indexTransition );
 	std::vector<cv::Mat> splited;
@@ -300,7 +303,7 @@ cv::Mat Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTra
 	cv::filter2D( splited[3], splited[3], -1, Rkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 
 	reverseZeroBasedFilter = splited[0] + splited[1] + splited[2] + splited[3];
-	return reverseZeroBasedFilter;
+	return;
 }
 
 cv::Mat Filter::filter_image()

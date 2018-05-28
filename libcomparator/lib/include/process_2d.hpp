@@ -4,6 +4,7 @@
 #include "libcomparator.hpp"
 #include "imageprocess.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "contour.hpp"
 
 #ifdef WITH_TESTS
 	#include <opencv2/highgui/highgui.hpp>
@@ -15,6 +16,7 @@ class MaskIterateProcess
 {
 public:
 	IterateProcessMask<TYPE> iterateProcessMask;
+	
 	MaskIterateProcess(cv::Mat image, cv::Mat mask)
 	:
 		iterateProcessMask
@@ -55,11 +57,24 @@ namespace Process2D
 	    return edge;
 	}
 
-	cv::Mat run_process2D(cv::Mat image, cv::Mat image_1d)
+	cv::Mat run_process2D(cv::Mat image, cv::Mat image1D)
 	{
-		cv::Mat img;
-		img = image.clone();
-		return image;
+		assert( image.cols == image1D.cols && image.cols == image1D.cols );
+		
+		cv::Mat cannyImage = calc_canny(image);
+		cv::Mat cannyImage1D = calc_canny(image1D);
+
+		cv::Mat shadowEdges;
+		cv::subtract(cannyImage, cannyImage1D, shadowEdges);
+
+		//auto idTrCluster = test_on_image( path, factor, 3.0, 1 );
+		MaskIterateProcess maskIterateProcess( image, shadowEdges);
+		auto idTr = maskIterateProcess.calc_transitions_with_mask();
+
+    	Filter filter(image, idTr, 160, 3, 2);
+    	cv::Mat result = filter.filter_image();
+
+		return result;
 	}
 
 }

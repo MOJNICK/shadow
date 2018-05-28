@@ -59,8 +59,7 @@ private:
 class Filter
 {
 public:
-	Filter( cv::Mat & image, double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1);
-	cv::Mat get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
+	Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1);
 	// cv::normalize(sum, sum, 0.0, 1.0, cv::NORM_MINMAX);
 	cv::Mat filter_image();
 
@@ -73,5 +72,6 @@ private:
 	double antiSigma;
 	double hvFactor;
 
+	void get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
 	cv::Mat cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition );
 };

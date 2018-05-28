@@ -149,13 +149,8 @@
 		:
 		classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
 		{
-			if(! img.isContinuous() )
-			{
-				img = cv::Mat( cv::Size(200,100), CV_8UC(channels), cv::Scalar(0));
-				cv::putText(img, "not coninuous", cv::Point(0,0), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200,200,250), 1, 8, false);
-				this->img = img;
-			}
-			else { this->img = img; }
+			assert(img.isContinuous());
+			this->img = img;
 		}
 
 		std::vector<IndexTransition> iterate_HV()
@@ -167,7 +162,7 @@
 			return detectedHV;
 		}
 	private:		
-		cv::Mat_<TYPE> img;//reference by default?
+		cv::Mat_<TYPE> img;
 		Classifier<TYPE> classifier;
 	#ifdef MASK_PROCESS
 		cv::Mat mask;//8UC1
