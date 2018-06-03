@@ -240,8 +240,6 @@ cv::Mat MakeFilter::get_gauss_antisimmetric_filter( double sizeFactor, double si
 	int sigmaHf = (int)(sigmaV * sizeFactor) | 1;
 	int sigmaVf = (int)(sigmaV * sizeFactor) | 1;
 
-
-	
 	cv::Mat kernel( cv::Size( sigmaHf, sigmaVf ), CV_64F, .0 );
 	int anchorH = kernel.rows / 2;
 	int anchorV = kernel.cols / 2; //not exactly	

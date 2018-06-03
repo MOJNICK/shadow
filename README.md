@@ -18,3 +18,7 @@ cmake ./libcomparator -DWITH_TESTS=ON -DTEST_PRIVATE_PART=ON -DCMAKE_BUILD_TYPE=
 ./libcomparator/test/unit/testcomparator
 
 python -m unittest test.testClustering.TestClustering
+
+ls $img_dir | grep '.jpg' | xargs -n1 -P6 -I{} bash -c "echo {} | sed 's/\.jpg$/\.png/g' | xargs -n1 -P1 -I[] ./test/execute/execute --linearize $img_dir{} $lin_dir[]"
+ls $lin_dir | grep '.png' | xargs -n1 -P1 -I[] ./test/execute/execute --normalize $lin_dir[] $lin_dir''normalized/[]
+lin_dir=~szozda/dsk/img/linearized/; ls $lin_dir | egrep '(.png)' | egrep -v '_n' | xargs -n1 -I{} -P6 echo {}

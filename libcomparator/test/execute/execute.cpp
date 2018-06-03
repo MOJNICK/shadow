@@ -1,8 +1,45 @@
 #include "show_result.hpp"
+#include "process_2d.hpp"
 #include <typeinfo>
 
 int main( int argc, char** argv )
 {
+    std::vector<std::string> vecArgv(argv, argv + argc);
+    if(argc>3 && vecArgv[1]==std::string("--linearize"))
+    {
+        std::string inputFile = vecArgv[2];
+        std::string outputFile = vecArgv[3];
+        std::cout << "linearize_2_2_gamma: " << inputFile << " -> " << outputFile << '\n';
+        cv::Mat img = cv::imread(inputFile, CV_LOAD_IMAGE_COLOR);
+        if(!img.data){std::cout<<"cant open\n"; return 0;}
+        linearize_2_2_gamma(img);
+        cv::imwrite(outputFile, img);
+    }
+    else if(argc>3 && vecArgv[1]==std::string("--normalize"))
+    {
+        std::string inputFile = vecArgv[2];
+        std::string outputFile = vecArgv[3];
+        std::cout << "normalize: " << inputFile << " -> " << outputFile << '\n';
+        cv::Mat img = cv::imread(inputFile, CV_LOAD_IMAGE_COLOR);
+        if(!img.data){std::cout<<"cant open\n"; return 0;}
+        cv::normalize(img, img, 0, 255, cv::NORM_MINMAX);
+        cv::imwrite(outputFile, img);
+    }
+    else if(argc>4 && vecArgv[1]==std::string("--process2d"))
+    {
+        std::string inputFile = vecArgv[2];
+        std::string inputFile1D = vecArgv[3];
+        std::string outputFile = vecArgv[4];
+        std::cout << "process2d: " << inputFile << " + " << inputFile1D << " -> " << outputFile << '\n';
+        cv::Mat img   = cv::imread(inputFile, CV_LOAD_IMAGE_COLOR);
+        cv::Mat img1D = cv::imread(inputFile1D, CV_LOAD_IMAGE_COLOR);
+        if(!img.data || !img1D.data){std::cout<<"cant open\n"; return 0;}
+        cv::Mat processed = process2d::run_process2d(img, img1D);
+
+        cv::imwrite(outputFile, processed);
+    }
+    return 0;
+
     test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0 );
 
     // cv::Mat image;
