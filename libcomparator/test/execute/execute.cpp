@@ -38,6 +38,16 @@ int main( int argc, char** argv )
 
         cv::imwrite(outputFile, processed);
     }
+    else if(argc>3 && vecArgv[1]==std::string("--iterate"))
+    {
+        std::string inputFile = vecArgv[2];
+        std::string outputFile = vecArgv[3];
+        std::cout << "iterate: " << inputFile << " -> " << outputFile << '\n';
+        cv::Mat img = cv::imread(inputFile, CV_LOAD_IMAGE_COLOR);
+        if(!img.data){std::cout<<"cant open\n"; return 0;}
+        img = test_gauss_directed( inputFile.c_str(), 0.25, 1);
+        cv::imwrite(outputFile, img);
+    }
     return 0;
 
     test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0 );

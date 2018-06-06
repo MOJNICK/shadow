@@ -41,19 +41,29 @@ namespace process2d
 	    edge.convertTo(edge, CV_8U);
 	    #ifdef WITH_TESTS
 	    cv::imshow( "Canny", edge );
+	    cv::waitKey(0);
 	    #endif
 	    return edge;
 	}
 
 	cv::Mat run_process2d(cv::Mat image, cv::Mat image1D)
 	{
-		assert( image.cols == image1D.cols && image.cols == image1D.cols );
+		std::cout << "debug str3" << std::endl;
+
+		assert( image.rows == image1D.rows && image.cols == image1D.cols );
+		std::cout << "debug str3" << std::endl;
 		
 		cv::Mat cannyImage = calc_canny(image);
 		cv::Mat cannyImage1D = calc_canny(image1D);
 
+		std::cout << "debug str3" << std::endl;
+
 		cv::Mat shadowEdges;
 		cv::subtract(cannyImage, cannyImage1D, shadowEdges);
+		#ifdef WITH_TESTS
+	    cv::imshow( "shadowEdges", shadowEdges );
+	    cv::waitKey(0);
+	    #endif
 
 		//auto idTrCluster = test_on_image( path, factor, 3.0, 1 );
 		MaskIterateProcess maskIterateProcess( image, shadowEdges);

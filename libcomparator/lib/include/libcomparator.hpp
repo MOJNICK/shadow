@@ -133,10 +133,10 @@
 	{
 		static constexpr double prealocate = 0.01;//vector reserve
 	public:
-		#ifndef MASK_PROCESS
-		IterateProcess
-		#else
+		#ifdef MASK_PROCESS
 		IterateProcessMask
+		#else
+		IterateProcess
 		#endif
 		(
 			cv::Mat& img,
@@ -149,8 +149,12 @@
 		:
 		classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
 		{
-			assert(img.isContinuous());
+			assert(img.isContinuous() && mask.isContinuous());
 			this->img = img;
+			#ifdef MASK_PROCESS
+			assert( img.rows == mask.rows && img.cols == mask.cols );
+			this->mask = mask;
+			#endif
 		}
 
 		std::vector<IndexTransition> iterate_HV()
