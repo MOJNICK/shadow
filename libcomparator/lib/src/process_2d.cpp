@@ -31,28 +31,87 @@ private:
 
 namespace process2d
 {
+	int const blurDivisor = 100;
 
 	cv::Mat calc_canny( cv::Mat image, int blurr = 7, int threshold1 = 80, int threshold2 = 500, int apertureSize = 5 )
 	{
 		cv::Mat edge;
-		cvtColor( image, edge, CV_BGR2GRAY );
-	    blur( edge, edge, cv::Size(blurr, blurr) );
-	    Canny( edge, edge, threshold1, threshold2, apertureSize, true );
+		cv::cvtColor( image, edge, CV_BGR2GRAY );
+	    cv::blur( edge, edge, cv::Size(blurr, blurr) );
+	    #ifdef WITH_TESTS
+	    cv::imshow( "calc_canny", edge );
+	    cv::waitKey(0);
+	    #endif
+	    cv::Canny( edge, edge, threshold1, threshold2, apertureSize, true );
 	    edge.convertTo(edge, CV_8U);
 	    #ifdef WITH_TESTS
-	    cv::imshow( "Canny", edge );
+	    cv::imshow( "calc_canny", edge );
 	    cv::waitKey(0);
 	    #endif
 	    return edge;
+	}
+
+	bool is_subset(cv::Mat cannyImage1D, cv::Mat const cannyImage, double maximumNonSubsetPercentage = 10)
+	{
+		cv::Mat cannyImage_ = cannyImage.clone();
+		int setSize = cv::countNonZero(cannyImage_);
+		
+		int dilationSize = 10;
+		cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE,
+                                       cv::Size( 2*dilationSize + 1, 2*dilationSize+1 ),
+                                       cv::Point( dilationSize, dilationSize ) );
+  		cv::morphologyEx( cannyImage_, cannyImage_, cv::MORPH_DILATE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
+
+  		#ifdef WITH_TESTS
+  		cv::imshow( "dilatedCannyImage", cannyImage_ );
+	    cv::waitKey(0);
+  		#endif
+
+  		cv::bitwise_xor(cannyImage_, cannyImage1D, cannyImage_);
+  		cv::bitwise_and(cannyImage_, cannyImage1D, cannyImage_);
+  		int numberOfNonSubset = cv::countNonZero(cannyImage_);
+  		
+  		#ifdef WITH_TESTS
+  		cv::imshow( "nonSubset", cannyImage_ );
+	    cv::waitKey(0);
+  		std::cout << "process2d::is_subset::numberOfNonSubset: " << numberOfNonSubset << " setSize: " << setSize << std::endl;
+  		#endif
+
+  		return 100.0 * numberOfNonSubset / setSize < maximumNonSubsetPercentage;
+	}
+
+	cv::Mat canny_until_1d_is_subset_of_orginal(cv::Mat const cannyImage, cv::Mat image1D, int blurr, int startThreshold, double thresholdDivisor = 1.3, int ratio = 2)
+	{
+		#ifdef WITH_TESTS
+		static int iteration = 10;
+		--iteration;
+		assert(iteration);
+		#endif
+
+		cv::Mat cannyImage1D = calc_canny(image1D, blurr, startThreshold, startThreshold*ratio);
+		if(is_subset(cannyImage1D, cannyImage))
+		{
+			startThreshold/=thresholdDivisor;
+			canny_until_1d_is_subset_of_orginal(cannyImage, image1D, blurr, startThreshold);
+		}
+		else
+		{
+			startThreshold*=thresholdDivisor;
+			cannyImage1D = calc_canny(image1D, blurr, startThreshold, startThreshold*ratio);
+			return cannyImage1D;
+		}
 	}
 
 	cv::Mat run_process2d(cv::Mat image, cv::Mat image1D)
 	{
 		assert( image.rows == image1D.rows && image.cols == image1D.cols );
 		
-		cv::Mat cannyImage = calc_canny(image, image.cols / 100);
-		cv::Mat cannyImage1D = calc_canny(image1D, image.cols / 100);
-
+		int startThreshold = 5;
+		int startThreshold1D = startThreshold * 10;
+		int blurr = image.cols / blurDivisor;
+		cv::Mat cannyImage = calc_canny(image, blurr, startThreshold);
+		cv::Mat cannyImage1D = canny_until_1d_is_subset_of_orginal(cannyImage, image1D, blurr, startThreshold1D);
+		
 		cv::Mat shadowEdges;
 		cv::subtract(cannyImage, cannyImage1D, shadowEdges);
 		#ifdef WITH_TESTS
@@ -69,27 +128,4 @@ namespace process2d
 
 		return result;
 	}
-
-	set_canny_threshold_until_1d_is_subset_of_orginal();
-	bool is_subset(cv::Mat image1D, cv::Mat image)
-	{
-		cv::Mat image_ = image.clone();
-		
-		int dilationSize = 1;
-		cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE,
-                                       cv::Size( 2*dilationSize + 1, 2*dilationSize+1 ),
-                                       cv::Point( dilationSize, dilationSize ) );
-  		morphologyEx( image_, image_, cv::MORPH_DILATE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
-
-  		cv::bitwise_xor(image_, image1D, image_);
-  		cv::bitwise_and(image_, image1D, image_);
-  		int numberOfNonSubset = cv::countNonZero(image_);
-  		
-  		#ifdef WITH_TESTS
-  		std::cout<<"process2d::is_subset::numberOfNonSubset: "<<numberOfNonSubset<<std::endl;
-  		#endif
-
-  		return !numberOfNonSubset;
-	}
-
 }
