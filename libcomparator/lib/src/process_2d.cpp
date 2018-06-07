@@ -48,15 +48,10 @@ namespace process2d
 
 	cv::Mat run_process2d(cv::Mat image, cv::Mat image1D)
 	{
-		std::cout << "debug str3" << std::endl;
-
 		assert( image.rows == image1D.rows && image.cols == image1D.cols );
-		std::cout << "debug str3" << std::endl;
 		
-		cv::Mat cannyImage = calc_canny(image);
-		cv::Mat cannyImage1D = calc_canny(image1D);
-
-		std::cout << "debug str3" << std::endl;
+		cv::Mat cannyImage = calc_canny(image, image.cols / 100);
+		cv::Mat cannyImage1D = calc_canny(image1D, image.cols / 100);
 
 		cv::Mat shadowEdges;
 		cv::subtract(cannyImage, cannyImage1D, shadowEdges);
@@ -66,13 +61,35 @@ namespace process2d
 	    #endif
 
 		//auto idTrCluster = test_on_image( path, factor, 3.0, 1 );
-		MaskIterateProcess maskIterateProcess( image, shadowEdges);
+		MaskIterateProcess maskIterateProcess(image, shadowEdges);
 		auto idTr = maskIterateProcess.calc_transitions_with_mask();
 
     	Filter filter(image, idTr, 160, 3, 1);
     	cv::Mat result = filter.filter_image();
 
 		return result;
+	}
+
+	set_canny_threshold_until_1d_is_subset_of_orginal();
+	bool is_subset(cv::Mat image1D, cv::Mat image)
+	{
+		cv::Mat image_ = image.clone();
+		
+		int dilationSize = 1;
+		cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE,
+                                       cv::Size( 2*dilationSize + 1, 2*dilationSize+1 ),
+                                       cv::Point( dilationSize, dilationSize ) );
+  		morphologyEx( image_, image_, cv::MORPH_DILATE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
+
+  		cv::bitwise_xor(image_, image1D, image_);
+  		cv::bitwise_and(image_, image1D, image_);
+  		int numberOfNonSubset = cv::countNonZero(image_);
+  		
+  		#ifdef WITH_TESTS
+  		std::cout<<"process2d::is_subset::numberOfNonSubset: "<<numberOfNonSubset<<std::endl;
+  		#endif
+
+  		return !numberOfNonSubset;
 	}
 
 }

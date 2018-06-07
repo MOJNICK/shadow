@@ -125,10 +125,10 @@
 
 
 	template <class TYPE>//, bool with_mask = false>
-	#ifndef MASK_PROCESS
-	class IterateProcess
-	#else
+	#ifdef MASK_PROCESS
 	class IterateProcessMask
+	#else
+	class IterateProcess
 	#endif
 	{
 		static constexpr double prealocate = 0.01;//vector reserve
@@ -149,9 +149,10 @@
 		:
 		classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
 		{
-			assert(img.isContinuous() && mask.isContinuous());
+			assert(img.isContinuous());
 			this->img = img;
 			#ifdef MASK_PROCESS
+			assert(mask.isContinuous());
 			assert( img.rows == mask.rows && img.cols == mask.cols );
 			this->mask = mask;
 			#endif
@@ -203,6 +204,7 @@
 			});
 			return result;
 		}
+	
 		std::vector<IndexTransition> iterate_V()
 		{
 			std::vector<IndexTransition> result;
@@ -263,10 +265,10 @@
 	
 	#ifdef WITH_TESTS
 		template class Classifier<TYPE>;
-		#ifndef MASK_PROCESS
-			template class IterateProcess<TYPE>;
-		#else
+		#ifdef MASK_PROCESS
 			template class IterateProcessMask<TYPE>;
+		#else
+			template class IterateProcess<TYPE>;
 		#endif
 	#endif
 #endif
