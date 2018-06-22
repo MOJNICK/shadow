@@ -86,11 +86,9 @@ void Preprocess::rm_out_edge_detected( std::vector<IndexTransition> & indexTrans
 /*canny and dilate*/
 cv::Mat Preprocess::make_thick_kernel( cv::Mat const & image, uint dilationSize )//tested visually
 {
-	thickKernel = image.clone();
- 
-    cv::Mat gray, edge, draw;
+	cv::Mat gray, edge;
+    
     cvtColor(image, gray, CV_BGR2GRAY);
- 
     blur( gray, gray, cv::Size(7, 7) );
 
     int apertureSize = 5;
@@ -242,8 +240,6 @@ cv::Mat MakeFilter::get_gauss_antisimmetric_filter( double sizeFactor, double si
 	int sigmaHf = (int)(sigmaV * sizeFactor) | 1;
 	int sigmaVf = (int)(sigmaV * sizeFactor) | 1;
 
-
-	
 	cv::Mat kernel( cv::Size( sigmaHf, sigmaVf ), CV_64F, .0 );
 	int anchorH = kernel.rows / 2;
 	int anchorV = kernel.cols / 2; //not exactly	
@@ -282,10 +278,13 @@ void MakeFilter::cvt_to_antisimmetric(cv::Mat& kernel, Transition direction, int
 }
 
 
-Filter::Filter( cv::Mat & image, double sizeFactor, double antiSigma, double hvFactor ):
-	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor} {}
+Filter::Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor, double antiSigma, double hvFactor ):
+	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor} 
+{
+	get_shadow_weight( indexTransition );
+}
 
-cv::Mat Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransition )
+void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransition )
 {
 	cv::Mat directed = cvt_it_to_matFloat( indexTransition );
 	std::vector<cv::Mat> splited;
@@ -302,7 +301,7 @@ cv::Mat Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTra
 	cv::filter2D( splited[3], splited[3], -1, Rkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 
 	reverseZeroBasedFilter = splited[0] + splited[1] + splited[2] + splited[3];
-	return reverseZeroBasedFilter;
+	return;
 }
 
 cv::Mat Filter::filter_image()

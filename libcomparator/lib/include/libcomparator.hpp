@@ -125,18 +125,18 @@
 
 
 	template <class TYPE>//, bool with_mask = false>
-	#ifndef MASK_PROCESS
-	class IterateProcess
-	#else
+	#ifdef MASK_PROCESS
 	class IterateProcessMask
+	#else
+	class IterateProcess
 	#endif
 	{
 		static constexpr double prealocate = 0.01;//vector reserve
 	public:
-		#ifndef MASK_PROCESS
-		IterateProcess
-		#else
+		#ifdef MASK_PROCESS
 		IterateProcessMask
+		#else
+		IterateProcess
 		#endif
 		(
 			cv::Mat& img,
@@ -149,13 +149,13 @@
 		:
 		classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
 		{
-			if(! img.isContinuous() )
-			{
-				img = cv::Mat( cv::Size(200,100), CV_8UC(channels), cv::Scalar(0));
-				cv::putText(img, "not coninuous", cv::Point(0,0), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200,200,250), 1, 8, false);
-				this->img = img;
-			}
-			else { this->img = img; }
+			assert(img.isContinuous());
+			this->img = img;
+			#ifdef MASK_PROCESS
+			assert(mask.isContinuous());
+			assert( img.rows == mask.rows && img.cols == mask.cols );
+			this->mask = mask;
+			#endif
 		}
 
 		std::vector<IndexTransition> iterate_HV()
@@ -167,7 +167,7 @@
 			return detectedHV;
 		}
 	private:		
-		cv::Mat_<TYPE> img;//reference by default?
+		cv::Mat_<TYPE> img;
 		Classifier<TYPE> classifier;
 	#ifdef MASK_PROCESS
 		cv::Mat mask;//8UC1
@@ -204,6 +204,7 @@
 			});
 			return result;
 		}
+	
 		std::vector<IndexTransition> iterate_V()
 		{
 			std::vector<IndexTransition> result;
@@ -264,10 +265,10 @@
 	
 	#ifdef WITH_TESTS
 		template class Classifier<TYPE>;
-		#ifndef MASK_PROCESS
-			template class IterateProcess<TYPE>;
-		#else
+		#ifdef MASK_PROCESS
 			template class IterateProcessMask<TYPE>;
+		#else
+			template class IterateProcess<TYPE>;
 		#endif
 	#endif
 #endif

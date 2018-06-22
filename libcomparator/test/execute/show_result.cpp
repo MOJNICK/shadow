@@ -1,10 +1,10 @@
 #include "show_result.hpp"
 
-void save_result(char* source_path, char const postFix[], char const outputFormat[], cv::Mat& image)
+void save_result(const char* source_path, char const postFix[], char const outputFormat[], cv::Mat& image)
 {
-    char* destination_path = (char*)calloc( strlen(source_path) + strlen(postFix) + strlen(outputFormat), sizeof(char) );
-
-    char* lastSlash = strrchr ( source_path, '.' );
+    char* destination_path = (char*)calloc( strlen(source_path) + strlen(postFix) + strlen(outputFormat) + strlen("\0"), sizeof(char) );
+    
+    const char* lastSlash = strrchr ( source_path, '.' );
     int lastSlashPos = lastSlash - source_path;
     
     strncpy( destination_path, source_path, lastSlashPos );
@@ -100,7 +100,7 @@ cv::Mat show_result(cv::Mat img, std::vector<IndexTransitionCluster> const & res
     return blackImage;
 }
 
-std::vector<IndexTransitionCluster> test_on_image(char path[], double factor, double eps, uint minPts)
+std::vector<IndexTransitionCluster> test_on_image(const char* path, double factor, double eps, uint minPts)
 {
     cv::Mat image;
     image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
@@ -223,7 +223,7 @@ cv::Mat test_canny( char* path, double factor, int dilationSize )
     return edges;
 }
 
-cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
+cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
 {
     cv::Mat image;
     image = cv::imread(path, CV_LOAD_IMAGE_COLOR);
@@ -249,17 +249,16 @@ cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
     show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
 
 
-    Filter filter(image, 160, 3, 2);
-    cv::Mat result = filter.get_shadow_weight( idTr );
-    result = filter.filter_image();
+    Filter filter(image, idTr, 160, 3, 2);
+    cv::Mat result = filter.filter_image();
 
     ContourTransition contourTransition(image);
     contourTransition.bw_push_transition( idTr );
     cv::Mat matTrans = contourTransition.show_matDataTrans();
 
+    #ifdef WITH_TEST
     cv::namedWindow( "matTrans", cv::WINDOW_AUTOSIZE );
     cv::imshow( "matTrans", matTrans );
-
 
     cv::namedWindow( "thickKernel", cv::WINDOW_AUTOSIZE );
     cv::imshow( "thickKernel", preprocess.get_thickKernel() );
@@ -267,6 +266,7 @@ cv::Mat test_gauss_directed( char* path, double factor, int dilationSize )
     cv::namedWindow( "GaussFiltered", cv::WINDOW_AUTOSIZE );
     cv::imshow( "GaussFiltered", result );
     cv::waitKey(0);
+    #endif
 
     return result;
 }

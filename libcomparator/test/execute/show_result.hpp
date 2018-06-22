@@ -11,7 +11,7 @@
 #include "imageprocess.hpp"
 #include <iostream>
 
-void save_result(char* source_path, char const postFix[], char const outputFormat[], cv::Mat& image);
+void save_result(const char* source_path, char const postFix[], char const outputFormat[], cv::Mat& image);
 
 void p_around(unsigned char* data, int before, int after);
 
@@ -19,12 +19,12 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
 
 cv::Mat show_result(cv::Mat img, std::vector<IndexTransitionCluster> const & result );
 
-std::vector<IndexTransitionCluster> test_on_image(char path[], double factor, double eps, uint minPts);
+std::vector<IndexTransitionCluster> test_on_image(const char* path, double factor, double eps, uint minPts);
 
 int broad_HUE(char* path);
 
 cv::Mat test_canny( char* path, double factor, int dilationSize );
 
-cv::Mat test_gauss_directed( char* path, double factor, int dilationSize );
+cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize );
 
 #endif
