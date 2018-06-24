@@ -164,6 +164,7 @@
 			std::vector<IndexTransition> detectedV = iterate_V();
 			detectedH.insert(detectedH.end(), detectedV.begin(), detectedV.end());
 			std::vector<IndexTransition> detectedHV = detectedH;
+			
 			return detectedHV;
 		}
 	private:		
