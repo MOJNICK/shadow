@@ -18,6 +18,26 @@
 		brightness = 1
 	};
 
+	class DataProcess
+	{
+	public:
+		DataProcess();
+		static void remove_noise_matches( std::vector<IndexTransition>&  );
+		static bool is_noise_detection( Transition const tr );
+		/*template< class TYPE, class Compare >
+			static void 
+			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });*/
+
+		template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >
+			static void
+			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both,
+						Compare less = []( TYPE& a, TYPE& b ){ return a < b; },
+						BaseArithm add = []( TYPE& a, TYPE& b ){ return a + b; },
+						BaseArithm subtract = []( TYPE& a, TYPE& b ){ return a - b; },
+						Cast cast_arithm_arg = [](TYPE& a)->TypeIn{ return static_cast<TypeIn>(a); }
+					);
+	};
+
 	struct ColorStruct
 	{
 	public:
@@ -86,27 +106,5 @@
 		void push_element_balance( IndexTransition const & );
 		double set_colorBalances_baseLevel();
 		static bool is_valid( Transition const & );
-	};
-
-
-	class DataProcess
-	{
-	public:
-		DataProcess();
-		static void concatenate_HV( std::vector< IndexTransition >& );
-		static void remove_noise_matches( std::vector<IndexTransition>&  );
-		static bool is_noise_detection( Transition const tr );
-		/*template< class TYPE, class Compare >
-			static void 
-			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });*/
-
-		template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >
-			static void
-			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both,
-						Compare less = []( TYPE& a, TYPE& b ){ return a < b; },
-						BaseArithm add = []( TYPE& a, TYPE& b ){ return a + b; },
-						BaseArithm subtract = []( TYPE& a, TYPE& b ){ return a - b; },
-						Cast cast_arithm_arg = [](TYPE& a)->TypeIn{ return static_cast<TypeIn>(a); }
-					);
 	};
 #endif

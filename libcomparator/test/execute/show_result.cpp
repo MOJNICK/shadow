@@ -114,7 +114,6 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat image, double 
 
     IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance);
     auto result = entryProcess.iterate_HV();
-    DataProcess::concatenate_HV(result);
     blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
     DataProcess::remove_noise_matches(result);
     
@@ -128,7 +127,6 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat image, double 
     colorThreshold = 0.2;
     IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 });//secondBalance);
     result = secondProcess.iterate_HV();
-    DataProcess::concatenate_HV(result);
     DataProcess::remove_noise_matches(result);
 
     blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
@@ -164,7 +162,6 @@ std::vector<IndexTransitionCluster> test_on_image(const char* path, double facto
     IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance);
     auto result = entryProcess.iterate_HV();
     std::cout << result.size() << '\n';
-    DataProcess::concatenate_HV(result);
     blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
     save_result(path, "_noisy", ".png", blackImage);
     DataProcess::remove_noise_matches(result);
@@ -179,7 +176,6 @@ std::vector<IndexTransitionCluster> test_on_image(const char* path, double facto
     colorThreshold = 0.2;
     IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 });//secondBalance);
     result = secondProcess.iterate_HV();
-    DataProcess::concatenate_HV(result);
     DataProcess::remove_noise_matches(result);
 
     blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));

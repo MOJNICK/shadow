@@ -26,7 +26,7 @@ protected:
     for(int i = 0; i < shuffleNumber; ++i)
     { 
       std::random_shuffle( inputVec.begin(), inputVec.end() );
-      DataProcess::concatenate_HV( inputVec );
+      IterateProcess<TYPE>::concatenate_HV( inputVec );
       compareVecIndexTransition(expectedVec, inputVec);
     }
   }
