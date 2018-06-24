@@ -12,6 +12,11 @@
 		both = head | tail
 	};
 
+	enum BalanceMode
+	{
+		color_balance = 0,
+		brightness = 1
+	};
 
 	struct ColorStruct
 	{
@@ -54,9 +59,6 @@
 	private:
 		double color[ channels ];
 		double baseLevel;
-
-
-
 	};
 
 
@@ -66,7 +68,7 @@
 		friend DataProcess;
 		
 		ColorBalance( cv::Mat const &, TYPE, uint );
-		ColorStruct balance( std::vector< IndexTransition > const & inputPositions );
+		ColorStruct balance( std::vector< IndexTransition > const & inputPositions, BalanceMode mode = color_balance );
 		~ColorBalance(){};
 		#ifdef WITH_TESTS
 			ColorStruct getColorBalance( uint idx = 0 );

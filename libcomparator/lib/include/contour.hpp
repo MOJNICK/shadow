@@ -72,7 +72,9 @@ private:
 	double sizeFactor;
 	double antiSigma;
 	double hvFactor;
+	cv::Vec3d correctionPower;
 
+	cv::Vec3d calc_correction_power( std::vector<IndexTransition> const & indexTransition );
 	void get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
 	cv::Mat cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition );
 };
