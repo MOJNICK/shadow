@@ -173,7 +173,7 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 	{
 
 		result = static_cast<Transition>( histo[0].second << shiftToDistinct );
-		if( DataProcess::is_noise_detection( result ))
+		if( is_noise_detection( result ))
 		{
 			return Transition::unknown;
 		}
@@ -185,7 +185,7 @@ Transition Preprocess::get_direction( int const row, int const col, cv::Mat_<Tra
 	else
 	{
 		result = static_cast<Transition>( ( histo[0].second | histo[1].second )<< shiftToDistinct );
-		if( DataProcess::is_noise_detection( result ))
+		if( is_noise_detection( result ))
 		{
 			return Transition::unknown;
 		}

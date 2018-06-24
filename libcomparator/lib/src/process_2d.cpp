@@ -1,5 +1,5 @@
 #include "process_2d.hpp"
-#include "libcomparator.hpp"
+//#include "libcomparator.hpp"
 
 double balance[] = {1.0, 1.0, 1.0};
 

@@ -100,8 +100,7 @@ cv::Mat show_result(cv::Mat const img, std::vector<IndexTransitionCluster> const
     return blackImage;
 }
 
-template<class MatFun>
-std::vector<IndexTransitionCluster> index_transition_part(cv::Mat image, double factor, double eps, uint minPts)
+std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, double factor, double eps, uint minPts)
 {
     cv::Mat imageCpy = image.clone();
     cv::Mat imageCpy2 = image.clone();
@@ -112,10 +111,9 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat image, double 
     double lightThreshold = 0.2;
     double colorThreshold = 0.2;
 
-    IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance);
+    IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, (double*)entryBalance);
     auto result = entryProcess.iterate_HV();
     blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
-    DataProcess::remove_noise_matches(result);
     
     ColorBalance cba( image, 5u, 6 );
     ColorStruct secondBalance = cba.balance( result );
@@ -127,7 +125,6 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat image, double 
     colorThreshold = 0.2;
     IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 });//secondBalance);
     result = secondProcess.iterate_HV();
-    DataProcess::remove_noise_matches(result);
 
     blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
     
@@ -164,7 +161,6 @@ std::vector<IndexTransitionCluster> test_on_image(const char* path, double facto
     std::cout << result.size() << '\n';
     blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
     save_result(path, "_noisy", ".png", blackImage);
-    DataProcess::remove_noise_matches(result);
     ColorBalance cba( image, 5u, 6 );
     ColorStruct secondBalance = cba.balance( result );
 
@@ -176,7 +172,6 @@ std::vector<IndexTransitionCluster> test_on_image(const char* path, double facto
     colorThreshold = 0.2;
     IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 });//secondBalance);
     result = secondProcess.iterate_HV();
-    DataProcess::remove_noise_matches(result);
 
     blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
     save_result(path, "_detect_balanced", ".png", blackImage);
@@ -272,12 +267,11 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     }
 //    linearize_2_2_gamma(image);
 
-    cv::Mat cImage = image.clone();
-    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
+    bilateralFilter( image, image, 30, 150, 150, cv::BORDER_REFLECT );
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     
 
-    auto idTrCluster = test_on_image( path, factor, 3.0, 1 );
+    auto idTrCluster = index_transition_part( image, factor, 3.0, 1 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
 
     Preprocess preprocess( MakeFilter::get_square_filter(3), image);

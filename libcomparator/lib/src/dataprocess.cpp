@@ -296,34 +296,6 @@ bool ColorBalance::is_valid( Transition const & transition )
 
 //double ColorStruct::baseLevel = 0.0;
 
-DataProcess::DataProcess(){}
-
-
-bool DataProcess::is_noise_detection( Transition const tr )
-{
-	bool result;
-	Transition tmpTr;
-	
-	tmpTr =	(Transition)( tr & biUpDw );
-	result = ( tmpTr == ( tmpTr | biUpDw ) );
-
-	tmpTr =(Transition)( tr & biLR );
-	result |= ( tmpTr == ( tmpTr | biLR ) );
-	
-	return result;
-}
-
-void DataProcess::remove_noise_matches( std::vector<IndexTransition>&  data )
-{
-	//detect if double side transition aka noise transition
-	data.erase(std::remove_if(data.begin(), data.end(), [](auto idxt){
-		
-		Transition const tr = idxt.transition;
-		return is_noise_detection( tr );
-
-	}), data.end() );
-}
-
 template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >
 void
 DataProcess::outliner( std::vector<TYPE> & dataset, double diffMult, SideToClear side, Compare less, BaseArithm add, BaseArithm subtract, Cast cast_arithm_arg )

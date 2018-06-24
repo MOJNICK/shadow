@@ -67,6 +67,20 @@
 	inline Transition& operator<<=( Transition& a, uint const b )
 	{ return a = a << b; }
 
+	static bool is_noise_detection( Transition const tr )
+	{
+		bool result;
+		Transition tmpTr;
+		
+		tmpTr =	(Transition)( tr & biUpDw );
+		result = ( tmpTr == ( tmpTr | biUpDw ) );
+
+		tmpTr =(Transition)( tr & biLR );
+		result |= ( tmpTr == ( tmpTr | biLR ) );
+		
+		return result;
+	}
+
 	class IndexTransition
 	{
 	public:
@@ -126,20 +140,15 @@
 
 	template <class TYPE>//, bool with_mask = false>
 	#ifdef MASK_PROCESS
-	class IterateProcessMask
-	#else
-	class IterateProcess
+	#define IterateProcess IterateProcessMask
 	#endif
+	class IterateProcess
 	{
 		static constexpr double prealocate = 0.01;//vector reserve
 	public:
-		#ifdef MASK_PROCESS
-		IterateProcessMask
-		#else
 		IterateProcess
-		#endif
 		(
-			cv::Mat& img,
+			cv::Mat const & img,
 			TYPE     acceptanceLevel,
 			double   lightThreshold,
 			double   colorThreshold,
@@ -156,6 +165,17 @@
 			assert( img.rows == mask.rows && img.cols == mask.cols );
 			this->mask = mask;
 			#endif
+		}
+		
+		static void remove_noise_matches( std::vector<IndexTransition>&  data )
+		{
+			//detect if double side transition aka noise transition
+			data.erase(std::remove_if(data.begin(), data.end(), [](auto idxt){
+				
+				Transition const tr = idxt.transition;
+				return is_noise_detection( tr );
+
+			}), data.end() );
 		}
 
 		static void concatenate_HV(std::vector<IndexTransition>& data)
@@ -189,14 +209,16 @@
 			detectedH.insert(detectedH.end(), detectedV.begin(), detectedV.end());
 			std::vector<IndexTransition> detectedHV = detectedH;
 			concatenate_HV( detectedHV );
+			remove_noise_matches( detectedHV );
 			return detectedHV;
 		}
+
 	private:		
 		cv::Mat_<TYPE> img;
 		Classifier<TYPE> classifier;
 	#ifdef MASK_PROCESS
 		cv::Mat mask;//8UC1
-		bool is_mask_ok(int row, int col){return mask.data[row*mask.cols + col/3] > 0;}
+		bool is_mask_ok(int row, int col){return mask.data[row*mask.cols + col / channels] > 0;}
 	#endif 
 
 		std::vector<IndexTransition> iterate_H()
@@ -290,10 +312,6 @@
 	
 	#ifdef WITH_TESTS
 		template class Classifier<TYPE>;
-		#ifdef MASK_PROCESS
-			template class IterateProcessMask<TYPE>;
-		#else
-			template class IterateProcess<TYPE>;
-		#endif
+		template class IterateProcess<TYPE>;
 	#endif
 #endif

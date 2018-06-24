@@ -21,9 +21,7 @@
 	class DataProcess
 	{
 	public:
-		DataProcess();
-		static void remove_noise_matches( std::vector<IndexTransition>&  );
-		static bool is_noise_detection( Transition const tr );
+		DataProcess() = default;
 		/*template< class TYPE, class Compare >
 			static void 
 			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });*/
