@@ -1,5 +1,5 @@
 #include "process_2d.hpp"
-#include "libcomparator.hpp"
+//#include "libcomparator.hpp"
 
 double balance[] = {1.0, 1.0, 1.0};
 
@@ -8,7 +8,7 @@ class MaskIterateProcess
 public:
 	IterateProcessMask<TYPE> iterateProcessMask;
 	
-	MaskIterateProcess(cv::Mat image, cv::Mat mask)
+	MaskIterateProcess(cv::Mat image, cv::Mat mask, int compareDistance = 1)
 	:
 		iterateProcessMask
 		(
@@ -17,6 +17,7 @@ public:
 			std::numeric_limits<double>::min(),
 			std::numeric_limits<double>::max(),
 			balance,
+			compareDistance,
 			mask
 		)
 	{}

@@ -34,7 +34,7 @@ protected:
     IterateProcess<TYPE> iterateProcess(mat, acceptanceLevel, lightThreshold, colorThreshold, balance);
     
     std::vector<IndexTransition> result = iterateProcess.iterate_HV();
-    std::vector<IndexTransition> expected{ { 1, 1, lToR }, { 1, 1, rToL }, { 1, 1, upToDw }, { 1, 1, dwToUp } };
+    std::vector<IndexTransition> expected{ };
     ASSERT_EQ( expected, result );
   }
 };

@@ -26,7 +26,7 @@ protected:
     for(int i = 0; i < shuffleNumber; ++i)
     { 
       std::random_shuffle( inputVec.begin(), inputVec.end() );
-      DataProcess::concatenate_HV( inputVec );
+      IterateProcess<TYPE>::concatenate_HV( inputVec );
       compareVecIndexTransition(expectedVec, inputVec);
     }
   }
@@ -100,7 +100,7 @@ protected:
       Transition tr = (Transition)( i << directionBit );
 
       std::vector<IndexTransition> testValue{ { 0, 0, tr } };
-      DataProcess::remove_noise_matches( testValue );
+      IterateProcess<TYPE>::remove_noise_matches( testValue );
       EXPECT_EQ( expectedSize[ i ], testValue.size() );
     }
 
@@ -112,7 +112,7 @@ protected:
       Transition tr = (Transition)( i << directionBit );
       testVector.push_back( IndexTransition{ 0, 0, tr } );
     }
-    DataProcess::remove_noise_matches( testVector );
+    IterateProcess<TYPE>::remove_noise_matches( testVector );
     EXPECT_EQ( expectedVector, testVector );
 
   }

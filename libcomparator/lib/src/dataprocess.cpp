@@ -146,7 +146,7 @@ img( img ), distance{ distance } //, colorBalance{ ColorStruct{ 0, 0 , 0 } }
 	acceptanceLevel = std::max( acceptanceLevel_, static_cast< TYPE >( 1 ) );
 }
 
-ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positions )
+ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positions, BalanceMode mode )
 {
 	std::for_each( positions.begin(), positions.end(), [ this ]( IndexTransition const & el )
 	{
@@ -179,10 +179,16 @@ ColorStruct ColorBalance::balance( std::vector< IndexTransition > const & positi
 		sumBalance += el;
 	} );
 
-	double normalizer = sumBalance.accumulate_color() / channels;
-
-	sumBalance /= normalizer;
-
+	if( mode == color_balance )
+	{
+		double normalizer = sumBalance.accumulate_color() / channels;
+		sumBalance /= normalizer;
+	}
+	else if( mode == brightness )
+	{
+		sumBalance /= colorBalances.size();
+	}
+	
 	inputPositionsBalance = sumBalance;
 	return inputPositionsBalance;
 }
@@ -289,57 +295,6 @@ bool ColorBalance::is_valid( Transition const & transition )
 #endif
 
 //double ColorStruct::baseLevel = 0.0;
-
-DataProcess::DataProcess(){}
-
-void DataProcess::concatenate_HV(std::vector<IndexTransition>& data)
-{
-	if(data.size() < 2)
-		return;
-
-	std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.col < b.col; });
-	std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.row < b.row; });
-
-	uint validIdx = 0;
-	for (uint idx = 1; idx < data.size(); idx++)
-	{
-		if( data[ validIdx ].same_position( data[ idx ] ) )
-		{
-			data[ validIdx ].transition |= data[ idx ].transition;			
-		}
-		else
-		{
-			std::swap( data[ ++validIdx ], data[ idx ] );
-		}
-
-	}
-	data.resize(++validIdx);
-}
-
-bool DataProcess::is_noise_detection( Transition const tr )
-{
-	bool result;
-	Transition tmpTr;
-	
-	tmpTr =	(Transition)( tr & biUpDw );
-	result = ( tmpTr == ( tmpTr | biUpDw ) );
-
-	tmpTr =(Transition)( tr & biLR );
-	result |= ( tmpTr == ( tmpTr | biLR ) );
-	
-	return result;
-}
-
-void DataProcess::remove_noise_matches( std::vector<IndexTransition>&  data )
-{
-	//detect if double side transition aka noise transition
-	data.erase(std::remove_if(data.begin(), data.end(), [](auto idxt){
-		
-		Transition const tr = idxt.transition;
-		return is_noise_detection( tr );
-
-	}), data.end() );
-}
 
 template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >
 void

@@ -67,6 +67,20 @@
 	inline Transition& operator<<=( Transition& a, uint const b )
 	{ return a = a << b; }
 
+	static bool is_noise_detection( Transition const tr )
+	{
+		bool result;
+		Transition tmpTr;
+		
+		tmpTr =	(Transition)( tr & biUpDw );
+		result = ( tmpTr == ( tmpTr | biUpDw ) );
+
+		tmpTr =(Transition)( tr & biLR );
+		result |= ( tmpTr == ( tmpTr | biLR ) );
+		
+		return result;
+	}
+
 	class IndexTransition
 	{
 	public:
@@ -126,27 +140,24 @@
 
 	template <class TYPE>//, bool with_mask = false>
 	#ifdef MASK_PROCESS
-	class IterateProcessMask
-	#else
-	class IterateProcess
+	#define IterateProcess IterateProcessMask
 	#endif
+	class IterateProcess
 	{
 		static constexpr double prealocate = 0.01;//vector reserve
 	public:
-		#ifdef MASK_PROCESS
-		IterateProcessMask
-		#else
 		IterateProcess
-		#endif
 		(
-			cv::Mat& img,
+			cv::Mat const & img,
 			TYPE     acceptanceLevel,
 			double   lightThreshold,
 			double   colorThreshold,
 			double   colorBalance[],
+			int compareDistance = 1,
 			cv::Mat  mask = cv::Mat()
 		)
 		:
+		compareDistance{compareDistance},
 		classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
 		{
 			assert(img.isContinuous());
@@ -157,6 +168,41 @@
 			this->mask = mask;
 			#endif
 		}
+		
+		static void remove_noise_matches( std::vector<IndexTransition>&  data )
+		{
+			//detect if double side transition aka noise transition
+			data.erase(std::remove_if(data.begin(), data.end(), [](auto idxt){
+				
+				Transition const tr = idxt.transition;
+				return is_noise_detection( tr );
+
+			}), data.end() );
+		}
+
+		static void concatenate_HV(std::vector<IndexTransition>& data)
+		{
+			if(data.size() < 2)
+				return;
+
+			std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.col < b.col; });
+			std::stable_sort(data.begin(), data.end(), []( const IndexTransition& a, const IndexTransition& b ){ return a.row < b.row; });
+
+			uint validIdx = 0;
+			for (uint idx = 1; idx < data.size(); idx++)
+			{
+				if( data[ validIdx ].same_position( data[ idx ] ) )
+				{
+					data[ validIdx ].transition |= data[ idx ].transition;			
+				}
+				else
+				{
+					std::swap( data[ ++validIdx ], data[ idx ] );
+				}
+
+			}
+			data.resize(++validIdx);
+		}
 
 		std::vector<IndexTransition> iterate_HV()
 		{
@@ -164,15 +210,19 @@
 			std::vector<IndexTransition> detectedV = iterate_V();
 			detectedH.insert(detectedH.end(), detectedV.begin(), detectedV.end());
 			std::vector<IndexTransition> detectedHV = detectedH;
+			concatenate_HV( detectedHV );
+			remove_noise_matches( detectedHV );
 			return detectedHV;
 		}
-	private:		
+
+	private:
 		cv::Mat_<TYPE> img;
 		Classifier<TYPE> classifier;
+		int compareDistance;
 	#ifdef MASK_PROCESS
 		cv::Mat mask;//8UC1
-		bool is_mask_ok(int row, int col){return mask.data[row*mask.cols + col/3] > 0;}
-	#endif 
+		bool is_mask_ok(int row, int col){return mask.data[row*mask.cols + col / channels] > 0;}
+	#endif
 
 		std::vector<IndexTransition> iterate_H()
 		{
@@ -182,7 +232,7 @@
 			for( int row = 0; row < img.rows; row++)		
 			{
 				int rowIndex = row * img.step;
-				for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))
+				for(int col = 0; col < img.cols - (channels * compareDistance); col += channels * sizeof(TYPE))
 				{
 					#ifdef MASK_PROCESS
 					if(!is_mask_ok(row, col))
@@ -190,11 +240,11 @@
 						continue;
 					}
 					#endif
-					classifier.copy_pix(img.data + rowIndex + col, img.data + rowIndex + col + channels);
+					classifier.copy_pix(img.data + rowIndex + col, img.data + rowIndex + col + (channels * compareDistance));
 					switch (classifier.f_classifier())
 					{
 						case no: continue; break;
-						case fwd: result.push_back( IndexTransition{ row, col + channels, lToR } ); break;
+						case fwd: result.push_back( IndexTransition{ row, col + (channels*compareDistance), lToR } ); break;
 						case back: result.push_back( IndexTransition{ row, col, rToL } ); break;
 					}
 				}
@@ -212,7 +262,7 @@
 
 			for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))		
 			{
-				for(int row = 0; row < img.rows - 1; row++)
+				for(int row = 0; row < img.rows - compareDistance; row++)
 				{
 					#ifdef MASK_PROCESS
 					if(!is_mask_ok(row, col))
@@ -220,11 +270,11 @@
 						continue;
 					}
 					#endif
-					classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
+					classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + compareDistance) * img.step) + col);
 					switch (classifier.f_classifier())
 					{
 						case no: continue; break;
-						case fwd: result.push_back( IndexTransition{ row + 1, col, upToDw } ); break;
+						case fwd: result.push_back( IndexTransition{ row + compareDistance, col, upToDw } ); break;
 						case back: result.push_back( IndexTransition{ row, col, dwToUp } ); break;
 					}
 				}
@@ -265,10 +315,6 @@
 	
 	#ifdef WITH_TESTS
 		template class Classifier<TYPE>;
-		#ifdef MASK_PROCESS
-			template class IterateProcessMask<TYPE>;
-		#else
-			template class IterateProcess<TYPE>;
-		#endif
+		template class IterateProcess<TYPE>;
 	#endif
 #endif
