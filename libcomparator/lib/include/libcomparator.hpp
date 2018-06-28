@@ -153,9 +153,11 @@
 			double   lightThreshold,
 			double   colorThreshold,
 			double   colorBalance[],
+			int compareDistance = 1,
 			cv::Mat  mask = cv::Mat()
 		)
 		:
+		compareDistance{compareDistance},
 		classifier(acceptanceLevel, lightThreshold, colorThreshold, colorBalance)
 		{
 			assert(img.isContinuous());
@@ -213,13 +215,14 @@
 			return detectedHV;
 		}
 
-	private:		
+	private:
 		cv::Mat_<TYPE> img;
 		Classifier<TYPE> classifier;
+		int compareDistance;
 	#ifdef MASK_PROCESS
 		cv::Mat mask;//8UC1
 		bool is_mask_ok(int row, int col){return mask.data[row*mask.cols + col / channels] > 0;}
-	#endif 
+	#endif
 
 		std::vector<IndexTransition> iterate_H()
 		{
@@ -229,7 +232,7 @@
 			for( int row = 0; row < img.rows; row++)		
 			{
 				int rowIndex = row * img.step;
-				for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))
+				for(int col = 0; col < img.cols - (channels * compareDistance); col += channels * sizeof(TYPE))
 				{
 					#ifdef MASK_PROCESS
 					if(!is_mask_ok(row, col))
@@ -237,11 +240,11 @@
 						continue;
 					}
 					#endif
-					classifier.copy_pix(img.data + rowIndex + col, img.data + rowIndex + col + channels);
+					classifier.copy_pix(img.data + rowIndex + col, img.data + rowIndex + col + (channels * compareDistance));
 					switch (classifier.f_classifier())
 					{
 						case no: continue; break;
-						case fwd: result.push_back( IndexTransition{ row, col + channels, lToR } ); break;
+						case fwd: result.push_back( IndexTransition{ row, col + (channels*compareDistance), lToR } ); break;
 						case back: result.push_back( IndexTransition{ row, col, rToL } ); break;
 					}
 				}
@@ -259,7 +262,7 @@
 
 			for(int col = 0; col < img.cols - channels; col += channels * sizeof(TYPE))		
 			{
-				for(int row = 0; row < img.rows - 1; row++)
+				for(int row = 0; row < img.rows - compareDistance; row++)
 				{
 					#ifdef MASK_PROCESS
 					if(!is_mask_ok(row, col))
@@ -267,11 +270,11 @@
 						continue;
 					}
 					#endif
-					classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + 1) * img.step) + col);
+					classifier.copy_pix(img.data + row * img.step + col, img.data + ((row + compareDistance) * img.step) + col);
 					switch (classifier.f_classifier())
 					{
 						case no: continue; break;
-						case fwd: result.push_back( IndexTransition{ row + 1, col, upToDw } ); break;
+						case fwd: result.push_back( IndexTransition{ row + compareDistance, col, upToDw } ); break;
 						case back: result.push_back( IndexTransition{ row, col, dwToUp } ); break;
 					}
 				}

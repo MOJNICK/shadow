@@ -106,10 +106,10 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, d
     cv::Mat imageCpy2 = image.clone();
     cv::Mat blackImage;
 
-    TYPE acceptanceLevel = 60;
+    TYPE acceptanceLevel = 70;
     ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
-    double lightThreshold = 0.2;
-    double colorThreshold = 0.2;
+    double lightThreshold = 0.05;
+    double colorThreshold = 0.8;
 
     IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, (double*)entryBalance);
     auto result = entryProcess.iterate_HV();
@@ -266,8 +266,8 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
         return image;
     }
 //    linearize_2_2_gamma(image);
-
-    bilateralFilter( image, image, 30, 150, 150, cv::BORDER_REFLECT );
+    cv::Mat cImage = image.clone();
+    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     
 
