@@ -266,10 +266,10 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     }
 //    linearize_2_2_gamma(image);
     cv::Mat cImage = image.clone();
-    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
+//    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
-    int sigma = 5;
-    cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
+    int sigma = 3;
+//    cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
 
     auto idTrCluster = index_transition_part( image, factor, 3.0, 1, sigma*3 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
@@ -281,7 +281,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
 
 
-    Filter filter(image, idTr, 190, 3, 2, sigma*3);
+    Filter filter(cImage, idTr, 80, 20, 1, sigma*3);
     cv::Mat result = filter.filter_image();
 
     ContourTransition contourTransition(image);
