@@ -61,7 +61,7 @@ private:
 class Filter
 {
 public:
-	Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1);
+	Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1, uint calcDistance = 1);
 	cv::Mat filter_image();
 
 private:
@@ -74,7 +74,7 @@ private:
 	double hvFactor;
 	cv::Vec3d correctionPower;
 
-	cv::Vec3d calc_correction_power( std::vector<IndexTransition> const & indexTransition );
+	cv::Vec3d calc_correction_power( std::vector<IndexTransition> const & indexTransition, uint calcDistance );
 	void get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
 	cv::Mat cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition );
 };

@@ -278,16 +278,16 @@ void MakeFilter::cvt_to_antisimmetric(cv::Mat& kernel, Transition direction, int
 }
 
 
-Filter::Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor, double antiSigma, double hvFactor ):
+Filter::Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor, double antiSigma, double hvFactor, uint calcDistance ):
 	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor} 
 {
-	calc_correction_power( indexTransition );
+	calc_correction_power( indexTransition, calcDistance );
 	get_shadow_weight( indexTransition );
 }
 
-cv::Vec3d Filter::calc_correction_power( std::vector<IndexTransition> const & indexTransition )
+cv::Vec3d Filter::calc_correction_power( std::vector<IndexTransition> const & indexTransition, uint calcDistance )
 {
-	ColorBalance colorBalance(_image, 5u, 6);
+	ColorBalance colorBalance(_image, 5u, calcDistance);
 	ColorStruct colorStruct = colorBalance.balance( indexTransition, BalanceMode::brightness );
 	for(int i = 0; i < channels; ++i){ correctionPower[i] = colorStruct.get_color( i ); }
 }

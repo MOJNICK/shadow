@@ -100,42 +100,6 @@ cv::Mat show_result(cv::Mat const img, std::vector<IndexTransitionCluster> const
     return blackImage;
 }
 
-std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, double factor, double eps, uint minPts)
-{
-    cv::Mat imageCpy = image.clone();
-    cv::Mat imageCpy2 = image.clone();
-    cv::Mat blackImage;
-
-    TYPE acceptanceLevel = 70;
-    ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
-    double lightThreshold = 0.05;
-    double colorThreshold = 0.8;
-
-    IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, (double*)entryBalance);
-    auto result = entryProcess.iterate_HV();
-    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
-    
-    ColorBalance cba( image, 5u, 6 );
-    ColorStruct secondBalance = cba.balance( result );
-
-    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
-    result.resize( 0 );
-
-    lightThreshold = 0.2;
-    colorThreshold = 0.2;
-    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 });//secondBalance);
-    result = secondProcess.iterate_HV();
-
-    blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
-    
-    Clustering clustering( result, Distance::distance_fast, eps, minPts);
-    clustering.points_clustering(&Clustering::check_point_zone_linear);
-    auto clusters = clustering.getRefVIndexTransitionCluster();
-    blackImage = show_result(imageCpy, clusters);
-    
-    return clusters;
-}
-
 std::vector<IndexTransitionCluster> test_on_image(const char* path, double factor, double eps, uint minPts)
 {
     cv::Mat image;
@@ -184,7 +148,6 @@ std::vector<IndexTransitionCluster> test_on_image(const char* path, double facto
     
     return clusters;
 }
-
 
 int broad_HUE(char* path)
 {
@@ -256,6 +219,42 @@ cv::Mat test_canny( char* path, double factor, int dilationSize )
     return edges;
 }
 
+std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, double factor, double eps, uint minPts, int compareDistance)
+{
+    cv::Mat imageCpy = image.clone();
+    cv::Mat imageCpy2 = image.clone();
+    cv::Mat blackImage;
+
+    TYPE acceptanceLevel = 70;
+    ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
+    double lightThreshold = 0.1;
+    double colorThreshold = 0.8;
+
+    IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, (double*)entryBalance, compareDistance);
+    auto result = entryProcess.iterate_HV();
+    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
+    
+    ColorBalance cba( image, 5u, compareDistance );
+    ColorStruct secondBalance = cba.balance( result );
+
+    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
+    result.resize( 0 );
+
+    lightThreshold = 0.1;
+    colorThreshold = 0.2;
+    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 }, compareDistance);//secondBalance);
+    result = secondProcess.iterate_HV();
+
+    blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
+    
+    Clustering clustering( result, Distance::distance_fast, eps, minPts);
+    clustering.points_clustering(&Clustering::check_point_zone_linear);
+    auto clusters = clustering.getRefVIndexTransitionCluster();
+    blackImage = show_result(imageCpy, clusters);
+    
+    return clusters;
+}
+
 cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
 {
     cv::Mat image;
@@ -269,19 +268,20 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     cv::Mat cImage = image.clone();
     bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
-    
+    int sigma = 5;
+    cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
 
-    auto idTrCluster = index_transition_part( image, factor, 3.0, 1 );
+    auto idTrCluster = index_transition_part( image, factor, 3.0, 1, sigma*3 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
 
     Preprocess preprocess( MakeFilter::get_square_filter(3), image);
-    preprocess.make_thick_kernel(image, dilationSize);
+    preprocess.make_thick_kernel(cImage, dilationSize);
     preprocess.rm_out_edge_detected( idTr );
 
     show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
 
 
-    Filter filter(image, idTr, 160, 3, 2);
+    Filter filter(image, idTr, 190, 3, 2, sigma*3);
     cv::Mat result = filter.filter_image();
 
     ContourTransition contourTransition(image);
