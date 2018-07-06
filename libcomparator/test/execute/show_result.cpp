@@ -219,7 +219,7 @@ cv::Mat test_canny( char* path, double factor, int dilationSize )
     return edges;
 }
 
-std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, double factor, double eps, uint minPts, int compareDistance)
+std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, double eps, uint minPts, int compareDistance)
 {
     cv::Mat imageCpy = image.clone();
     cv::Mat imageCpy2 = image.clone();
@@ -228,21 +228,18 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, d
     TYPE acceptanceLevel = 70;
     ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
     double lightThreshold = 0.1;
-    double colorThreshold = 0.8;
+    double colorThreshold = 0.05;
 
-    IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, (double*)entryBalance, compareDistance);
+    IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance, compareDistance);
     auto result = entryProcess.iterate_HV();
     blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
     
     ColorBalance cba( image, 5u, compareDistance );
     ColorStruct secondBalance = cba.balance( result );
 
-    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
     result.resize( 0 );
-
-    lightThreshold = 0.1;
-    colorThreshold = 0.2;
-    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 }, compareDistance);//secondBalance);
+std::cout<<"secondProcess";
+    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, secondBalance, compareDistance);//secondBalance);
     result = secondProcess.iterate_HV();
 
     blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
@@ -268,20 +265,21 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     cv::Mat cImage = image.clone();
 //    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
-    int sigma = 3;
-//    cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
+    int sigma = 5;
+    cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
 
-    auto idTrCluster = index_transition_part( image, factor, 3.0, 1, sigma*3 );
+    auto idTrCluster = index_transition_part( image, 3.0, 1, sigma*3 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
 
+/*
     Preprocess preprocess( MakeFilter::get_square_filter(3), image);
     preprocess.make_thick_kernel(cImage, dilationSize);
     preprocess.rm_out_edge_detected( idTr );
-
+*/
     show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
 
 
-    Filter filter(cImage, idTr, 80, 20, 1, sigma*3);
+    Filter filter(cImage, idTr, 190, 3, 2, sigma*3);
     cv::Mat result = filter.filter_image();
 
     ContourTransition contourTransition(image);

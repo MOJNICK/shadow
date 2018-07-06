@@ -45,7 +45,7 @@ int main( int argc, char** argv )
         std::cout << "iterate: " << inputFile << " -> " << outputFile << '\n';
         cv::Mat img = cv::imread(inputFile, CV_LOAD_IMAGE_COLOR);
         if(!img.data){std::cout<<"cant open\n"; return 0;}
-        img = test_gauss_directed( inputFile.c_str(), 1, 1);
+        img = test_gauss_directed( inputFile.c_str(), 1, 2);
         cv::imwrite(outputFile, img);
     }
     return 0;

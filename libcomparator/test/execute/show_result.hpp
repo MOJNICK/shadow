@@ -19,7 +19,7 @@ void draw_clusterNumber(cv::Mat& image, std::vector<IndexTransitionCluster> cons
 
 cv::Mat show_result(cv::Mat const img, std::vector<IndexTransitionCluster> const & result );
 
-std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, double factor, double eps, uint minPts);
+std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, double eps, uint minPts);
 
 int broad_HUE(char* path);
 
