@@ -48,13 +48,30 @@ private:
 	cv::Mat_<Transition> cvt_it_to_matTSilent( std::vector<IndexTransition> const & indexTransition );
 };
 
+
+
+
 class MakeFilter
 {
+	enum class KernelType
+	{
+		gauss,
+		triangle
+	}kernelType;
 public:
-	static cv::Mat_<double> get_square_filter( int size );
-	static cv::Mat get_gauss_antisimmetric_filter( double sizeFactor, double sigma, Transition direction, double hvFactor );
+	MakeFilter(KernelType kernelType = KernelType::gauss) : kernelType{kernelType}{}
+
+	static cv::Mat box_kernel( int height, int width = -1 );
+	cv::Mat operator()( double sigma, double sizeFactor, Transition direction, double hvFactor ){return calc_antisimmetric_filter( sigma, sizeFactor, direction, hvFactor );}
 private:
-	static void cvt_to_antisimmetric( cv::Mat& kernel, Transition direction, int anchorH, int anchorV );
+	static void cvt_to_antisimmetric( cv::Mat& kernel, Transition direction, int anchorH = -1, int anchorV = -1);
+	cv::Mat calc_antisimmetric_filter( double sigma, double sizeFactor, Transition direction, double hvFactor );
+	static cv::Mat gauss_kernel( cv::Size kernelSigma, cv::Size kernelSize );
+	static cv::Mat triangle_kernel( cv::Size kernelSigma, cv::Size kernelSize = cv::Size(-1, -1) );
+	struct Kernel
+	{
+		cv::Mat operator()(cv::Mat& input, cv::Mat& output){return cv::Mat();}
+	};
 	// cv::Mat_<double> cvt_mat_matDoble(cv::Mat filterKernel);
 };
 
@@ -77,5 +94,6 @@ private:
 	cv::Vec3d calc_correction_power( std::vector<IndexTransition> const & indexTransition, uint calcDistance );
 	void get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
 	cv::Mat cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition );
+
 };
 #endif

@@ -210,50 +210,75 @@ cv::Mat_<Transition> Preprocess::cvt_it_to_matTSilent( std::vector<IndexTransiti
 	return result;//return with silent border
 }
 
-cv::Mat_<double> MakeFilter::get_square_filter( int filterSize )
+cv::Mat MakeFilter::box_kernel( int height, int width )
 {
-	if( filterSize & 1 == 0)
-		filterSize -= 1;
+	if( height & 1 == 0)
+		height -= 1;
 
-	cv::Mat_<double> result( cv::Size2i( filterSize, filterSize ), 1.0/( filterSize * filterSize ) );
+	cv::Mat result( cv::Size( height, height ), CV_64F, 1.0/( height * height ) );
 
 	return result;
 }
 
-cv::Mat MakeFilter::get_gauss_antisimmetric_filter( double sizeFactor, double sigma, Transition direction, double hvFactor )//add direction factor
+cv::Mat MakeFilter::calc_antisimmetric_filter( double sigma, double sizeFactor, Transition direction, double hvFactor )//add direction factor
 {
 	if(!(direction && !(direction & (direction - 1))))
 		return cv::Mat( 1, 1, CV_64F, 1.0 );
 
-	if( std::abs(hvFactor) < 0.01 )
-	{
-		hvFactor = 1;
-	}
-	else
-	{
-		if( direction & biUpDw )
-			hvFactor = 1 / hvFactor;		
-	}
+	assert( std::abs(hvFactor) > 0.01 );
+
+	if( direction & biUpDw )
+		hvFactor = 1 / hvFactor;		
 
 	int sigmaH = (int)(sigma * hvFactor) | 1;
 	int sigmaV = (int)(sigma / hvFactor) | 1;
-	int sigmaHf = (int)(sigmaV * sizeFactor) | 1;
-	int sigmaVf = (int)(sigmaV * sizeFactor) | 1;
+	int sizeH = (int)(sigmaV * sizeFactor) | 1;
+	int sizeV = (int)(sigmaV * sizeFactor) | 1;
 
-	cv::Mat kernel( cv::Size( sigmaHf, sigmaVf ), CV_64F, .0 );
-	int anchorH = kernel.rows / 2;
-	int anchorV = kernel.cols / 2; //not exactly	
-	kernel.at<double>(anchorH, anchorV) = 1.0;
-
-    cv::GaussianBlur( kernel, kernel, cv::Size( sigmaHf, sigmaVf ), sigmaH , sigmaV );
-	
- 	cvt_to_antisimmetric( kernel, direction, anchorH, anchorV );
+	cv::Mat kernel;
+	switch(kernelType)
+	{
+		case KernelType::gauss : kernel = gauss_kernel( cv::Size(sigmaH, sigmaV), cv::Size(sizeH, sizeV) ); break;
+		case KernelType::triangle : kernel = triangle_kernel( cv::Size(sigmaH, sigmaV) ); break;
+	}
+ 	cvt_to_antisimmetric( kernel, direction );
 
 	return kernel;
 }
 
+cv::Mat MakeFilter::gauss_kernel( cv::Size kernelSigma, cv::Size kernelSize )
+{
+	cv::Mat kernel( cv::Size( kernelSize.height, kernelSize.width ), CV_64F, .0 );
+	int anchorH = kernel.rows / 2;
+	int anchorV = kernel.cols / 2; //not exactly	
+	kernel.at<double>(anchorH, anchorV) = 1.0;	
+
+	cv::GaussianBlur( kernel, kernel, kernelSize, kernelSigma.height , kernelSigma.width );
+	return kernel;
+}
+
+cv::Mat MakeFilter::triangle_kernel( cv::Size kernelSigma, cv::Size kernelSize )
+{
+	if(kernelSize.height == -1)
+	{
+		kernelSize = kernelSigma * 2;
+	}
+	cv::Mat boxKernel = box_kernel( kernelSigma.height );
+	cv::Mat outFilter = boxKernel.clone();
+
+	cv::filter2D( outFilter, outFilter, -1, boxKernel, cv::Point(-1,-1), 0, cv::BORDER_REFLECT );
+
+	return boxKernel;
+}
+
 void MakeFilter::cvt_to_antisimmetric(cv::Mat& kernel, Transition direction, int anchorH, int anchorV)
 {
+	if(anchorH == -1)
+	{
+		anchorH = kernel.rows / 2;
+		anchorV = kernel.cols / 2; //not exactly
+	}
+
 	for(int i = 0; i < kernel.rows; i++)
 	{
 	    for(int j = 0; j < kernel.cols; j++)
@@ -279,7 +304,7 @@ void MakeFilter::cvt_to_antisimmetric(cv::Mat& kernel, Transition direction, int
 
 
 Filter::Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor, double antiSigma, double hvFactor, uint calcDistance ):
-	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor} 
+	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor}
 {
 	calc_correction_power( indexTransition, calcDistance );
 	get_shadow_weight( indexTransition );
@@ -298,10 +323,11 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 	std::vector<cv::Mat> splited;
 	cv::split(directed, splited);
 
-	cv::Mat UPkernel = MakeFilter::get_gauss_antisimmetric_filter( sizeFactor, antiSigma, upToDw, hvFactor);
-	cv::Mat Lkernel = MakeFilter::get_gauss_antisimmetric_filter( sizeFactor, antiSigma, lToR, hvFactor);
-	cv::Mat DWkernel = MakeFilter::get_gauss_antisimmetric_filter( sizeFactor, antiSigma, dwToUp, hvFactor);
-	cv::Mat Rkernel = MakeFilter::get_gauss_antisimmetric_filter( sizeFactor, antiSigma, rToL, hvFactor);
+	MakeFilter calc_antisimmetric_filter;
+	cv::Mat UPkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, upToDw, hvFactor);
+	cv::Mat Lkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, lToR, hvFactor);
+	cv::Mat DWkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, dwToUp, hvFactor);
+	cv::Mat Rkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, rToL, hvFactor);
 
 	cv::filter2D( splited[0], splited[0], -1, UPkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 	cv::filter2D( splited[1], splited[1], -1, Lkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );

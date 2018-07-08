@@ -210,7 +210,7 @@ cv::Mat test_canny( char* path, double factor, int dilationSize )
     }
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
 
-    Preprocess preprocess( MakeFilter::get_square_filter(11), image);
+    Preprocess preprocess( MakeFilter::box_kernel(11), image);
     cv::Mat edges = preprocess.make_thick_kernel( image, dilationSize );
     cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Canny", edges );
@@ -262,9 +262,9 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
         return image;
     }
 //    linearize_2_2_gamma(image);
+    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     cv::Mat cImage = image.clone();
 //    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
-    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     int sigma = 5;
     cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
 
@@ -272,7 +272,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
 
 /*
-    Preprocess preprocess( MakeFilter::get_square_filter(3), image);
+    Preprocess preprocess( MakeFilter::box_kernel(3), image);
     preprocess.make_thick_kernel(cImage, dilationSize);
     preprocess.rm_out_edge_detected( idTr );
 */
