@@ -48,6 +48,18 @@ int main( int argc, char** argv )
         img = test_gauss_directed( inputFile.c_str(), 0.25, 1);
         cv::imwrite(outputFile, img);
     }
+    else if(argc>3 && vecArgv[1]==std::string("--compare"))
+    {
+        std::string inputFile0 = vecArgv[2];
+        std::string inputFile1 = vecArgv[3];
+        std::cout << "compare: " << inputFile0 << " == " << inputFile1 << " -> " << '\n';
+        cv::Mat img0   = cv::imread(inputFile0, CV_LOAD_IMAGE_COLOR);
+        cv::Mat img1 = cv::imread(inputFile1, CV_LOAD_IMAGE_COLOR);
+        if(!img0.data || !img1.data){std::cout<<"cant open\n"; return 0;}
+        //bool eq = cv::countNonZero(img0!=img1) == 0;
+        bool eq = (sum(img0 != img1) == cv::Scalar(0,0,0));
+        std::cout << eq << "\n";
+    }
     return 0;
 
     test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0 );

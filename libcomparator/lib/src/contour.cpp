@@ -22,13 +22,17 @@ cv::Mat ContourTransition::show_matDataTrans()
 			{
 				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 255, 0);
 			}
-			if(trans & biUpDw)
+			if(trans & upToDw)
 			{
 				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 0, 255);
 			}
+			if(trans & dwToUp)
+			{
+				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 160, 255);
+			}
 			if(trans & unknown)
 			{
-				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 0, 255);
+				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(255, 255, 255);
 			}
 		}
 

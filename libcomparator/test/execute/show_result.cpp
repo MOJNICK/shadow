@@ -286,12 +286,12 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     contourTransition.bw_push_transition( idTr );
     cv::Mat matTrans = contourTransition.show_matDataTrans();
 
-    #ifdef WITH_TEST
+    #ifdef WITH_TESTS
     cv::namedWindow( "matTrans", cv::WINDOW_AUTOSIZE );
     cv::imshow( "matTrans", matTrans );
 
-    cv::namedWindow( "thickKernel", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "thickKernel", preprocess.get_thickKernel() );
+    // cv::namedWindow( "thickKernel", cv::WINDOW_AUTOSIZE );
+    // cv::imshow( "thickKernel", preprocess.get_thickKernel() );
 
     cv::namedWindow( "GaussFiltered", cv::WINDOW_AUTOSIZE );
     cv::imshow( "GaussFiltered", result );
