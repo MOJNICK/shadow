@@ -216,8 +216,7 @@ cv::Mat_<Transition> Preprocess::cvt_it_to_matTSilent( std::vector<IndexTransiti
 
 cv::Mat MakeFilter::box_kernel( int height, int width )
 {
-	if( height & 1 == 0)
-		height -= 1;
+	height |= 1;
 
 	cv::Mat result( cv::Size( height, height ), CV_64F, 1.0/( height * height ) );
 
@@ -257,22 +256,21 @@ cv::Mat MakeFilter::gauss_kernel( cv::Size kernelSigma, cv::Size kernelSize )
 	int anchorV = kernel.cols / 2; //not exactly	
 	kernel.at<double>(anchorH, anchorV) = 1.0;	
 
-	cv::GaussianBlur( kernel, kernel, kernelSize, kernelSigma.height , kernelSigma.width );
+	cv::GaussianBlur( kernel, kernel, kernelSize, kernelSigma.width , kernelSigma.height );
 	return kernel;
 }
 
 cv::Mat MakeFilter::triangle_kernel( cv::Size kernelSigma, cv::Size kernelSize )
 {
-	if(kernelSize.height == -1)
-	{
-		kernelSize = kernelSigma * 2;
-	}
-	cv::Mat boxKernel = box_kernel( kernelSigma.height );
-	cv::Mat outFilter = boxKernel.clone();
+	int sigma = kernelSigma.height;
+	sigma |= 1;
+	int border = sigma / 2;
+	cv::Mat boxKernel = box_kernel( sigma );
+	copyMakeBorder(boxKernel, boxKernel, border, border, border, border, cv::BORDER_CONSTANT, cv::Scalar(0) );
+	cv::Mat triangleKernel;
+	cv::filter2D( boxKernel, triangleKernel, -1, boxKernel, cv::Point(-1,-1), 0, cv::BORDER_REFLECT );
 
-	cv::filter2D( outFilter, outFilter, -1, boxKernel, cv::Point(-1,-1), 0, cv::BORDER_REFLECT );
-
-	return boxKernel;
+	return triangleKernel;
 }
 
 void MakeFilter::cvt_to_antisimmetric(cv::Mat& kernel, Transition direction, int anchorH, int anchorV)

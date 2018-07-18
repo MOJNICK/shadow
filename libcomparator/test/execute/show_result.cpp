@@ -289,7 +289,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     #ifdef WITH_TESTS
     cv::namedWindow( "matTrans", cv::WINDOW_AUTOSIZE );
     cv::imshow( "matTrans", matTrans );
-
+    cv::waitKey(0);
     // cv::namedWindow( "thickKernel", cv::WINDOW_AUTOSIZE );
     // cv::imshow( "thickKernel", preprocess.get_thickKernel() );
 

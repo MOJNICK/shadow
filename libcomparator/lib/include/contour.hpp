@@ -68,10 +68,6 @@ private:
 	cv::Mat calc_antisimmetric_filter( double sigma, double sizeFactor, Transition direction, double hvFactor );
 	static cv::Mat gauss_kernel( cv::Size kernelSigma, cv::Size kernelSize );
 	static cv::Mat triangle_kernel( cv::Size kernelSigma, cv::Size kernelSize = cv::Size(-1, -1) );
-	struct Kernel
-	{
-		cv::Mat operator()(cv::Mat& input, cv::Mat& output){return cv::Mat();}
-	};
 	// cv::Mat_<double> cvt_mat_matDoble(cv::Mat filterKernel);
 };
 
