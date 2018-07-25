@@ -305,8 +305,11 @@ void MakeFilter::cvt_to_antisimmetric(cv::Mat& kernel, Transition direction, int
 }
 
 
-Filter::Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor, double antiSigma, double hvFactor, uint calcDistance ):
-	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor}
+Filter::Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition,
+				double sizeFactor, double antiSigma, double hvFactor,
+				uint calcDistance, FilterMode filterMode )
+:
+	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor}, filterMode{filterMode}
 {
 	calc_correction_power( indexTransition, calcDistance );
 	get_shadow_weight( indexTransition );
@@ -337,6 +340,91 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 	cv::filter2D( splited[3], splited[3], -1, Rkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 
 	reverseZeroBasedFilter = splited[0] + splited[1] + splited[2] + splited[3];
+	
+	cv::Mat copy;
+	cv::normalize(reverseZeroBasedFilter, copy, 0, 255, cv::NORM_MINMAX);
+    cv::imwrite("./reverseZeroBasedFilter.test1.png", copy);
+	
+	if(filterMode == FilterMode::grabCut)
+	{
+		auto minmax = std::minmax_element(reverseZeroBasedFilter.begin<double>(), reverseZeroBasedFilter.end<double>());
+		double min = *minmax.first;
+		double max = *minmax.second;
+		min*=0.3; max*=0.5;
+
+		cv::Mat mask = reverseZeroBasedFilter.clone();
+		cv::GaussianBlur( mask, mask, cv::Size(7,7), 4 , 4 );
+		std::for_each(mask.begin<double>(), mask.end<double>(), 
+			[min, max](auto& el){
+				if(el < min)
+				{
+					el = cv::GC_FGD;
+				}
+				else if(el < 0)
+				{
+					el = cv::GC_PR_FGD;
+				}
+				else if(el < max)
+				{
+					el = cv::GC_PR_BGD;
+				}
+				else
+				{
+					el = cv::GC_BGD;
+				}
+			}
+		);
+
+		mask.convertTo(mask, CV_8U);
+		cv::Mat bgdModel, fgdModel;
+		cv::grabCut( _image, mask, cv::Rect(0, 0, mask.cols, mask.rows), bgdModel, fgdModel, 10, cv::GC_INIT_WITH_MASK );
+		for(int i=0; i<mask.rows*mask.cols; ++i)
+		{
+			uchar maskValue = mask.data[i];
+			if( maskValue == cv::GC_FGD || maskValue == cv::GC_PR_FGD)
+			{
+				*(reinterpret_cast<double*>(reverseZeroBasedFilter.data) + i) = -1.0;
+			}
+			else
+			{
+				*(reinterpret_cast<double*>(reverseZeroBasedFilter.data) + i) = 1.0;
+			}
+		}
+
+		#ifdef VERBOSE
+		int occurences[3] = {0};
+		std::for_each(reverseZeroBasedFilter.begin<double>(), reverseZeroBasedFilter.end<double>(), 
+			[&occurences](auto& el){
+				if(el == -1.0)
+				{
+					occurences[0]++;
+				}
+				else if(el == 1.0)
+				{
+					occurences[1]++;
+				}
+				else
+				{
+					occurences[2]++;
+				}
+			}
+		);
+
+		for(int i =0; i<2; ++i)
+		{
+			std::cout<<occurences[i] << '\n';
+		}
+
+		cv::Mat mask1 = mask.clone();
+		mask1*=50;
+		cv::imshow("mask1", mask1);
+		cv::waitKey(0);
+		
+		
+		cv::imshow("mask3", mask);
+		cv::waitKey(0);
+		#endif
+	}
 	return;
 }
 
@@ -346,7 +434,7 @@ cv::Mat Filter::filter_image()
 	{	
 	    for(int j = 0; j < _image.cols; j++)
 	    {	
-	    	if(reverseZeroBasedFilter.at<double>(i, j) < 0)
+	    	if(reverseZeroBasedFilter.at<double>(i, j) < .0)
 	    	{
 			    cv::Vec3b vec3b = _image.at<cv::Vec3b>( i, j );
 				cv::multiply( vec3b, correctionPower, vec3b);

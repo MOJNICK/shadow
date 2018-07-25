@@ -226,7 +226,7 @@ void ColorBalance::push_element_balance( IndexTransition const & inputShadow )
 		}
 		colorBalances.push_back( _colorBalance );
 	}
-	#ifdef WITH_TESTS
+	#ifdef VERBOSE
 	else
 	{
 		if( distance <= 1)//distance within shadow detection zone

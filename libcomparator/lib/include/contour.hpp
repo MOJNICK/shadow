@@ -68,13 +68,20 @@ private:
 	cv::Mat calc_antisimmetric_filter( double sigma, double sizeFactor, Transition direction, double hvFactor );
 	static cv::Mat gauss_kernel( cv::Size kernelSigma, cv::Size kernelSize );
 	static cv::Mat triangle_kernel( cv::Size kernelSigma, cv::Size kernelSize = cv::Size(-1, -1) );
-	// cv::Mat_<double> cvt_mat_matDoble(cv::Mat filterKernel);
 };
 
 class Filter
 {
+	enum class FilterMode
+	{
+		normal,
+		grabCut
+	}filterMode;
 public:
-	Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1, uint calcDistance = 1);
+	Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition,
+			double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1,
+			uint calcDistance = 1, FilterMode filterMode = FilterMode::grabCut );
+	
 	cv::Mat filter_image();
 
 private:
