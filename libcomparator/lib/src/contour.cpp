@@ -415,10 +415,8 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 			std::cout<<occurences[i] << '\n';
 		}
 
-		cv::Mat mask1 = mask.clone();
-		mask1*=50;
-		cv::imshow("mask1", mask1);
-		cv::waitKey(0);
+		present_grabCut_result(mask);
+		
 		
 		
 		cv::imshow("mask3", mask);
