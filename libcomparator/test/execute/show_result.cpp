@@ -228,7 +228,7 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, d
     TYPE acceptanceLevel = 150;
     ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
     double lightThreshold = 0.03;
-    double colorThreshold = 0.001;
+    double colorThreshold = 0.01;
 
     IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance, compareDistance);
     auto result = entryProcess.iterate_HV();
