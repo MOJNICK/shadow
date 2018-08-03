@@ -232,7 +232,6 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, d
 
     IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance, compareDistance);
     auto result = entryProcess.iterate_HV();
-    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
     
     ColorBalance cba( image, 5u, compareDistance );
     ColorStruct secondBalance = cba.balance( result );
@@ -242,12 +241,16 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, d
     IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, secondBalance, compareDistance);//secondBalance);
     result = secondProcess.iterate_HV();
 
-    blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
     
     Clustering clustering( result, Distance::distance_fast, eps, minPts);
     clustering.points_clustering(&Clustering::check_point_zone_linear);
     auto clusters = clustering.getRefVIndexTransitionCluster();
+    
+    #ifdef VERBOSE    
+    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
+    blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
     blackImage = show_result(imageCpy, clusters);
+    #endif
     
     return clusters;
 }
@@ -264,20 +267,18 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
 
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     cv::Mat cImage = image.clone();
-//    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
-    int sigma = 5;
-    cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
+    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
 
     auto idTrCluster = index_transition_part( image, 3.0, 1, sigma*3 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
 
-/*
     Preprocess preprocess( MakeFilter::box_kernel(3), image);
     preprocess.make_thick_kernel(cImage, dilationSize);
     preprocess.rm_out_edge_detected( idTr );
-*/
-    show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
 
+    #ifdef VERBOSE
+    show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
+    #endif
 
     Filter filter(cImage, idTr, 190, 3, 2, sigma*3);
     cv::Mat result = filter.filter_image();

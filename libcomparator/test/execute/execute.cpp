@@ -287,11 +287,11 @@ int main( int argc, char** argv )
         bool eq = (sum(img0 != img1) == cv::Scalar(0,0,0));
         std::cout << eq << "\n";
     }
-    else if(argc>3 && vecArgv[1]==std::string("--difference"))
+    else if(argc>3 && vecArgv[1]==std::string("--relative_norm"))
     {
         std::string inputFile0 = vecArgv[2];
         std::string inputFile1 = vecArgv[3];
-        std::cout << "difference: " << inputFile0 << " == " << inputFile1 << " -> ";
+        std::cout << "relative_norm: " << inputFile0 << " == " << inputFile1 << " -> ";
         cv::Mat img0   = cv::imread(inputFile0, CV_LOAD_IMAGE_COLOR);
         cv::Mat img1 = cv::imread(inputFile1, CV_LOAD_IMAGE_COLOR);
         if(!img0.data || !img1.data){std::cout<<"cant open\n"; return 0;}
