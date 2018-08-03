@@ -21,7 +21,7 @@
 		change_gamma(img, 2.2);
 	}
 
-	inline cv::Mat present_grabCut_result(cv::Mat grabCutOutput, bool imshow = true)
+	inline cv::Mat present_grabCut_mask(cv::Mat grabCutOutput, bool imshow = true)
 	{
 		cv::Mat mask = grabCutOutput.clone();
 		cv::Mat lut(1, 256, CV_8U);
@@ -32,7 +32,7 @@
 		cv::LUT(mask, lut, mask);
 		if(imshow)
 		{
-			cv::imshow("present_grabCut_result", mask);
+			cv::imshow("present_grabCut_mask", mask);
 			cv::waitKey(0);
 		}
 		return mask;

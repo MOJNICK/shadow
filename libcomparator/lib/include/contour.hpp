@@ -1,8 +1,7 @@
 #ifndef CONTOUR_HPP
 #define CONTOUR_HPP
 #include <opencv2/core/core.hpp>
-#include "opencv2/imgproc/imgproc.hpp"
-// #include <opencv2/core/matx.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include "libcomparator.hpp"
 #include "dataprocess.hpp"
 #include <iostream>

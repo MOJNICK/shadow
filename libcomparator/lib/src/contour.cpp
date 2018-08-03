@@ -100,12 +100,9 @@ cv::Mat Preprocess::make_thick_kernel( cv::Mat const & image, uint dilationSize 
  
     edge.convertTo(thickKernel, CV_8U);
 
-    //dilate here
     cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE,
                                        cv::Size( 2*dilationSize + 1, 2*dilationSize+1 ),
                                        cv::Point( dilationSize, dilationSize ) );
-
-  	// morphologyEx( thickKernel, thickKernel, cv::MORPH_CLOSE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
   	morphologyEx( thickKernel, thickKernel, cv::MORPH_DILATE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
 	
 	return thickKernel;
@@ -414,13 +411,8 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 		{
 			std::cout<<occurences[i] << '\n';
 		}
+		present_grabCut_mask(mask);
 
-		present_grabCut_result(mask);
-		
-		
-		
-		cv::imshow("mask3", mask);
-		cv::waitKey(0);
 		#endif
 	}
 	return;
