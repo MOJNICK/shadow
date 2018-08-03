@@ -283,7 +283,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
     #endif
 
-    Filter filter(cImage, idTr, 20, 5, 1, 20);
+    Filter filter(cImage, idTr, 20, 5, 1, 10);
     cv::Mat result = filter.filter_image();
 /*
     ContourTransition contourTransition(image);
