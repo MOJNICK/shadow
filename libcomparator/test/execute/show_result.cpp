@@ -238,7 +238,7 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, d
     ColorStruct secondBalance = cba.balance( result );
 
     result.resize( 0 );
-std::cout<<"secondProcess";
+    colorThreshold/=2;
     IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, secondBalance, compareDistance);//secondBalance);
     result = secondProcess.iterate_HV();
 
@@ -261,7 +261,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
         std::cout<<"\nwrong path\n";
         return image;
     }
-//    linearize_2_2_gamma(image);
+
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     cv::Mat cImage = image.clone();
 //    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
@@ -286,7 +286,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     contourTransition.bw_push_transition( idTr );
     cv::Mat matTrans = contourTransition.show_matDataTrans();
 
-    #ifdef WITH_TESTS
+    #ifdef VERBOSE
     cv::namedWindow( "matTrans", cv::WINDOW_AUTOSIZE );
     cv::imshow( "matTrans", matTrans );
     cv::waitKey(0);

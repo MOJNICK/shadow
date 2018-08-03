@@ -77,22 +77,3 @@
 	{
 		return (pix0[0] + pix0[1] + pix0[2]) > (pix1[0] + pix1[1] + pix1[2]);
 	}
-
-	// void instantiate()
-	// {
-	// 	double x[]={1.2,1.0,1.0};
-	// 	TYPE pix [] = {10,10,10};
-	// 	Classifier<TYPE> specifyCL(1, 1.0, 1.0, x);
-	// 	specifyCL.copy_pix(pix, pix);
-	// 	specifyCL.f_classifier();
-	// 	cv::Mat_<TYPE> mat(0,0);
-	// 	IterateProcess<TYPE> specifyIT( mat, 1, 1.0, 1.0, x );
-	// 	specifyIT.iterate_HV();
-	// #ifdef WITH_TESTS
-	// 	specifyCL.set_parameters(1, 1.0, 1.0, x);
-	// 	#ifdef TEST_PRIVATE_PART
-	// 		specifyIT.iterate_H();
-	// 		specifyIT.iterate_V();
-	// 	#endif
-	// #endif
-	// }
