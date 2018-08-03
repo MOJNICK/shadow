@@ -378,7 +378,7 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 		present_grabCut_mask(mask);
 		#endif
 		cv::Mat bgdModel, fgdModel;
-		cv::grabCut( _image, mask, cv::Rect(0, 0, mask.cols, mask.rows), bgdModel, fgdModel, 2, cv::GC_INIT_WITH_MASK );
+		cv::grabCut( _image, mask, cv::Rect(0, 0, mask.cols, mask.rows), bgdModel, fgdModel, 5, cv::GC_INIT_WITH_MASK );
 		for(int i=0; i<mask.rows*mask.cols; ++i)
 		{
 			uchar maskValue = mask.data[i];
