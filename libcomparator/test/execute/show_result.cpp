@@ -274,10 +274,11 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
 
     auto idTrCluster = index_transition_part( image, 3.0, 1, 7 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
-
+/*
     Preprocess preprocess( MakeFilter::box_kernel(3), image);
     preprocess.make_thick_kernel(cImage, dilationSize);
     preprocess.rm_out_edge_detected( idTr );
+*/
 
     #ifdef VERBOSE
     show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
