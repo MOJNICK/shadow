@@ -358,7 +358,7 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 				{
 					el = cv::GC_FGD;
 				}
-				else if(el < 0)
+				else if(el < min+(max-min)/5)
 				{
 					el = cv::GC_PR_FGD;
 				}
@@ -378,7 +378,7 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 		present_grabCut_mask(mask);
 		#endif
 		cv::Mat bgdModel, fgdModel;
-		cv::grabCut( _image, mask, cv::Rect(0, 0, mask.cols, mask.rows), bgdModel, fgdModel, 10, cv::GC_INIT_WITH_MASK );
+		cv::grabCut( _image, mask, cv::Rect(0, 0, mask.cols, mask.rows), bgdModel, fgdModel, 2, cv::GC_INIT_WITH_MASK );
 		for(int i=0; i<mask.rows*mask.cols; ++i)
 		{
 			uchar maskValue = mask.data[i];
@@ -441,7 +441,7 @@ cv::Mat Filter::filter_image()
 
 cv::Mat Filter::cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition )
 {
-	cv::Mat result( srcImgSize, CV_64FC4, .001 );//, Transition::no );
+	cv::Mat result( srcImgSize, CV_64FC4, .01 );//, Transition::no );
 
 	std::for_each( indexTransition.begin(), indexTransition.end(), [&result]( auto& el){
 		cv::Vec4d vec4d = result.at<cv::Vec4d>( el.row, el.col);//reference
