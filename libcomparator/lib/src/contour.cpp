@@ -1,4 +1,5 @@
 #include "contour.hpp"
+#include "imageprocess.hpp"
 
 ContourTransition::ContourTransition( cv::Mat& image )
 {
@@ -373,6 +374,9 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 		);
 
 		mask.convertTo(mask, CV_8U);
+		#ifdef VERBOSE
+		present_grabCut_mask(mask);
+		#endif
 		cv::Mat bgdModel, fgdModel;
 		cv::grabCut( _image, mask, cv::Rect(0, 0, mask.cols, mask.rows), bgdModel, fgdModel, 10, cv::GC_INIT_WITH_MASK );
 		for(int i=0; i<mask.rows*mask.cols; ++i)
@@ -437,7 +441,7 @@ cv::Mat Filter::filter_image()
 
 cv::Mat Filter::cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition )
 {
-	cv::Mat result( srcImgSize, CV_64FC4, .0 );//, Transition::no );
+	cv::Mat result( srcImgSize, CV_64FC4, .001 );//, Transition::no );
 
 	std::for_each( indexTransition.begin(), indexTransition.end(), [&result]( auto& el){
 		cv::Vec4d vec4d = result.at<cv::Vec4d>( el.row, el.col);//reference
