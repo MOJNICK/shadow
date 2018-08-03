@@ -285,11 +285,11 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
 
     Filter filter(cImage, idTr, 20, 5, 1, 20);
     cv::Mat result = filter.filter_image();
-
+/*
     ContourTransition contourTransition(image);
     contourTransition.bw_push_transition( idTr );
     cv::Mat matTrans = contourTransition.show_matDataTrans();
-
+*/
     #ifdef VERBOSE
     cv::namedWindow( "matTrans", cv::WINDOW_AUTOSIZE );
     cv::imshow( "matTrans", matTrans );
