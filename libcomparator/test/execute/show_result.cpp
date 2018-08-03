@@ -225,7 +225,7 @@ std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, d
     cv::Mat imageCpy2 = image.clone();
     cv::Mat blackImage;
 
-    TYPE acceptanceLevel = 70;
+    TYPE acceptanceLevel = 150;
     ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
     double lightThreshold = 0.03;
     double colorThreshold = 0.001;
