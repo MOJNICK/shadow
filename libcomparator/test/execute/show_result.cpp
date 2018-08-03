@@ -267,7 +267,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
 
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     cv::Mat cImage = image.clone();
-    bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
+    //bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
 
     // int sigma = 2;
     // cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
