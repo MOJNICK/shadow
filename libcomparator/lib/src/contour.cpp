@@ -338,11 +338,7 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 	cv::filter2D( splited[3], splited[3], -1, Rkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 
 	reverseZeroBasedFilter = splited[0] + splited[1] + splited[2] + splited[3];
-	
-	cv::Mat copy;
-	cv::normalize(reverseZeroBasedFilter, copy, 0, 255, cv::NORM_MINMAX);
-    cv::imwrite("./reverseZeroBasedFilter.test1.png", copy);
-	
+		
 	if(filterMode == FilterMode::grabCut)
 	{
 		auto minmax = std::minmax_element(reverseZeroBasedFilter.begin<double>(), reverseZeroBasedFilter.end<double>());
@@ -358,7 +354,7 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 				{
 					el = cv::GC_FGD;
 				}
-				else if(el < min+(max-min)/5)
+				else if(el < 0)
 				{
 					el = cv::GC_PR_FGD;
 				}
