@@ -272,7 +272,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     // int sigma = 2;
     // cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
 
-    auto idTrCluster = index_transition_part( image, 3.0, 1, 3 );
+    auto idTrCluster = index_transition_part( image, 3.0, 1, 7 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
 
     Preprocess preprocess( MakeFilter::box_kernel(3), image);
