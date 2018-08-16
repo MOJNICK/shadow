@@ -437,7 +437,7 @@ cv::Mat Filter::filter_image()
 
 cv::Mat Filter::cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition )
 {
-	cv::Mat result( srcImgSize, CV_64FC4, .01 );//, Transition::no );
+	cv::Mat result( srcImgSize, CV_64FC4, .003 );//, Transition::no );
 
 	std::for_each( indexTransition.begin(), indexTransition.end(), [&result]( auto& el){
 		cv::Vec4d vec4d = result.at<cv::Vec4d>( el.row, el.col);//reference
