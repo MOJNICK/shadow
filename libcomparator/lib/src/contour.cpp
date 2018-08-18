@@ -317,7 +317,7 @@ cv::Vec3d Filter::calc_correction_power( std::vector<IndexTransition> const & in
 {
 	ColorBalance colorBalance(_image, 5u, calcDistance);
 	ColorStruct colorStruct = colorBalance.balance( indexTransition, BalanceMode::brightness );
-	for(int i = 0; i < channels; ++i){ correctionPower[i] = colorStruct.get_color( i ); }
+	for(int i = 0; i < channels; ++i){ correctionPower[i] = 1.1 * colorStruct.get_color( i ); }
 }
 
 void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransition )
