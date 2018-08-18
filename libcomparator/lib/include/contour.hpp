@@ -79,7 +79,7 @@ class Filter
 public:
 	Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition,
 			double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1,
-			uint calcDistance = 1, FilterMode filterMode = FilterMode::normal );
+			uint calcDistance = 1, FilterMode filterMode = FilterMode::grabCut );
 	
 	cv::Mat filter_image();
 
