@@ -52,7 +52,7 @@ namespace process2d
 	    return edge;
 	}
 
-	bool is_subset(cv::Mat cannyImage1D, cv::Mat const cannyImage, double maximumNonSubsetPercentage = 20)
+	bool is_subset(cv::Mat cannyImage1D, cv::Mat const cannyImage, double maximumNonSubsetPercentage = 0)
 	{
 		cv::Mat cannyImage_ = cannyImage.clone();
 		int setSize = cv::countNonZero(cannyImage_);
