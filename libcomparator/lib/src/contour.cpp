@@ -328,14 +328,14 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 
 	MakeFilter calc_antisimmetric_filter;
 	cv::Mat UPkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, upToDw, hvFactor);
-	cv::Mat Lkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, lToR, hvFactor);
+	cv::Mat Lkernel  = calc_antisimmetric_filter( antiSigma, sizeFactor, lToR, hvFactor);
 	cv::Mat DWkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, dwToUp, hvFactor);
-	cv::Mat Rkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, rToL, hvFactor);
+	cv::Mat Rkernel  = calc_antisimmetric_filter( antiSigma, sizeFactor, rToL, hvFactor);
 
 	cv::filter2D( splited[0], splited[0], -1, UPkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
-	cv::filter2D( splited[1], splited[1], -1, Lkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
+	cv::filter2D( splited[1], splited[1], -1, Lkernel,  cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 	cv::filter2D( splited[2], splited[2], -1, DWkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
-	cv::filter2D( splited[3], splited[3], -1, Rkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
+	cv::filter2D( splited[3], splited[3], -1, Rkernel,  cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 
 	reverseZeroBasedFilter = splited[0] + splited[1] + splited[2] + splited[3];
 		
@@ -418,21 +418,22 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 	return;
 }
 
-cv::Mat Filter::filter_image()
+cv::Mat Filter::filter_image( cv::Mat image)
 {
-	for(int i = 0; i < _image.rows; i++)
+	cv::resize(reverseZeroBasedFilter, reverseZeroBasedFilter, cv::Size(image.cols, image.rows));
+	for(int i = 0; i < image.rows; i++)
 	{	
-	    for(int j = 0; j < _image.cols; j++)
+	    for(int j = 0; j < image.cols; j++)
 	    {	
 	    	if(reverseZeroBasedFilter.at<double>(i, j) < .0)
 	    	{
-			    cv::Vec3b vec3b = _image.at<cv::Vec3b>( i, j );
+			    cv::Vec3b vec3b = image.at<cv::Vec3b>( i, j );
 				cv::multiply( vec3b, correctionPower, vec3b);
-				_image.at<cv::Vec3b>( i, j ) = vec3b;
+				image.at<cv::Vec3b>( i, j ) = vec3b;
 	    	}
 		}
 	}
-	return _image;
+	return image;
 }
 
 cv::Mat Filter::cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition )
