@@ -125,7 +125,7 @@ namespace process2d
 		auto idTr = maskIterateProcess.calc_transitions_with_mask();
 
     	Filter filter(image, idTr, 160, 3, 1, 5);
-    	cv::Mat result = filter.filter_image();
+    	cv::Mat result = filter.filter_image(image);
 
 		return result;
 	}

@@ -265,6 +265,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
         return image;
     }
 
+    cv::Mat fullSize = image.clone();
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     cv::Mat cImage = image.clone();
     bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
@@ -285,7 +286,7 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
     #endif
 
     Filter filter(cImage, idTr, 20, 5, 1, 10);
-    cv::Mat result = filter.filter_image();
+    cv::Mat result = filter.filter_image(fullSize);
 /*
     ContourTransition contourTransition(image);
     contourTransition.bw_push_transition( idTr );

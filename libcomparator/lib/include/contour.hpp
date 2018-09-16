@@ -81,7 +81,7 @@ public:
 			double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1,
 			uint calcDistance = 1, FilterMode filterMode = FilterMode::grabCut );
 	
-	cv::Mat filter_image();
+	cv::Mat filter_image(cv::Mat image);
 
 private:
 	cv::Mat & _image;
