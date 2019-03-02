@@ -39,20 +39,20 @@ namespace process2d
 		cv::Mat edge;
 		cv::cvtColor( image, edge, CV_BGR2GRAY );
 	    cv::blur( edge, edge, cv::Size(blurr, blurr) );
-	    #ifdef WITH_TESTS
+	    #ifdef VERBOSE
 	    cv::imshow( "calc_canny", edge );
 	    cv::waitKey(0);
 	    #endif
 	    cv::Canny( edge, edge, threshold1, threshold2, apertureSize, true );
 	    edge.convertTo(edge, CV_8U);
-	    #ifdef WITH_TESTS
+	    #ifdef VERBOSE
 	    cv::imshow( "calc_canny", edge );
 	    cv::waitKey(0);
 	    #endif
 	    return edge;
 	}
 
-	bool is_subset(cv::Mat cannyImage1D, cv::Mat const cannyImage, double maximumNonSubsetPercentage = 10)
+	bool is_subset(cv::Mat cannyImage1D, cv::Mat const cannyImage, double maximumNonSubsetPercentage = 0)
 	{
 		cv::Mat cannyImage_ = cannyImage.clone();
 		int setSize = cv::countNonZero(cannyImage_);
@@ -63,7 +63,7 @@ namespace process2d
                                        cv::Point( dilationSize, dilationSize ) );
   		cv::morphologyEx( cannyImage_, cannyImage_, cv::MORPH_DILATE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
 
-  		#ifdef WITH_TESTS
+  		#ifdef VERBOSE
   		cv::imshow( "dilatedCannyImage", cannyImage_ );
 	    cv::waitKey(0);
   		#endif
@@ -72,7 +72,7 @@ namespace process2d
   		cv::bitwise_and(cannyImage_, cannyImage1D, cannyImage_);
   		int numberOfNonSubset = cv::countNonZero(cannyImage_);
   		
-  		#ifdef WITH_TESTS
+  		#ifdef VERBOSE
   		cv::imshow( "nonSubset", cannyImage_ );
 	    cv::waitKey(0);
   		std::cout << "process2d::is_subset::numberOfNonSubset: " << numberOfNonSubset << " setSize: " << setSize << std::endl;
@@ -115,7 +115,7 @@ namespace process2d
 		
 		cv::Mat shadowEdges;
 		cv::subtract(cannyImage, cannyImage1D, shadowEdges);
-		#ifdef WITH_TESTS
+		#ifdef VERBOSE
 	    cv::imshow( "shadowEdges", shadowEdges );
 	    cv::waitKey(0);
 	    #endif
@@ -124,8 +124,8 @@ namespace process2d
 		MaskIterateProcess maskIterateProcess(image, shadowEdges);
 		auto idTr = maskIterateProcess.calc_transitions_with_mask();
 
-    	Filter filter(image, idTr, 160, 3, 1);
-    	cv::Mat result = filter.filter_image();
+    	Filter filter(image, idTr, 160, 3, 1, 5);
+    	cv::Mat result = filter.filter_image(image);
 
 		return result;
 	}

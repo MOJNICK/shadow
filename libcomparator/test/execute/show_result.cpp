@@ -100,42 +100,6 @@ cv::Mat show_result(cv::Mat const img, std::vector<IndexTransitionCluster> const
     return blackImage;
 }
 
-std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, double factor, double eps, uint minPts)
-{
-    cv::Mat imageCpy = image.clone();
-    cv::Mat imageCpy2 = image.clone();
-    cv::Mat blackImage;
-
-    TYPE acceptanceLevel = 70;
-    ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
-    double lightThreshold = 0.05;
-    double colorThreshold = 0.8;
-
-    IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, (double*)entryBalance);
-    auto result = entryProcess.iterate_HV();
-    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
-    
-    ColorBalance cba( image, 5u, 6 );
-    ColorStruct secondBalance = cba.balance( result );
-
-    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
-    result.resize( 0 );
-
-    lightThreshold = 0.2;
-    colorThreshold = 0.2;
-    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, ColorStruct{ 0.82, 1.05, 1.14 });//secondBalance);
-    result = secondProcess.iterate_HV();
-
-    blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
-    
-    Clustering clustering( result, Distance::distance_fast, eps, minPts);
-    clustering.points_clustering(&Clustering::check_point_zone_linear);
-    auto clusters = clustering.getRefVIndexTransitionCluster();
-    blackImage = show_result(imageCpy, clusters);
-    
-    return clusters;
-}
-
 std::vector<IndexTransitionCluster> test_on_image(const char* path, double factor, double eps, uint minPts)
 {
     cv::Mat image;
@@ -184,7 +148,6 @@ std::vector<IndexTransitionCluster> test_on_image(const char* path, double facto
     
     return clusters;
 }
-
 
 int broad_HUE(char* path)
 {
@@ -247,13 +210,49 @@ cv::Mat test_canny( char* path, double factor, int dilationSize )
     }
     cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
 
-    Preprocess preprocess( MakeFilter::get_square_filter(11), image);
+    Preprocess preprocess( MakeFilter::box_kernel(11), image);
     cv::Mat edges = preprocess.make_thick_kernel( image, dilationSize );
     cv::namedWindow( "Canny", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Canny", edges );
     cv::waitKey(0);
 
     return edges;
+}
+
+std::vector<IndexTransitionCluster> index_transition_part(cv::Mat const image, double eps, uint minPts, int compareDistance)
+{
+    cv::Mat imageCpy = image.clone();
+    cv::Mat imageCpy2 = image.clone();
+    cv::Mat blackImage;
+
+    TYPE acceptanceLevel = 150;
+    ColorStruct entryBalance{ 1.0, 1.0, 1.0 };
+    double lightThreshold = 0.03;
+    double colorThreshold = 0.01;
+
+    IterateProcess<TYPE> entryProcess(image, acceptanceLevel, lightThreshold, colorThreshold, entryBalance, compareDistance);
+    auto result = entryProcess.iterate_HV();
+    
+    ColorBalance cba( image, 5u, compareDistance );
+    ColorStruct secondBalance = cba.balance( result );
+
+    result.resize( 0 );
+    //colorThreshold/=2;
+    IterateProcess<TYPE> secondProcess(imageCpy2, acceptanceLevel, lightThreshold, colorThreshold, secondBalance, compareDistance);//secondBalance);
+    result = secondProcess.iterate_HV();
+
+    
+    Clustering clustering( result, Distance::distance_fast, eps, minPts);
+    clustering.points_clustering(&Clustering::check_point_zone_linear);
+    auto clusters = clustering.getRefVIndexTransitionCluster();
+    
+    #ifdef VERBOSE    
+    blackImage = show_result( image, std::vector<IndexTransitionCluster>( result.begin(), result.end() ) );
+    blackImage = show_result(imageCpy2, std::vector<IndexTransitionCluster>( result.begin(), result.end() ));
+    blackImage = show_result(imageCpy, clusters);
+    #endif
+    
+    return clusters;
 }
 
 cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
@@ -265,35 +264,40 @@ cv::Mat test_gauss_directed(const char* path, double factor, int dilationSize )
         std::cout<<"\nwrong path\n";
         return image;
     }
-//    linearize_2_2_gamma(image);
+
+    cv::Mat fullSize = image.clone();
+    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
     cv::Mat cImage = image.clone();
     bilateralFilter( cImage, image, 30, 150, 150, cv::BORDER_REFLECT );
-    cv::resize(image, image, cv::Size(), factor, factor, cv::INTER_NEAREST);
-    
 
-    auto idTrCluster = index_transition_part( image, factor, 3.0, 1 );
+    // int sigma = 2;
+    // cv::GaussianBlur( image, image, cv::Size(sigma*4+1, sigma*4+1), sigma);
+
+    auto idTrCluster = index_transition_part( image, 3.0, 1, 7 );
     std::vector<IndexTransition> idTr( idTrCluster.begin(), idTrCluster.end() );
-
-    Preprocess preprocess( MakeFilter::get_square_filter(3), image);
-    preprocess.make_thick_kernel(image, dilationSize);
+/*
+    Preprocess preprocess( MakeFilter::box_kernel(3), image);
+    preprocess.make_thick_kernel(cImage, dilationSize);
     preprocess.rm_out_edge_detected( idTr );
+*/
 
+    #ifdef VERBOSE
     show_result( image, std::vector<IndexTransitionCluster>(idTr.begin(), idTr.end()));
+    #endif
 
-
-    Filter filter(image, idTr, 160, 3, 2);
-    cv::Mat result = filter.filter_image();
-
+    Filter filter(cImage, idTr, 20, 5, 1, 10);
+    cv::Mat result = filter.filter_image(fullSize);
+/*
     ContourTransition contourTransition(image);
     contourTransition.bw_push_transition( idTr );
     cv::Mat matTrans = contourTransition.show_matDataTrans();
-
-    #ifdef WITH_TEST
+*/
+    #ifdef VERBOSE
     cv::namedWindow( "matTrans", cv::WINDOW_AUTOSIZE );
     cv::imshow( "matTrans", matTrans );
-
-    cv::namedWindow( "thickKernel", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "thickKernel", preprocess.get_thickKernel() );
+    cv::waitKey(0);
+    // cv::namedWindow( "thickKernel", cv::WINDOW_AUTOSIZE );
+    // cv::imshow( "thickKernel", preprocess.get_thickKernel() );
 
     cv::namedWindow( "GaussFiltered", cv::WINDOW_AUTOSIZE );
     cv::imshow( "GaussFiltered", result );

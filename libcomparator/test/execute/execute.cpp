@@ -2,6 +2,233 @@
 #include "process_2d.hpp"
 #include <typeinfo>
 
+namespace debug_norm{
+    using namespace cv;
+template<typename _Tp> static double
+norm_(const _Tp* src, size_t total, int cn, int normType, double startval, const uchar* mask)
+{
+    size_t i;
+    double result = startval;
+    if( !mask )
+        total *= cn;
+
+    if( normType == cv::NORM_INF )
+    {
+        if( !mask )
+            for( i = 0; i < total; i++ )
+                result = std::max(result, (double)std::abs(0+src[i]));// trick with 0 used to quiet gcc warning
+        else
+            for( int c = 0; c < cn; c++ )
+            {
+                for( i = 0; i < total; i++ )
+                    if( mask[i] )
+                        result = std::max(result, (double)std::abs(0+src[i*cn + c]));
+            }
+    }
+    else if( normType == cv::NORM_L1 )
+    {
+        if( !mask )
+            for( i = 0; i < total; i++ )
+                result += std::abs(0+src[i]);
+        else
+            for( int c = 0; c < cn; c++ )
+            {
+                for( i = 0; i < total; i++ )
+                    if( mask[i] )
+                        result += std::abs(0+src[i*cn + c]);
+            }
+    }
+    else
+    {
+        if( !mask )
+            for( i = 0; i < total; i++ )
+            {
+                double v = src[i];
+                result += v*v;
+            }
+        else
+            for( int c = 0; c < cn; c++ )
+            {
+                for( i = 0; i < total; i++ )
+                    if( mask[i] )
+                    {
+                        double v = src[i*cn + c];
+                        result += v*v;
+                    }
+            }
+    }
+    return result;
+}
+
+
+template<typename _Tp> static double
+norm_(const _Tp* src1, const _Tp* src2, size_t total, int cn, int normType, double startval, const uchar* mask)
+{
+    size_t i;
+    double result = startval;
+    if( !mask )
+        total *= cn;
+
+    if( normType == cv::NORM_INF )
+    {
+        if( !mask )
+            for( i = 0; i < total; i++ )
+                result = std::max(result, (double)std::abs(src1[i] - src2[i]));
+        else
+            for( int c = 0; c < cn; c++ )
+            {
+                for( i = 0; i < total; i++ )
+                    if( mask[i] )
+                        result = std::max(result, (double)std::abs(src1[i*cn + c] - src2[i*cn + c]));
+            }
+    }
+    else if( normType == cv::NORM_L1 )
+    {
+        if( !mask )
+            for( i = 0; i < total; i++ )
+                result += std::abs(src1[i] - src2[i]);
+        else
+            for( int c = 0; c < cn; c++ )
+            {
+                for( i = 0; i < total; i++ )
+                    if( mask[i] )
+                        result += std::abs(src1[i*cn + c] - src2[i*cn + c]);
+            }
+    }
+    else
+    {
+        if( !mask )
+            for( i = 0; i < total; i++ )
+            {
+                double v = src1[i] - src2[i];
+                result += v*v;
+            }
+        else
+            for( int c = 0; c < cn; c++ )
+            {
+                for( i = 0; i < total; i++ )
+                    if( mask[i] )
+                    {
+                        double v = src1[i*cn + c] - src2[i*cn + c];
+                        result += v*v;
+                    }
+            }
+    }
+    return result;
+}
+
+
+double norm(const Mat& src, int normType, const Mat& mask=Mat())
+{
+    int normType0 = normType;
+    normType = normType == cv::NORM_L2SQR ? cv::NORM_L2 : normType;
+
+    CV_Assert( mask.empty() || (src.size == mask.size && mask.type() == CV_8U) );
+    CV_Assert( normType == cv::NORM_INF || normType == cv::NORM_L1 || normType == cv::NORM_L2 );
+
+    const Mat *arrays[]={&src, &mask, 0};
+    Mat planes[2];
+
+    NAryMatIterator it(arrays, planes);
+    size_t total = planes[0].total();
+    size_t i, nplanes = it.nplanes;
+    int depth = src.depth(), cn = planes[0].channels();
+    double result = 0;
+
+    for( i = 0; i < nplanes; i++, ++it )
+    {
+        const uchar* sptr = planes[0].data;
+        const uchar* mptr = planes[1].data;
+
+        switch( depth )
+        {
+        case CV_8U:
+            result = norm_((const uchar*)sptr, total, cn, normType, result, mptr);
+            break;
+        case CV_8S:
+            result = norm_((const schar*)sptr, total, cn, normType, result, mptr);
+            break;
+        case CV_16U:
+            result = norm_((const ushort*)sptr, total, cn, normType, result, mptr);
+            break;
+        case CV_16S:
+            result = norm_((const short*)sptr, total, cn, normType, result, mptr);
+            break;
+        case CV_32S:
+            result = norm_((const int*)sptr, total, cn, normType, result, mptr);
+            break;
+        case CV_32F:
+            result = norm_((const float*)sptr, total, cn, normType, result, mptr);
+            break;
+        case CV_64F:
+            result = norm_((const double*)sptr, total, cn, normType, result, mptr);
+            break;
+        default:
+            CV_Error(CV_StsUnsupportedFormat, "");
+        };
+    }
+    if( normType0 == NORM_L2 )
+        result = sqrt(result);
+    return result;
+}
+
+
+double norm(const Mat& src1, const Mat& src2, int normType, const Mat& mask=Mat())
+{
+    int normType0 = normType;
+    normType = normType == NORM_L2SQR ? NORM_L2 : normType;
+
+    CV_Assert( src1.type() == src2.type() && src1.size == src2.size );
+    CV_Assert( mask.empty() || (src1.size == mask.size && mask.type() == CV_8U) );
+    CV_Assert( normType == NORM_INF || normType == NORM_L1 || normType == NORM_L2 );
+    const Mat *arrays[]={&src1, &src2, &mask, 0};
+    Mat planes[3];
+
+    NAryMatIterator it(arrays, planes);
+    size_t total = planes[0].total();
+    size_t i, nplanes = it.nplanes;
+    int depth = src1.depth(), cn = planes[0].channels();
+    double result = 0;
+
+    for( i = 0; i < nplanes; i++, ++it )
+    {
+        const uchar* sptr1 = planes[0].data;
+        const uchar* sptr2 = planes[1].data;
+        const uchar* mptr = planes[2].data;
+
+        switch( depth )
+        {
+        case CV_8U:
+            result = norm_((const uchar*)sptr1, (const uchar*)sptr2, total, cn, normType, result, mptr);
+            break;
+        case CV_8S:
+            result = norm_((const schar*)sptr1, (const schar*)sptr2, total, cn, normType, result, mptr);
+            break;
+        case CV_16U:
+            result = norm_((const ushort*)sptr1, (const ushort*)sptr2, total, cn, normType, result, mptr);
+            break;
+        case CV_16S:
+            result = norm_((const short*)sptr1, (const short*)sptr2, total, cn, normType, result, mptr);
+            break;
+        case CV_32S:
+            result = norm_((const int*)sptr1, (const int*)sptr2, total, cn, normType, result, mptr);
+            break;
+        case CV_32F:
+            result = norm_((const float*)sptr1, (const float*)sptr2, total, cn, normType, result, mptr);
+            break;
+        case CV_64F:
+            result = norm_((const double*)sptr1, (const double*)sptr2, total, cn, normType, result, mptr);
+            break;
+        default:
+            CV_Error(CV_StsUnsupportedFormat, "");
+        };
+    }
+    if( normType0 == NORM_L2 )
+        result = sqrt(result);
+    return result;
+}
+}
+
 int main( int argc, char** argv )
 {
     std::vector<std::string> vecArgv(argv, argv + argc);
@@ -45,106 +272,32 @@ int main( int argc, char** argv )
         std::cout << "iterate: " << inputFile << " -> " << outputFile << '\n';
         cv::Mat img = cv::imread(inputFile, CV_LOAD_IMAGE_COLOR);
         if(!img.data){std::cout<<"cant open\n"; return 0;}
-        img = test_gauss_directed( inputFile.c_str(), 1, 2);
+        img = test_gauss_directed( inputFile.c_str(), 0.25, 1);
         cv::imwrite(outputFile, img);
     }
-    return 0;
-
-    test_canny( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 0 );
-
-    // cv::Mat image;
-    // image = cv::imread("/home/szozda/Downloads/refImg/girRef.jpg", CV_LOAD_IMAGE_COLOR);
-    // if(! image.data )
-    // {
-    //     std::cout<<"\nwrong path\n";
-    //     return -1;
-    // }
-    // cv::GaussianBlur( image, image, cv::Size(51,51), 30 , 1 );
-    // // cv::copyMakeBorder( image, image, 100, 100, 300, 300, cv::BORDER_REFLECT);//to be safe
-    // cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
-    // cv::imshow( "Display window", image );
-    // std::cout<<image.total()<<"\n";
-    // cv::waitKey(0);
-
-    // cv::Rect rect(10, 100, 30, 800);
-    // cv::Mat roi = image(rect);
-    // cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
-    // cv::imshow( "Display window", roi );
-    // std::cout<<roi.total()<<"\n";
-    // cv::waitKey(0);
-
-    // std::cout<<std::endl;
-    // std::cout<<std::endl;
-
-    // cv::Mat testN(7, 6, CV_8UC1 );
-    // for( int i = 0; i<testN.total(); ++i )
-    // {
-    //     testN.data[i] = i;
-    // }
-
-    // cv::Rect rct(2, 1, 3, 2);
-
-    // cv::Mat testR = testN(rct);
-    // for( int i = 0; i < testN.total(); ++i )
-    // {
-    //     // std::cout << (int)( *testN.ptr( i ) ) << " ";
-    //     std::cout << (int)( testN.data[ i ] ) << " ";
-    // }
-    // std::cout<<std::endl;
-    // for( int i = 0; i < testR.total(); ++i )
-    // {
-    //     // std::cout << (int)( *testR.ptr( i ) ) << " ";
-    //     std::cout << (int)( testR.data[ i ] ) << " ";
-    // }
-    // std::cout<<std::endl;
-    // std::cout<<std::endl;
-
-
-    // for( int i = 0; i < testN.rows; ++i )
-    //     for( int j = 0; j < testN.cols; ++j )
-    //     {
-    //         std::cout << (int)( *testN.ptr( i, j ) ) << " ";
-    //     }
-    // std::cout<<std::endl;
-    // for( int i = 0; i < testR.rows; ++i )
-    //     for( int j = 0; j < testR.cols; ++j )
-    //     {
-    //         std::cout << (int)( *testR.ptr( i, j ) ) << " ";
-    //     }
-    // std::cout<<std::endl;
-    // std::cout<<std::endl;
-
-    // test_directed_canny("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 3);
-
-    // std::cout<<std::endl;
-    // std::cout<<std::endl;
-    // std::cout<< (static_cast<int>(Transition::all) >> shiftToDistinct);
-    // std::cout<<std::endl;
-    // std::cout<<std::endl;
-    
-
-
-    test_gauss_directed( "/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 1);
-
-    // test_on_image("/home/szozda/Downloads/refImg/girRef.jpg", 0.25, 3.0, 10);
-    // test_on_image("/home/szozda/Downloads/refImg/linThin.png", 1, 6.0, 2);
-    // test_on_image("/home/szozda/Downloads/refImg/linThick.png", 1, 6.0, 2);
-    // test_on_image("/home/szozda/Downloads/refImg/appRef.jpg", 1, 6.0, 2);
-    // test_on_image("/home/szozda/Downloads/refImg/roof.png", 0.25, 6.0, 2); 
-    // test_on_image("/home/szozda/Downloads/refImg/cirRef.png", 1, 2.0, 100);
-    // test_on_image("/home/szozda/Downloads/refImg/cirRef2.png", 1, 6.0, 2);
-    // test_on_image("/home/szozda/Downloads/refImg/cirRef3.png", 1, 6.0, 2);
-    // test_on_image("/home/szozda/Downloads/refImg/cirRef4.png", 1, 2.0, 2);
-    // test_on_image("/home/szozda/Downloads/refImg/cirRef5.png", 1, 6.0, 2);
-
-
-   // broad_HUE("/home/szozda/Downloads/refImg/girRef.jpg");
-//    broad_HUE("/home/szozda/Downloads/refImg/palma.jpg");
-//    broad_HUE("/home/szozda/Downloads/refImg/table.jpg");
-//    broad_HUE("/home/szozda/Downloads/refImg/palma_linear.png");
-//    broad_HUE("/home/szozda/Downloads/refImg/roof_black.png");
-//    broad_HUE("/home/szozda/Downloads/refImg/roof_invariant.png");
-//    broad_HUE("/home/szozda/Downloads/refImg/roof_finlay_invariant.png");
-
+    else if(argc>3 && vecArgv[1]==std::string("--compare"))
+    {
+        std::string inputFile0 = vecArgv[2];
+        std::string inputFile1 = vecArgv[3];
+        std::cout << "compare: " << inputFile0 << " == " << inputFile1 << " -> ";
+        cv::Mat img0   = cv::imread(inputFile0, CV_LOAD_IMAGE_COLOR);
+        cv::Mat img1 = cv::imread(inputFile1, CV_LOAD_IMAGE_COLOR);
+        if(!img0.data || !img1.data){std::cout<<"cant open\n"; return 0;}
+        //bool eq = cv::countNonZero(img0!=img1) == 0;
+        bool eq = (sum(img0 != img1) == cv::Scalar(0,0,0));
+        std::cout << eq << "\n";
+    }
+    else if(argc>3 && vecArgv[1]==std::string("--relative_norm"))
+    {
+        std::string inputFile0 = vecArgv[2];
+        std::string inputFile1 = vecArgv[3];
+        std::cout << "relative_norm: " << inputFile0 << " == " << inputFile1 << " -> ";
+        cv::Mat img0   = cv::imread(inputFile0, CV_LOAD_IMAGE_COLOR);
+        cv::Mat img1 = cv::imread(inputFile1, CV_LOAD_IMAGE_COLOR);
+        if(!img0.data || !img1.data){std::cout<<"cant open\n"; return 0;}
+        cv::resize(img0,img0,img1.size());
+        double norm = 1.0 - debug_norm::norm( img0, img1, cv::NORM_L2) / debug_norm::norm(img1, cv::NORM_L2);
+        std::cout << norm << '\n';
+    }
     return 0;
 }

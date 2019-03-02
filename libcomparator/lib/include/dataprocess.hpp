@@ -22,9 +22,6 @@
 	{
 	public:
 		DataProcess() = default;
-		/*template< class TYPE, class Compare >
-			static void 
-			outliner( std::vector<TYPE> & dataset, double diffMult = 1, SideToClear side = both, Compare fun = []( TYPE& a, TYPE& b ){ return a < b; });*/
 
 		template< class TypeIn, class TYPE, class Compare, class BaseArithm, class Cast >
 			static void

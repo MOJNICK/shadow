@@ -1,4 +1,5 @@
 #include "contour.hpp"
+#include "imageprocess.hpp"
 
 ContourTransition::ContourTransition( cv::Mat& image )
 {
@@ -22,13 +23,17 @@ cv::Mat ContourTransition::show_matDataTrans()
 			{
 				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 255, 0);
 			}
-			if(trans & biUpDw)
+			if(trans & upToDw)
 			{
 				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 0, 255);
 			}
+			if(trans & dwToUp)
+			{
+				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 160, 255);
+			}
 			if(trans & unknown)
 			{
-				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 0, 255);
+				blackImage.at<cv::Vec3b>(row, col) = cv::Vec3b(255, 255, 255);
 			}
 		}
 
@@ -96,12 +101,9 @@ cv::Mat Preprocess::make_thick_kernel( cv::Mat const & image, uint dilationSize 
  
     edge.convertTo(thickKernel, CV_8U);
 
-    //dilate here
     cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE,
                                        cv::Size( 2*dilationSize + 1, 2*dilationSize+1 ),
                                        cv::Point( dilationSize, dilationSize ) );
-
-  	// morphologyEx( thickKernel, thickKernel, cv::MORPH_CLOSE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
   	morphologyEx( thickKernel, thickKernel, cv::MORPH_DILATE, element, cv::Point(-1,-1), 1, cv::BORDER_REFLECT );
 	
 	return thickKernel;
@@ -210,50 +212,73 @@ cv::Mat_<Transition> Preprocess::cvt_it_to_matTSilent( std::vector<IndexTransiti
 	return result;//return with silent border
 }
 
-cv::Mat_<double> MakeFilter::get_square_filter( int filterSize )
+cv::Mat MakeFilter::box_kernel( int height, int width )
 {
-	if( filterSize & 1 == 0)
-		filterSize -= 1;
+	height |= 1;
 
-	cv::Mat_<double> result( cv::Size2i( filterSize, filterSize ), 1.0/( filterSize * filterSize ) );
+	cv::Mat result( cv::Size( height, height ), CV_64F, 1.0/( height * height ) );
 
 	return result;
 }
 
-cv::Mat MakeFilter::get_gauss_antisimmetric_filter( double sizeFactor, double sigma, Transition direction, double hvFactor )//add direction factor
+cv::Mat MakeFilter::calc_antisimmetric_filter( double sigma, double sizeFactor, Transition direction, double hvFactor )//add direction factor
 {
 	if(!(direction && !(direction & (direction - 1))))
 		return cv::Mat( 1, 1, CV_64F, 1.0 );
 
-	if( std::abs(hvFactor) < 0.01 )
-	{
-		hvFactor = 1;
-	}
-	else
-	{
-		if( direction & biUpDw )
-			hvFactor = 1 / hvFactor;		
-	}
+	assert( std::abs(hvFactor) > 0.01 );
+
+	if( direction & biUpDw )
+		hvFactor = 1 / hvFactor;		
 
 	int sigmaH = (int)(sigma * hvFactor) | 1;
 	int sigmaV = (int)(sigma / hvFactor) | 1;
-	int sigmaHf = (int)(sigmaV * sizeFactor) | 1;
-	int sigmaVf = (int)(sigmaV * sizeFactor) | 1;
+	int sizeH = (int)(sigmaV * sizeFactor) | 1;
+	int sizeV = (int)(sigmaV * sizeFactor) | 1;
 
-	cv::Mat kernel( cv::Size( sigmaHf, sigmaVf ), CV_64F, .0 );
-	int anchorH = kernel.rows / 2;
-	int anchorV = kernel.cols / 2; //not exactly	
-	kernel.at<double>(anchorH, anchorV) = 1.0;
-
-    cv::GaussianBlur( kernel, kernel, cv::Size( sigmaHf, sigmaVf ), sigmaH , sigmaV );
-	
- 	cvt_to_antisimmetric( kernel, direction, anchorH, anchorV );
+	cv::Mat kernel;
+	switch(kernelType)
+	{
+		case KernelType::gauss : kernel = gauss_kernel( cv::Size(sigmaH, sigmaV), cv::Size(sizeH, sizeV) ); break;
+		case KernelType::triangle : kernel = triangle_kernel( cv::Size(sigmaH, sigmaV) ); break;
+	}
+ 	cvt_to_antisimmetric( kernel, direction );
 
 	return kernel;
 }
 
+cv::Mat MakeFilter::gauss_kernel( cv::Size kernelSigma, cv::Size kernelSize )
+{
+	cv::Mat kernel( cv::Size( kernelSize.height, kernelSize.width ), CV_64F, .0 );
+	int anchorH = kernel.rows / 2;
+	int anchorV = kernel.cols / 2; //not exactly	
+	kernel.at<double>(anchorH, anchorV) = 1.0;	
+
+	cv::GaussianBlur( kernel, kernel, kernelSize, kernelSigma.width , kernelSigma.height );
+	return kernel;
+}
+
+cv::Mat MakeFilter::triangle_kernel( cv::Size kernelSigma, cv::Size kernelSize )
+{
+	int sigma = kernelSigma.height;
+	sigma |= 1;
+	int border = sigma / 2;
+	cv::Mat boxKernel = box_kernel( sigma );
+	copyMakeBorder(boxKernel, boxKernel, border, border, border, border, cv::BORDER_CONSTANT, cv::Scalar(0) );
+	cv::Mat triangleKernel;
+	cv::filter2D( boxKernel, triangleKernel, -1, boxKernel, cv::Point(-1,-1), 0, cv::BORDER_REFLECT );
+
+	return triangleKernel;
+}
+
 void MakeFilter::cvt_to_antisimmetric(cv::Mat& kernel, Transition direction, int anchorH, int anchorV)
 {
+	if(anchorH == -1)
+	{
+		anchorH = kernel.rows / 2;
+		anchorV = kernel.cols / 2; //not exactly
+	}
+
 	for(int i = 0; i < kernel.rows; i++)
 	{
 	    for(int j = 0; j < kernel.cols; j++)
@@ -278,18 +303,21 @@ void MakeFilter::cvt_to_antisimmetric(cv::Mat& kernel, Transition direction, int
 }
 
 
-Filter::Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor, double antiSigma, double hvFactor ):
-	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor} 
+Filter::Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition,
+				double sizeFactor, double antiSigma, double hvFactor,
+				uint calcDistance, FilterMode filterMode )
+:
+	srcImgSize( image.cols, image.rows ), _image(image), sizeFactor{sizeFactor}, antiSigma{antiSigma}, hvFactor{hvFactor}, filterMode{filterMode}
 {
-	calc_correction_power( indexTransition );
+	calc_correction_power( indexTransition, calcDistance );
 	get_shadow_weight( indexTransition );
 }
 
-cv::Vec3d Filter::calc_correction_power( std::vector<IndexTransition> const & indexTransition )
+cv::Vec3d Filter::calc_correction_power( std::vector<IndexTransition> const & indexTransition, uint calcDistance )
 {
-	ColorBalance colorBalance(_image, 5u, 6);
+	ColorBalance colorBalance(_image, 5u, calcDistance);
 	ColorStruct colorStruct = colorBalance.balance( indexTransition, BalanceMode::brightness );
-	for(int i = 0; i < channels; ++i){ correctionPower[i] = colorStruct.get_color( i ); }
+	for(int i = 0; i < channels; ++i){ correctionPower[i] = 1.0 * colorStruct.get_color( i ); }
 }
 
 void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransition )
@@ -298,40 +326,119 @@ void Filter::get_shadow_weight( std::vector<IndexTransition> const & indexTransi
 	std::vector<cv::Mat> splited;
 	cv::split(directed, splited);
 
-	cv::Mat UPkernel = MakeFilter::get_gauss_antisimmetric_filter( sizeFactor, antiSigma, upToDw, hvFactor);
-	cv::Mat Lkernel = MakeFilter::get_gauss_antisimmetric_filter( sizeFactor, antiSigma, lToR, hvFactor);
-	cv::Mat DWkernel = MakeFilter::get_gauss_antisimmetric_filter( sizeFactor, antiSigma, dwToUp, hvFactor);
-	cv::Mat Rkernel = MakeFilter::get_gauss_antisimmetric_filter( sizeFactor, antiSigma, rToL, hvFactor);
+	MakeFilter calc_antisimmetric_filter;
+	cv::Mat UPkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, upToDw, hvFactor);
+	cv::Mat Lkernel  = calc_antisimmetric_filter( antiSigma, sizeFactor, lToR, hvFactor);
+	cv::Mat DWkernel = calc_antisimmetric_filter( antiSigma, sizeFactor, dwToUp, hvFactor);
+	cv::Mat Rkernel  = calc_antisimmetric_filter( antiSigma, sizeFactor, rToL, hvFactor);
 
 	cv::filter2D( splited[0], splited[0], -1, UPkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
-	cv::filter2D( splited[1], splited[1], -1, Lkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
+	cv::filter2D( splited[1], splited[1], -1, Lkernel,  cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 	cv::filter2D( splited[2], splited[2], -1, DWkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
-	cv::filter2D( splited[3], splited[3], -1, Rkernel, cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
+	cv::filter2D( splited[3], splited[3], -1, Rkernel,  cv::Point(-1,-1), 0, cv::BORDER_ISOLATED );
 
 	reverseZeroBasedFilter = splited[0] + splited[1] + splited[2] + splited[3];
+		
+	if(filterMode == FilterMode::grabCut)
+	{
+		auto minmax = std::minmax_element(reverseZeroBasedFilter.begin<double>(), reverseZeroBasedFilter.end<double>());
+		double min = *minmax.first;
+		double max = *minmax.second;
+		min*=0.3; max*=0.5;
+
+		cv::Mat mask = reverseZeroBasedFilter.clone();
+		cv::GaussianBlur( mask, mask, cv::Size(7,7), 4 , 4 );
+		std::for_each(mask.begin<double>(), mask.end<double>(), 
+			[min, max](auto& el){
+				if(el < min)
+				{
+					el = cv::GC_FGD;
+				}
+				else if(el < 0)
+				{
+					el = cv::GC_PR_FGD;
+				}
+				else if(el < max)
+				{
+					el = cv::GC_PR_BGD;
+				}
+				else
+				{
+					el = cv::GC_BGD;
+				}
+			}
+		);
+
+		mask.convertTo(mask, CV_8U);
+		#ifdef VERBOSE
+		present_grabCut_mask(mask);
+		#endif
+		cv::Mat bgdModel, fgdModel;
+		cv::grabCut( _image, mask, cv::Rect(0, 0, mask.cols, mask.rows), bgdModel, fgdModel, 5, cv::GC_INIT_WITH_MASK );
+		for(int i=0; i<mask.rows*mask.cols; ++i)
+		{
+			uchar maskValue = mask.data[i];
+			if( maskValue == cv::GC_FGD || maskValue == cv::GC_PR_FGD)
+			{
+				*(reinterpret_cast<double*>(reverseZeroBasedFilter.data) + i) = -1.0;
+			}
+			else
+			{
+				*(reinterpret_cast<double*>(reverseZeroBasedFilter.data) + i) = 1.0;
+			}
+		}
+
+		#ifdef VERBOSE
+		int occurences[3] = {0};
+		std::for_each(reverseZeroBasedFilter.begin<double>(), reverseZeroBasedFilter.end<double>(), 
+			[&occurences](auto& el){
+				if(el == -1.0)
+				{
+					occurences[0]++;
+				}
+				else if(el == 1.0)
+				{
+					occurences[1]++;
+				}
+				else
+				{
+					occurences[2]++;
+				}
+			}
+		);
+
+		for(int i =0; i<2; ++i)
+		{
+			std::cout<<occurences[i] << '\n';
+		}
+		present_grabCut_mask(mask);
+
+		#endif
+	}
 	return;
 }
 
-cv::Mat Filter::filter_image()
+cv::Mat Filter::filter_image( cv::Mat image)
 {
-	for(int i = 0; i < _image.rows; i++)
+	cv::resize(reverseZeroBasedFilter, reverseZeroBasedFilter, cv::Size(image.cols, image.rows));
+	for(int i = 0; i < image.rows; i++)
 	{	
-	    for(int j = 0; j < _image.cols; j++)
+	    for(int j = 0; j < image.cols; j++)
 	    {	
-	    	if(reverseZeroBasedFilter.at<double>(i, j) < 0)
+	    	if(reverseZeroBasedFilter.at<double>(i, j) < .0)
 	    	{
-			    cv::Vec3b vec3b = _image.at<cv::Vec3b>( i, j );
+			    cv::Vec3b vec3b = image.at<cv::Vec3b>( i, j );
 				cv::multiply( vec3b, correctionPower, vec3b);
-				_image.at<cv::Vec3b>( i, j ) = vec3b;
+				image.at<cv::Vec3b>( i, j ) = vec3b;
 	    	}
 		}
 	}
-	return _image;
+	return image;
 }
 
 cv::Mat Filter::cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition )
 {
-	cv::Mat result( srcImgSize, CV_64FC4, .0 );//, Transition::no );
+	cv::Mat result( srcImgSize, CV_64FC4, .01 );//, Transition::no );
 
 	std::for_each( indexTransition.begin(), indexTransition.end(), [&result]( auto& el){
 		cv::Vec4d vec4d = result.at<cv::Vec4d>( el.row, el.col);//reference

@@ -1,8 +1,7 @@
 #ifndef CONTOUR_HPP
 #define CONTOUR_HPP
 #include <opencv2/core/core.hpp>
-#include "opencv2/imgproc/imgproc.hpp"
-// #include <opencv2/core/matx.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include "libcomparator.hpp"
 #include "dataprocess.hpp"
 #include <iostream>
@@ -48,21 +47,41 @@ private:
 	cv::Mat_<Transition> cvt_it_to_matTSilent( std::vector<IndexTransition> const & indexTransition );
 };
 
+
+
+
 class MakeFilter
 {
+	enum class KernelType
+	{
+		gauss,
+		triangle
+	}kernelType;
 public:
-	static cv::Mat_<double> get_square_filter( int size );
-	static cv::Mat get_gauss_antisimmetric_filter( double sizeFactor, double sigma, Transition direction, double hvFactor );
+	MakeFilter(KernelType kernelType = KernelType::gauss) : kernelType{kernelType}{}
+
+	static cv::Mat box_kernel( int height, int width = -1 );
+	cv::Mat operator()( double sigma, double sizeFactor, Transition direction, double hvFactor ){return calc_antisimmetric_filter( sigma, sizeFactor, direction, hvFactor );}
 private:
-	static void cvt_to_antisimmetric( cv::Mat& kernel, Transition direction, int anchorH, int anchorV );
-	// cv::Mat_<double> cvt_mat_matDoble(cv::Mat filterKernel);
+	static void cvt_to_antisimmetric( cv::Mat& kernel, Transition direction, int anchorH = -1, int anchorV = -1);
+	cv::Mat calc_antisimmetric_filter( double sigma, double sizeFactor, Transition direction, double hvFactor );
+	static cv::Mat gauss_kernel( cv::Size kernelSigma, cv::Size kernelSize );
+	static cv::Mat triangle_kernel( cv::Size kernelSigma, cv::Size kernelSize = cv::Size(-1, -1) );
 };
 
 class Filter
 {
+	enum class FilterMode
+	{
+		normal,
+		grabCut
+	}filterMode;
 public:
-	Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition, double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1);
-	cv::Mat filter_image();
+	Filter( cv::Mat & image, std::vector<IndexTransition> const & indexTransition,
+			double sizeFactor = 10, double antiSigma = 5, double hvFactor = 1,
+			uint calcDistance = 1, FilterMode filterMode = FilterMode::grabCut );
+	
+	cv::Mat filter_image(cv::Mat image);
 
 private:
 	cv::Mat & _image;
@@ -74,8 +93,9 @@ private:
 	double hvFactor;
 	cv::Vec3d correctionPower;
 
-	cv::Vec3d calc_correction_power( std::vector<IndexTransition> const & indexTransition );
+	cv::Vec3d calc_correction_power( std::vector<IndexTransition> const & indexTransition, uint calcDistance );
 	void get_shadow_weight( std::vector<IndexTransition> const & indexTransition );
 	cv::Mat cvt_it_to_matFloat( std::vector<IndexTransition> const & indexTransition );
+
 };
 #endif
